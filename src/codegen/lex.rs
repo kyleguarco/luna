@@ -1,5 +1,10 @@
-use core::str::FromStr;
+use core::{fmt::Display, ops::Deref, str::FromStr};
 
+use alloc::vec::Vec;
+
+use crate::zio::{Read, Zio};
+
+#[derive(Clone, Debug)]
 pub enum Reserved {
     And,
     Break,
@@ -84,5 +89,74 @@ impl FromStr for Reserved {
             "<string>" => Ok(Self::String),
             _ => Err(()),
         }
+    }
+}
+
+#[derive(Clone, Debug)]
+struct Token {
+    line: usize,
+    ttype: Reserved,
+}
+
+impl Display for Token {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{:?}", self.ttype)
+    }
+}
+
+#[derive(Clone, Debug)]
+struct LexerError<'a> {
+    token: &'a Token,
+    lexeme: &'a str,
+    msg: &'static str,
+}
+
+impl Display for LexerError<'_> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(
+            f,
+            "[L{}] Error on \"{}\" (parsed as {}): {}",
+            self.token.line, self.lexeme, self.token, self.msg
+        )
+    }
+}
+
+type LexerResult<'a> = Result<(), LexerError<'a>>;
+
+struct Lines<B> {
+    buffer: B,
+}
+
+struct LexerState {
+    source: Zio,
+    tokens: Vec<Token>,
+    pos: usize,
+}
+
+impl LexerState {
+    fn new<T: Into<Zio>>(source: T) -> Self {
+        LexerState {
+            source: source.into(),
+            tokens: Vec::new(),
+            pos: 0,
+        }
+    }
+
+    fn scan(&mut self) -> LexerResult {
+        let mut buff = [0u8; 32];
+
+        while !self.is_at_end() {
+            if let Ok(adv) = self.source.read(&mut buff) {
+
+            } else {
+                return Err(LexerError {})
+            }
+        }
+
+        Ok(())
+    }
+
+    fn is_at_end(&self) -> bool {
+        self.pos >= self.source.stream().len()
     }
 }
