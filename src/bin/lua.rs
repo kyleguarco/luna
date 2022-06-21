@@ -1,6 +1,8 @@
 //! The REPL used to test and run lua code from the command line.
 
-use std::{env::args, process::ExitCode};
+use std::{env::args, process::ExitCode, io::{stdin, BufRead, Write}};
+
+use luna::codegen::lex::LexerState;
 
 fn main() -> ExitCode {
 	let mut args = args();
@@ -26,8 +28,21 @@ fn script(path: &str) -> ExitCode {
 }
 
 fn repl() -> ExitCode {
+	let mut io = stdin().lock();
+	let mut line = String::new();
+
 	loop {
-		break
+		line.clear();
+
+		print!(">> ");
+		std::io::stdout().flush().unwrap();
+
+		io.read_line(&mut line).expect("Couldn't read REPL line.");
+
+		if line.starts_with("exit") { break }
+
+		let mut lexer = LexerState::new(&line);
+		println!("{:?}", lexer.scan());
 	}
 
 	ExitCode::SUCCESS

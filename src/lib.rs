@@ -6,13 +6,12 @@ extern crate alloc;
 mod debug;
 mod gc;
 mod mem;
-mod zio;
 
 // State and object libraries
-mod ltypes;
+pub mod ltypes;
 
 // Codegen libraries
-mod codegen;
+pub mod codegen;
 
 // Virtual machine internals
 mod lvm;

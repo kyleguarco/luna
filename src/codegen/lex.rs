@@ -1,10 +1,12 @@
 use core::{fmt::Display, ops::Deref, str::FromStr};
 
-use alloc::vec::Vec;
+use alloc::{
+    borrow::ToOwned,
+    string::{String, ToString},
+    vec::Vec,
+};
 
-use crate::zio::{Read, Zio};
-
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Reserved {
     And,
     Break,
@@ -37,65 +39,84 @@ pub enum Reserved {
     NotEqual,
     ShiftLeft,
     ShiftRight,
+    /// Used by [`Reserved::Goto`] to specify labels.
     DoubleColon,
+    /// Allows for squishing [`Reserved::Name`]`s betwixt quotes.
+    StringBound,
     EndOfScript,
-    Float,
-    Integer,
-    Name,
-    String,
+    Float(f32),
+    Integer(i32),
+    Name(String),
+    String(String),
 }
 
-impl FromStr for Reserved {
-    type Err = ();
-
-    fn from_str(token: &str) -> Result<Self, Self::Err> {
+// Why not FromStr or From<&str>? It's because both types have
+// requirements that don't serve this enum. FromStr has the potential
+// to fail; From<&str> doesn't fail, but requires that Into<Reserved>
+// be satisfied, which isn't guaranteed with a string slice. Any
+// errors in parsing will be caught by the code generator, not the lexer.
+impl Reserved {
+    fn parse(token: &str) -> Self {
         match token {
-            "and" => Ok(Self::And),
-            "break" => Ok(Self::Break),
-            "do" => Ok(Self::Do),
-            "else" => Ok(Self::Else),
-            "elseif" => Ok(Self::ElseIf),
-            "end" => Ok(Self::End),
-            "false" => Ok(Self::False),
-            "for" => Ok(Self::For),
-            "function" => Ok(Self::Function),
-            "goto" => Ok(Self::Goto),
-            "if" => Ok(Self::If),
-            "in" => Ok(Self::In),
-            "local" => Ok(Self::Local),
-            "nil" => Ok(Self::Nil),
-            "not" => Ok(Self::Not),
-            "or" => Ok(Self::Or),
-            "repeat" => Ok(Self::Repeat),
-            "return" => Ok(Self::Return),
-            "then" => Ok(Self::Then),
-            "true" => Ok(Self::True),
-            "until" => Ok(Self::Until),
-            "while" => Ok(Self::While),
-            "//" => Ok(Self::FloorDiv),
-            ".." => Ok(Self::Concat),
-            "..." => Ok(Self::Dots),
-            "==" => Ok(Self::Equal),
-            ">=" => Ok(Self::GreaterEqual),
-            "<=" => Ok(Self::LessEqual),
-            "~=" => Ok(Self::NotEqual),
-            "<<" => Ok(Self::ShiftLeft),
-            ">>" => Ok(Self::ShiftRight),
-            "::" => Ok(Self::DoubleColon),
-            "<eof>" => Ok(Self::EndOfScript),
-            "<number>" => Ok(Self::Float),
-            "<integer>" => Ok(Self::Integer),
-            "<name>" => Ok(Self::Name),
-            "<string>" => Ok(Self::String),
-            _ => Err(()),
+            "and" => Self::And,
+            "break" => Self::Break,
+            "do" => Self::Do,
+            "else" => Self::Else,
+            "elseif" => Self::ElseIf,
+            "end" => Self::End,
+            "false" => Self::False,
+            "for" => Self::For,
+            "function" => Self::Function,
+            "goto" => Self::Goto,
+            "if" => Self::If,
+            "in" => Self::In,
+            "local" => Self::Local,
+            "nil" => Self::Nil,
+            "not" => Self::Not,
+            "or" => Self::Or,
+            "repeat" => Self::Repeat,
+            "return" => Self::Return,
+            "then" => Self::Then,
+            "true" => Self::True,
+            "until" => Self::Until,
+            "while" => Self::While,
+            "//" => Self::FloorDiv,
+            ".." => Self::Concat,
+            "..." => Self::Dots,
+            "==" => Self::Equal,
+            ">=" => Self::GreaterEqual,
+            "<=" => Self::LessEqual,
+            "~=" => Self::NotEqual,
+            "<<" => Self::ShiftLeft,
+            ">>" => Self::ShiftRight,
+            "::" => Self::DoubleColon,
+            "\"" => Self::StringBound,
+            _ => {
+                if let Ok(num) = token.parse::<i32>() {
+                    return Self::Integer(num);
+                }
+
+                if let Ok(num) = token.parse::<f32>() {
+                    return Self::Float(num);
+                }
+
+                Self::Name(token.to_owned())
+            }
+            // todo!("Work on strings!")
         }
     }
 }
 
-#[derive(Clone, Debug)]
-struct Token {
-    line: usize,
+#[derive(Clone, Debug, PartialEq)]
+pub struct Token {
     ttype: Reserved,
+    line: usize,
+}
+
+impl Token {
+    fn new(ttype: Reserved, line: usize) -> Self {
+        Token { ttype, line }
+    }
 }
 
 impl Display for Token {
@@ -104,59 +125,26 @@ impl Display for Token {
     }
 }
 
-#[derive(Clone, Debug)]
-struct LexerError<'a> {
-    token: &'a Token,
-    lexeme: &'a str,
-    msg: &'static str,
+pub struct LexerState<'a> {
+    source: &'a str,
 }
 
-impl Display for LexerError<'_> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(
-            f,
-            "[L{}] Error on \"{}\" (parsed as {}): {}",
-            self.token.line, self.lexeme, self.token, self.msg
-        )
-    }
-}
-
-type LexerResult<'a> = Result<(), LexerError<'a>>;
-
-struct Lines<B> {
-    buffer: B,
-}
-
-struct LexerState {
-    source: Zio,
-    tokens: Vec<Token>,
-    pos: usize,
-}
-
-impl LexerState {
-    fn new<T: Into<Zio>>(source: T) -> Self {
-        LexerState {
-            source: source.into(),
-            tokens: Vec::new(),
-            pos: 0,
-        }
+impl<'a> LexerState<'a> {
+    pub fn new<T: Deref<Target = str>>(source: &'a T) -> Self {
+        LexerState { source }
     }
 
-    fn scan(&mut self) -> LexerResult {
-        let mut buff = [0u8; 32];
+    pub fn scan(self) -> Vec<Token> {
+        let mut tokens = Vec::new();
 
-        while !self.is_at_end() {
-            if let Ok(adv) = self.source.read(&mut buff) {
-
-            } else {
-                return Err(LexerError {})
-            }
+        for (lnum, line) in self.source.lines().enumerate() {
+            tokens.extend(
+                line.split(" ")
+                    .map(|lexeme| Reserved::parse(lexeme))
+                    .map(|ttype| Token::new(ttype, lnum)),
+            );
         }
 
-        Ok(())
-    }
-
-    fn is_at_end(&self) -> bool {
-        self.pos >= self.source.stream().len()
+        tokens
     }
 }

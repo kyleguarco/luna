@@ -49,5 +49,3 @@ pub(crate) enum UnaryOperator {
     Not,
     Length,
 }
-
-
