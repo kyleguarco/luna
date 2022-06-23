@@ -14,5 +14,27 @@ fn test(i: i32) -> i32 { 0 }
 fn lib() {
 	test.register();
 }
+``` or
+```rust
+trait Reg {
+	fn register(self);
+}
+
+impl<T> Reg for T
+where
+	T: Fn(i64) -> i32
+{
+	fn register(self) {
+		self(0);
+	}
+}
+
+macro_rules! register_func {
+	( $( $x:expr),* ) => {
+		$(
+			$x.register();
+		)*
+	};
+}
 ```
 It will likely be easy to register functions in lua like this.

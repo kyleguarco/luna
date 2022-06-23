@@ -41,8 +41,8 @@ fn repl() -> ExitCode {
 
 		if line.starts_with("exit") { break }
 
-		let mut lexer = LexerState::new(&line);
-		println!("{:?}", lexer.scan());
+		let lexer = LexerState::new(&line);
+		println!("{:?}", lexer.to_tokens());
 	}
 
 	ExitCode::SUCCESS
