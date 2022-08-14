@@ -112,7 +112,13 @@ impl<'src> Iterator for Lexer<'src> {
             "+" => Some(self.tokenize(TokenType::Plus)),
             "-" => Some(self.tokenize(TokenType::Minus)),
             "*" => Some(self.tokenize(TokenType::Star)),
-            "/" => Some(self.tokenize(TokenType::Slash)),
+            "/" => match self.peek(1) {
+                "/" => {
+                    self.advance(1);
+                    Some(self.tokenize(TokenType::DoubleSlash))
+                }
+                _ => Some(self.tokenize(TokenType::Slash)),
+            },
             "%" => Some(self.tokenize(TokenType::Percent)),
             "^" => Some(self.tokenize(TokenType::Caret)),
             "#" => Some(self.tokenize(TokenType::Pound)),
@@ -125,17 +131,53 @@ impl<'src> Iterator for Lexer<'src> {
                 _ => Some(self.tokenize(TokenType::Tilde)),
             },
             "|" => Some(self.tokenize(TokenType::Pipe)),
-            "<" => Some(self.tokenize(TokenType::LessThan)),
-            ">" => Some(self.tokenize(TokenType::GreaterThan)),
-            "=" => Some(self.tokenize(TokenType::Equal)),
+            "<" => match self.peek(1) {
+                "=" => {
+                    self.advance(1);
+                    Some(self.tokenize(TokenType::LessEqual))
+                }
+                _ => Some(self.tokenize(TokenType::LessThan)),
+            },
+            ">" => match self.peek(1) {
+                "=" => {
+                    self.advance(1);
+                    Some(self.tokenize(TokenType::GreaterEqual))
+                }
+                _ => Some(self.tokenize(TokenType::GreaterThan)),
+            },
+            "=" => match self.peek(1) {
+                "=" => {
+                    self.advance(1);
+                    Some(self.tokenize(TokenType::Equality))
+                }
+                _ => Some(self.tokenize(TokenType::Equal)),
+            },
             "(" => Some(self.tokenize(TokenType::LeftParen)),
             ")" => Some(self.tokenize(TokenType::RightParen)),
             "{" => Some(self.tokenize(TokenType::LeftBrace)),
             "}" => Some(self.tokenize(TokenType::RightBrace)),
             "[" => Some(self.tokenize(TokenType::LeftBracket)),
             "]" => Some(self.tokenize(TokenType::RightBracket)),
-            "." => Some(self.tokenize(TokenType::Dot)),
-            ":" => Some(self.tokenize(TokenType::Colon)),
+            "." => match self.peek(1) {
+                "." => match self.peek(2) {
+                    ".." => {
+                        self.advance(2);
+                        Some(self.tokenize(TokenType::TripleDots))
+                    }
+                    _ => {
+                        self.advance(1);
+                        Some(self.tokenize(TokenType::DoubleDots))
+                    }
+                },
+                _ => Some(self.tokenize(TokenType::Dot)),
+            },
+            ":" => match self.peek(1) {
+                ":" => {
+                    self.advance(1);
+                    Some(self.tokenize(TokenType::DoubleColon))
+                }
+                _ => Some(self.tokenize(TokenType::Colon)),
+            },
             "," => Some(self.tokenize(TokenType::Comma)),
             ";" => Some(self.tokenize(TokenType::Semicolon)),
             _ => None,
