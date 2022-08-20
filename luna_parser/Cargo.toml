@@ -1,0 +1,10 @@
+[package]
+name = "luna_parser"
+description = "A parser for the lua programming language."
+authors = ["Kyle Guarco <kyleguarco55@gmail.com>"]
+version = "5.4.4"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]

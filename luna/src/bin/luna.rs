@@ -2,15 +2,13 @@
 
 use std::{
     env::args,
+    fs::read_to_string,
     io::{stdin, BufRead, Write},
-    process::ExitCode,
 };
 
-use luna::codegen::{Lexer, Token};
+use luna_parser::codegen::{Lexer, Token};
 
-// use luna::codegen::lex::Lexer;
-
-fn main() -> ExitCode {
+fn main() {
     let mut args = args();
 
     match args.len() {
@@ -22,18 +20,20 @@ fn main() -> ExitCode {
         }
         _ => {
             eprintln!("Usage: {} [script]", args.next().expect("prog"));
-            ExitCode::FAILURE
         }
     }
 }
 
-fn script(path: &str) -> ExitCode {
-    println!("{path}");
-
-    ExitCode::SUCCESS
+fn script(path: &str) {
+    if let Ok(data) = read_to_string(path) {
+        let lexer = Lexer::new(&data).collect::<Vec<Token>>();
+        println!("{lexer:?}");
+    } else {
+        eprintln!("Couldn't open file \"{path}\"");
+    }
 }
 
-fn repl() -> ExitCode {
+fn repl() {
     let mut io = stdin().lock();
     let mut line = String::new();
 
@@ -49,9 +49,7 @@ fn repl() -> ExitCode {
             break;
         }
 
-        let lexer = Lexer::new(&line);
-        println!("{:?}", lexer.collect::<Vec<Token>>());
+        let lexer = Lexer::new(&line).collect::<Vec<Token>>();
+        println!("{lexer:?}");
     }
-
-    ExitCode::SUCCESS
 }

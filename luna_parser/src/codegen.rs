@@ -87,12 +87,7 @@ impl<'src> Lexer<'src> {
     fn advance(&mut self, seek: usize) -> &'src str {
         let slice = self.peek(seek);
         self.position += seek;
-        if slice.contains("\n") {
-            self.line += 1;
-            self.col = 1;
-        } else {
-            self.col += seek;
-        }
+        self.col += seek;
         slice
     }
 }
@@ -104,8 +99,6 @@ impl<'src> Iterator for Lexer<'src> {
         if self.is_end() {
             return None;
         }
-
-        //while self.peek(1) != " " { self.position += 1; }
 
         match self.advance(1) {
             // Terminal Symbols
@@ -180,6 +173,13 @@ impl<'src> Iterator for Lexer<'src> {
             },
             "," => Some(self.tokenize(TokenType::Comma)),
             ";" => Some(self.tokenize(TokenType::Semicolon)),
+            // Ignore the whitespace and return the result of tne next iteration
+            " " | "\x0C" | "\t" | "\x0B" => self.next(),
+            "\n" | "\r" => {
+                self.line += 1;
+                self.col = 0;
+                self.next()
+            },
             _ => None,
         }
     }
