@@ -6,7 +6,7 @@ use std::{
     io::{stdin, BufRead, Write},
 };
 
-use luna_parser::{token::Token, Lexer};
+use luna_parser::{token::Token, lexer::Lexer};
 
 fn main() {
     let mut args = args();
