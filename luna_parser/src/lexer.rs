@@ -74,8 +74,9 @@ impl<'src> Lexer<'src> {
         let quote = self.source.get(self.last..self.position).unwrap();
 
         loop {
-            let cur = self.advance(1);
+            let cur = self.peek(1);
 
+            // TODO: This allows newlines in all strings, but that shouldn't be possible
             if cur == "\n" {
                 self.new_line();
             }
@@ -83,12 +84,16 @@ impl<'src> Lexer<'src> {
             if cur == quote || self.is_at_end() {
                 break;
             }
+
+            self.advance(1);
         }
 
         if self.is_at_end() {
             None
         } else {
-            Some(self.tokenize(TokenType::String))
+            let tok = Some(self.tokenize(TokenType::String));
+            self.advance(1);
+            tok
         }
     }
 }
@@ -103,6 +108,20 @@ impl<'src> Iterator for Lexer<'src> {
 
         match self.advance(1) {
             "+" => Some(self.tokenize(TokenType::Plus)),
+            "*" => Some(self.tokenize(TokenType::Star)),
+            "%" => Some(self.tokenize(TokenType::Percent)),
+            "^" => Some(self.tokenize(TokenType::Caret)),
+            "#" => Some(self.tokenize(TokenType::Pound)),
+            "&" => Some(self.tokenize(TokenType::Amphersand)),
+            "|" => Some(self.tokenize(TokenType::Pipe)),
+            "(" => Some(self.tokenize(TokenType::LeftParen)),
+            ")" => Some(self.tokenize(TokenType::RightParen)),
+            "{" => Some(self.tokenize(TokenType::LeftBrace)),
+            "}" => Some(self.tokenize(TokenType::RightBrace)),
+            "[" => Some(self.tokenize(TokenType::LeftBracket)),
+            "]" => Some(self.tokenize(TokenType::RightBracket)),
+            "," => Some(self.tokenize(TokenType::Comma)),
+            ";" => Some(self.tokenize(TokenType::Semicolon)),
             "-" => match self.peek(1) {
                 "-" => {
                     self.skip_line();
@@ -110,7 +129,6 @@ impl<'src> Iterator for Lexer<'src> {
                 }
                 _ => Some(self.tokenize(TokenType::Minus)),
             },
-            "*" => Some(self.tokenize(TokenType::Star)),
             "/" => match self.peek(1) {
                 "/" => {
                     self.advance(1);
@@ -118,10 +136,6 @@ impl<'src> Iterator for Lexer<'src> {
                 }
                 _ => Some(self.tokenize(TokenType::Slash)),
             },
-            "%" => Some(self.tokenize(TokenType::Percent)),
-            "^" => Some(self.tokenize(TokenType::Caret)),
-            "#" => Some(self.tokenize(TokenType::Pound)),
-            "&" => Some(self.tokenize(TokenType::Amphersand)),
             "~" => match self.peek(1) {
                 "=" => {
                     self.advance(1);
@@ -129,7 +143,6 @@ impl<'src> Iterator for Lexer<'src> {
                 }
                 _ => Some(self.tokenize(TokenType::Tilde)),
             },
-            "|" => Some(self.tokenize(TokenType::Pipe)),
             "<" => match self.peek(1) {
                 "=" => {
                     self.advance(1);
@@ -151,12 +164,6 @@ impl<'src> Iterator for Lexer<'src> {
                 }
                 _ => Some(self.tokenize(TokenType::Equal)),
             },
-            "(" => Some(self.tokenize(TokenType::LeftParen)),
-            ")" => Some(self.tokenize(TokenType::RightParen)),
-            "{" => Some(self.tokenize(TokenType::LeftBrace)),
-            "}" => Some(self.tokenize(TokenType::RightBrace)),
-            "[" => Some(self.tokenize(TokenType::LeftBracket)),
-            "]" => Some(self.tokenize(TokenType::RightBracket)),
             "." => match self.peek(1) {
                 "." => match self.peek(2) {
                     ".." => {
@@ -177,8 +184,6 @@ impl<'src> Iterator for Lexer<'src> {
                 }
                 _ => Some(self.tokenize(TokenType::Colon)),
             },
-            "," => Some(self.tokenize(TokenType::Comma)),
-            ";" => Some(self.tokenize(TokenType::Semicolon)),
             "\"" | "\'" => self.parse_string(),
             // Ignore the whitespace and return the result of the next iteration
             " " | "\x0C" | "\t" | "\x0B" => self.next(),
