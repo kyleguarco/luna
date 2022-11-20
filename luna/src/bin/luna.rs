@@ -6,7 +6,7 @@ use std::{
     io::{stdin, BufRead, Write},
 };
 
-use luna_parser::{token::Token, lexer::Lexer};
+use luna_parser::lexer::Lexer;
 
 fn main() {
     let mut args = args();
@@ -25,12 +25,9 @@ fn main() {
 }
 
 fn script(path: &str) {
-    if let Ok(data) = read_to_string(path) {
-        let lexer = Lexer::new(&data).collect::<Vec<Token>>();
-        println!("{lexer:?}");
-    } else {
-        eprintln!("Couldn't open file \"{path}\"");
-    }
+    let data = read_to_string(path).expect("Couldn't open the script (Does it exist?)");
+    let lexer: Result<Vec<_>, _> = Lexer::new(&data).collect();
+    println!("{lexer:?}");
 }
 
 fn repl() {
@@ -49,7 +46,7 @@ fn repl() {
             break;
         }
 
-        let lexer = Lexer::new(&line).collect::<Vec<Token>>();
+        let lexer: Result<Vec<_>, _> = Lexer::new(&line).collect();
         println!("{lexer:?}");
     }
 }

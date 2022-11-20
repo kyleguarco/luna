@@ -1,197 +1,126 @@
-use core::ops::Deref;
+use core::{iter::Peekable, str::Chars};
 
-use crate::token::{Token, TokenType};
+use crate::{
+    error::LexError,
+    token::{Token, TokenType},
+};
+
+/// The iterating type for our lexer.
+/// The lexer will stop iterating should it return this types' `Err` type.
+pub type LexResult<'src> = Result<Token<'src>, LexError<'src>>;
 
 pub struct Lexer<'src> {
     source: &'src str,
-    /// Position of the last successful parse
-    last: usize,
-    /// The cursor (position in the source string)
-    position: usize,
+    chars: Peekable<Chars<'src>>,
     line: usize,
     col: usize,
+    curr: usize,
+    /// The beginning index of the current lexeme
+    last: usize,
 }
 
 impl<'src> Lexer<'src> {
-    pub fn new<T: Deref<Target = str>>(source: &'src T) -> Self {
+    pub fn new<T: AsRef<str>>(source: &'src T) -> Self {
+        let source = source.as_ref();
         Self {
             source: source.as_ref(),
-            last: 0,
-            position: 0,
+            chars: source.chars().peekable(),
             line: 1,
             col: 0,
+            curr: 0,
+            last: 0,
         }
     }
 
-    fn is_at_end(&self) -> bool {
-        self.position >= self.source.len()
+    fn new_lexeme(&mut self) {
+        self.last = self.curr;
     }
 
-    fn peek(&self, peek: usize) -> &'src str {
-        let slice = if self.position + peek < self.source.len() {
-            self.position..self.position + peek
-        } else {
-            self.position..self.source.len()
-        };
-        // Unwrap is safe here, since we check the length of the lookahead
-        // before returning it. We return a slice to the end of the source
-        // if the length is invalid.
-        self.source.get(slice).unwrap()
-    }
-
-    fn tokenize(&mut self, ttype: TokenType) -> Token<'src> {
-        let token = Token::new(
-            ttype,
-            self.source.get(self.last..self.position).unwrap(),
-            self.line,
-            self.col,
-        );
-        self.last = self.position;
-        token
-    }
-
-    fn new_line(&mut self) {
-        self.line += 1;
-        self.col = 0;
-    }
-
-    fn skip_line(&mut self) {
-        while self.peek(1) != "\n" {
-            self.position += 1;
-        }
-        self.last = self.position;
-        self.new_line();
-    }
-
-    fn advance(&mut self, seek: usize) -> &'src str {
-        let slice = self.peek(seek);
-        self.position += seek;
-        self.col += seek;
-        slice
-    }
-
-    fn parse_string(&mut self) -> Option<Token<'src>> {
-        let quote = self.source.get(self.last..self.position).unwrap();
-
+    fn skip_whitespace(&mut self) {
         loop {
-            let cur = self.peek(1);
-
-            // TODO: This allows newlines in all strings, but that shouldn't be possible
-            if cur == "\n" {
-                self.new_line();
-            }
-
-            if cur == quote || self.is_at_end() {
+            let Some(c) = self.chars.peek() else {
                 break;
+            };
+            match c {
+                ' ' | '\t' | '\x0C' | '\x0B' => {}
+                '\n' => {
+                    self.line += 1;
+                    self.col = 0;
+                }
+                _ => break,
             }
-
-            self.advance(1);
+            self.advance();
         }
+    }
 
-        if self.is_at_end() {
-            None
-        } else {
-            let tok = Some(self.tokenize(TokenType::String));
-            self.advance(1);
-            tok
+    fn advance(&mut self) -> Option<char> {
+        self.col += 1;
+        self.curr += 1;
+        self.chars.next()
+    }
+
+    fn advance_if(&mut self, expected: impl Fn(&char) -> bool) {
+        while self.chars.next_if(&expected).is_some() {
+            self.curr += 1;
+            self.col += 1;
         }
+    }
+
+    fn accept(&mut self, ttype: TokenType) -> Option<LexResult<'src>> {
+        let lexeme = self.lexeme();
+        let tok = Some(Ok(Token::new(ttype, lexeme, self.line, self.col)));
+        tok
+    }
+
+    #[inline]
+    fn reject(&self) -> Option<LexResult<'src>> {
+        Some(Err(LexError::new(self.lexeme(), self.line, self.col)))
+    }
+
+    #[inline]
+    fn lexeme(&self) -> &'src str {
+        // SAFETY: self.curr is guaranteed to stop at the last character.
+        unsafe { self.source.get_unchecked(self.last..self.curr) }
     }
 }
 
 impl<'src> Iterator for Lexer<'src> {
-    type Item = Token<'src>;
+    type Item = LexResult<'src>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.is_at_end() {
-            return None;
-        }
+        self.skip_whitespace();
+        self.new_lexeme();
+        let curr = self.advance()?;
 
-        match self.advance(1) {
-            "+" => Some(self.tokenize(TokenType::Plus)),
-            "*" => Some(self.tokenize(TokenType::Star)),
-            "%" => Some(self.tokenize(TokenType::Percent)),
-            "^" => Some(self.tokenize(TokenType::Caret)),
-            "#" => Some(self.tokenize(TokenType::Pound)),
-            "&" => Some(self.tokenize(TokenType::Amphersand)),
-            "|" => Some(self.tokenize(TokenType::Pipe)),
-            "(" => Some(self.tokenize(TokenType::LeftParen)),
-            ")" => Some(self.tokenize(TokenType::RightParen)),
-            "{" => Some(self.tokenize(TokenType::LeftBrace)),
-            "}" => Some(self.tokenize(TokenType::RightBrace)),
-            "[" => Some(self.tokenize(TokenType::LeftBracket)),
-            "]" => Some(self.tokenize(TokenType::RightBracket)),
-            "," => Some(self.tokenize(TokenType::Comma)),
-            ";" => Some(self.tokenize(TokenType::Semicolon)),
-            "-" => match self.peek(1) {
-                "-" => {
-                    self.skip_line();
-                    self.next()
-                }
-                _ => Some(self.tokenize(TokenType::Minus)),
-            },
-            "/" => match self.peek(1) {
-                "/" => {
-                    self.advance(1);
-                    Some(self.tokenize(TokenType::DoubleSlash))
-                }
-                _ => Some(self.tokenize(TokenType::Slash)),
-            },
-            "~" => match self.peek(1) {
-                "=" => {
-                    self.advance(1);
-                    Some(self.tokenize(TokenType::NotEqual))
-                }
-                _ => Some(self.tokenize(TokenType::Tilde)),
-            },
-            "<" => match self.peek(1) {
-                "=" => {
-                    self.advance(1);
-                    Some(self.tokenize(TokenType::LessEqual))
-                }
-                _ => Some(self.tokenize(TokenType::LessThan)),
-            },
-            ">" => match self.peek(1) {
-                "=" => {
-                    self.advance(1);
-                    Some(self.tokenize(TokenType::GreaterEqual))
-                }
-                _ => Some(self.tokenize(TokenType::GreaterThan)),
-            },
-            "=" => match self.peek(1) {
-                "=" => {
-                    self.advance(1);
-                    Some(self.tokenize(TokenType::Equality))
-                }
-                _ => Some(self.tokenize(TokenType::Equal)),
-            },
-            "." => match self.peek(1) {
-                "." => match self.peek(2) {
-                    ".." => {
-                        self.advance(2);
-                        Some(self.tokenize(TokenType::TripleDots))
-                    }
-                    _ => {
-                        self.advance(1);
-                        Some(self.tokenize(TokenType::DoubleDots))
-                    }
-                },
-                _ => Some(self.tokenize(TokenType::Dot)),
-            },
-            ":" => match self.peek(1) {
-                ":" => {
-                    self.advance(1);
-                    Some(self.tokenize(TokenType::DoubleColon))
-                }
-                _ => Some(self.tokenize(TokenType::Colon)),
-            },
-            "\"" | "\'" => self.parse_string(),
-            // Ignore the whitespace and return the result of the next iteration
-            " " | "\x0C" | "\t" | "\x0B" => self.next(),
-            "\n" | "\r" => {
-                self.new_line();
-                self.next()
+        match curr {
+            '+' => self.accept(TokenType::Plus),
+            '-' => self.accept(TokenType::Minus),
+            '*' => self.accept(TokenType::Star),
+            '/' => self.accept(TokenType::Slash),
+            '%' => self.accept(TokenType::Percent),
+            '^' => self.accept(TokenType::Caret),
+            '#' => self.accept(TokenType::Pound),
+            '&' => self.accept(TokenType::Amphersand),
+            '~' => self.accept(TokenType::Tilde),
+            '|' => self.accept(TokenType::Pipe),
+            '<' => self.accept(TokenType::LessThan),
+            '>' => self.accept(TokenType::GreaterThan),
+            '=' => self.accept(TokenType::Equal),
+            '(' => self.accept(TokenType::LeftParen),
+            ')' => self.accept(TokenType::RightParen),
+            '{' => self.accept(TokenType::LeftBrace),
+            '}' => self.accept(TokenType::RightBrace),
+            '[' => self.accept(TokenType::LeftBracket),
+            ']' => self.accept(TokenType::RightBracket),
+            '.' => self.accept(TokenType::Dot),
+            ':' => self.accept(TokenType::Colon),
+            ',' => self.accept(TokenType::Comma),
+            ';' => self.accept(TokenType::Semicolon),
+            _ if curr.is_alphabetic() => {
+                self.advance_if(|c| c.is_alphanumeric());
+                self.accept(TokenType::Identifier)
             }
-            _ => None,
+            _ => self.reject(),
         }
     }
 }
