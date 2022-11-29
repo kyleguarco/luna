@@ -1,16 +1,44 @@
+use crate::cursor::Cursor;
+
+#[derive(Debug)]
+pub enum LexErrorType {
+    UnknownSequence,
+    InvalidKeyword,
+    InvalidTerminal,
+    InvalidLiteral,
+}
+
 #[derive(Debug)]
 pub struct LexError<'src> {
+    pub etype: LexErrorType,
     pub lexeme: &'src str,
-    pub line: usize,
-    pub col: usize,
+    pub cursor: Cursor,
 }
 
 impl<'src> LexError<'src> {
-    pub(crate) fn new(lexeme: &'src str, line: usize, col: usize) -> Self {
+    pub(crate) fn new(etype: LexErrorType, lexeme: &'src str, cursor: Cursor) -> Self {
         Self {
+            etype,
             lexeme,
-            line,
-            col,
+            cursor,
         }
+    }
+}
+
+#[derive(Debug)]
+pub enum ParseErrorType {
+    NothingToParse,
+    InvalidToken,
+}
+
+#[derive(Debug)]
+pub struct ParseError {
+    pub etype: ParseErrorType,
+    pub cursor: Cursor,
+}
+
+impl ParseError {
+    pub(crate) fn new(etype: ParseErrorType, cursor: Cursor) -> Self {
+        Self { etype, cursor }
     }
 }

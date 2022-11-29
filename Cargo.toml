@@ -1,5 +1,7 @@
 [workspace]
+
 members = [
 	"luna",
 	"luna_parser",
+	"luna_types",
 ]

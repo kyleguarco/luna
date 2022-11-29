@@ -1,6 +1,6 @@
 [package]
 name = "luna_parser"
-description = "A parser for the lua programming language."
+description = "A parser for the Lua programming language."
 authors = ["Kyle Guarco <kyleguarco55@gmail.com>"]
 version = "5.4.4"
 edition = "2021"
@@ -8,3 +8,4 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+luna_types = { path = "../luna_types" }

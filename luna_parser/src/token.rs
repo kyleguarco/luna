@@ -1,5 +1,9 @@
+use luna_types::num::{LuaNumber, LuaInteger};
+
+use crate::{cursor::Cursor, error::LexErrorType};
+
 #[rustfmt::skip]
-#[derive(Clone, Debug)]
+#[derive(PartialEq, Clone, Debug)]
 pub enum TokenType {
 	// Keywords
 	And, Break, Do, Else, ElseIf, End, False, For, Function,
@@ -14,24 +18,62 @@ pub enum TokenType {
 	ShiftLeft, ShiftRight, DoubleSlash, Equality, NotEqual,
 	LessEqual, GreaterEqual, DoubleColon, DoubleDots, TripleDots,
     // Literals
-    Identifier, String, Number, Float
+    Identifier, String, Integer(LuaInteger), Float(LuaNumber),
+    /// The nothing type (for parsing errors)
+    Nothing
+}
+
+impl TokenType {
+    pub fn is_terminal(c: &char) -> bool {
+        match c {
+            '+' | '-' | '*' | '/' | '%' | '^' | '#' | '&' | '~' | '|' | '<' | '>' | '=' | '('
+            | ')' | '{' | '}' | '[' | ']' | '.' | ':' | ',' | ';' => true,
+            _ => false,
+        }
+    }
+
+    pub fn try_keyword(s: &str) -> Result<Self, LexErrorType> {
+        match s {
+            "and" => Ok(Self::And),
+            "break" => Ok(Self::Break),
+            "do" => Ok(Self::Do),
+            "else" => Ok(Self::Else),
+            "elseif" => Ok(Self::ElseIf),
+            "end" => Ok(Self::End),
+            "false" => Ok(Self::False),
+            "for" => Ok(Self::For),
+            "function" => Ok(Self::Function),
+            "goto" => Ok(Self::Goto),
+            "if" => Ok(Self::If),
+            "in" => Ok(Self::In),
+            "local" => Ok(Self::Local),
+            "nil" => Ok(Self::Nil),
+            "not" => Ok(Self::Not),
+            "or" => Ok(Self::Or),
+            "repeat" => Ok(Self::Repeat),
+            "return" => Ok(Self::Return),
+            "then" => Ok(Self::Then),
+            "true" => Ok(Self::True),
+            "until" => Ok(Self::Until),
+            "while" => Ok(Self::While),
+            _ => Err(LexErrorType::InvalidKeyword),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
 pub struct Token<'src> {
     ttype: TokenType,
     lexeme: &'src str,
-    line: usize,
-    col: usize,
+    cursor: Cursor,
 }
 
 impl<'src> Token<'src> {
-    pub(crate) fn new(ttype: TokenType, lexeme: &'src str, line: usize, col: usize) -> Self {
+    pub(crate) fn new(ttype: TokenType, lexeme: &'src str, cursor: Cursor) -> Self {
         Self {
             ttype,
             lexeme,
-            line,
-            col,
+            cursor,
         }
     }
 
@@ -39,8 +81,8 @@ impl<'src> Token<'src> {
         &self.ttype
     }
 
-    pub fn position(&self) -> (usize, usize) {
-        (self.line, self.col)
+    pub fn cursor(&self) -> &Cursor {
+        &self.cursor
     }
 
     pub fn lexeme(&self) -> &'src str {

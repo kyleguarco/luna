@@ -2,4 +2,6 @@
 
 pub mod token;
 pub mod error;
-pub mod lexer;
+pub mod lex;
+pub mod parse;
+pub mod cursor;
