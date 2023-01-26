@@ -6,8 +6,6 @@ use std::{
     io::{stdin, BufRead, Write},
 };
 
-use luna_parser::lex::Lexer;
-
 fn main() {
     let mut args = args();
 
@@ -26,8 +24,6 @@ fn main() {
 
 fn script(path: &str) {
     let data = read_to_string(path).expect("Couldn't open the script (Does it exist?)");
-    let lexer: Result<Vec<_>, _> = Lexer::new(&data).collect();
-    println!("{lexer:?}");
 }
 
 fn repl() {
@@ -46,7 +42,7 @@ fn repl() {
             break;
         }
 
-        let lexer: Result<Vec<_>, _> = Lexer::new(&line).collect();
-        println!("{lexer:?}");
+        // let lexer: Result<Vec<_>, _> = Lexer::new(&line).collect();
+        // println!("{lexer:?}");
     }
 }
