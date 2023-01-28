@@ -1,103 +1,121 @@
-use nom::IResult;
+use nom::{IResult, error::ParseError, InputTakeAtPosition, AsChar, character::complete::multispace0, sequence::delimited};
 
 mod stat;
 
-fn chunk(input: &str) -> IResult<&str, ()> {
+pub fn chunk(input: &str) -> IResult<&str, &str> {
 	block(input)
 }
 
-fn block(input: &str) -> IResult<&str, ()> {
+pub fn block(input: &str) -> IResult<&str, &str> {
 	todo!()
 }
 
-fn stat(input: &str) -> IResult<&str, ()> {
+pub fn stat(input: &str) -> IResult<&str, ()> {
+	use stat;
+
 	todo!()
 }
 
-fn attnamelist(input: &str) -> IResult<&str, ()> {
+pub fn attnamelist(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn attrib(input: &str) -> IResult<&str, ()> {
+pub fn attrib(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn retstat(input: &str) -> IResult<&str, ()> {
+pub fn retstat(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn label(input: &str) -> IResult<&str, ()> {
+pub fn label(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn funcname(input: &str) -> IResult<&str, ()> {
+pub fn funcname(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn varlist(input: &str) -> IResult<&str, ()> {
+pub fn varlist(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn var(input: &str) -> IResult<&str, ()> {
+pub fn var(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn namelist(input: &str) -> IResult<&str, ()> {
+pub fn namelist(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn explist(input: &str) -> IResult<&str, ()> {
+pub fn explist(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn exp(input: &str) -> IResult<&str, ()> {
+pub fn exp(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn prefixexp(input: &str) -> IResult<&str, ()> {
+pub fn prefixexp(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn functioncall(input: &str) -> IResult<&str, ()> {
+pub fn functioncall(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn args(input: &str) -> IResult<&str, ()> {
+pub fn args(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn functiondef(input: &str) -> IResult<&str, ()> {
+pub fn functiondef(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn funcbody(input: &str) -> IResult<&str, ()> {
+pub fn funcbody(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn parlist(input: &str) -> IResult<&str, ()> {
+pub fn parlist(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn tableconstructor(input: &str) -> IResult<&str, ()> {
+pub fn tableconstructor(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn fieldlist(input: &str) -> IResult<&str, ()> {
+pub fn fieldlist(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn field(input: &str) -> IResult<&str, ()> {
+pub fn field(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn fieldsep(input: &str) -> IResult<&str, ()> {
+pub fn fieldsep(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn binop(input: &str) -> IResult<&str, ()> {
+pub fn binop(input: &str) -> IResult<&str, ()> {
 	todo!()
 }
 
-fn unop(input: &str) -> IResult<&str, ()> {
+pub fn unop(input: &str) -> IResult<&str, ()> {
 	todo!()
+}
+
+/// A combinator that takes a parser `inner` and produces a parser that also consumes both leading and
+/// trailing whitespace, returning the output of `inner`.
+///
+/// This function was taken from [the nom::recipes documentation][1]
+///
+/// [1]: https://docs.rs/nom/latest/nom/recipes/index.html#whitespace
+pub fn whitespace<'a, T, F, O, E>(inner: F) -> impl FnMut(T) -> IResult<T, O, E>
+where
+	F: Fn(T) -> IResult<T, O, E> + 'a,
+	E: ParseError<T>,
+	T: InputTakeAtPosition + 'a,
+	<T as InputTakeAtPosition>::Item: Clone + AsChar,
+{
+	delimited(multispace0, inner, multispace0)
 }

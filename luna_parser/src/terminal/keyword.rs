@@ -1,10 +1,16 @@
 use nom::{bytes::complete::tag, IResult};
 
+use crate::parse::whitespace;
+
 macro_rules! build_keyword_tags {
 	($($name:tt, $tok:literal)*) => {
 		$(
+			#[doc = "Comsumes the leading and trailing whitespace around the `"]
+			#[doc = $tok]
+			#[doc = "` keyword."]
+			#[inline]
 			pub fn $name(i: &str) -> IResult<&str, &str> {
-				tag($tok)(i)
+				whitespace(tag($tok))(i)
 			}
 		)*
 	};

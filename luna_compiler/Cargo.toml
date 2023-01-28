@@ -1,0 +1,10 @@
+[package]
+name = "luna_compiler"
+description = "A bytecode compiler for the Lua programming language."
+authors = ["Kyle Guarco <kyleguarco55@gmail.com>"]
+version = "5.4.4"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
