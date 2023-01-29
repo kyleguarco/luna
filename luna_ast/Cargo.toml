@@ -1,6 +1,6 @@
 [package]
-name = "luna_types"
-description = "Various Lua types"
+name = "luna_ast"
+description = "Structures for the Lua syntax tree."
 authors = ["Kyle Guarco <kyleguarco55@gmail.com>"]
 version = "5.4.4"
 edition = "2021"

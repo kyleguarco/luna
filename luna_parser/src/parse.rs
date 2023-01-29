@@ -1,106 +1,116 @@
-use nom::{IResult, error::ParseError, InputTakeAtPosition, AsChar, character::complete::multispace0, sequence::delimited};
+use luna_ast::types::{
+	Arguments, Attribute, AttributeNameList, Block, Expression, ExpressionList, Field, FieldList,
+	FunctionBody, FunctionCall, FunctionDefinition, FunctionIdentifier, Identifier, IdentifierList,
+	InfixOperation, Label, ParameterList, PrefixExpression, PrefixOperation, ReturnStatement,
+	Statement, TableConstructor, Variable, VariableList,
+};
+use nom::{
+	branch::alt, character::complete::multispace0, error::ParseError, sequence::delimited, AsChar,
+	IResult, InputTakeAtPosition,
+};
 
-mod stat;
+mod cstat;
 
-pub fn chunk(input: &str) -> IResult<&str, &str> {
-	block(input)
-}
-
-pub fn block(input: &str) -> IResult<&str, &str> {
+pub fn block(input: &str) -> IResult<&str, Block> {
 	todo!()
 }
 
-pub fn stat(input: &str) -> IResult<&str, ()> {
-	use stat;
+pub fn stat(input: &str) -> IResult<&str, Statement> {
+	alt((
+		cstat::semicolon,
+		cstat::varlist_explist,
+		cstat::fcall,
+		cstat::label_state,
+		cstat::break_state,
+		cstat::goto_name,
+	))(input)
+}
 
+pub fn attnamelist(input: &str) -> IResult<&str, AttributeNameList> {
 	todo!()
 }
 
-pub fn attnamelist(input: &str) -> IResult<&str, ()> {
+pub fn attrib(input: &str) -> IResult<&str, Attribute> {
 	todo!()
 }
 
-pub fn attrib(input: &str) -> IResult<&str, ()> {
+pub fn retstat(input: &str) -> IResult<&str, ReturnStatement> {
 	todo!()
 }
 
-pub fn retstat(input: &str) -> IResult<&str, ()> {
+pub fn label(input: &str) -> IResult<&str, Label> {
+	Ok((input, Label(Identifier(""))))
+}
+
+pub fn funcname(input: &str) -> IResult<&str, FunctionIdentifier> {
 	todo!()
 }
 
-pub fn label(input: &str) -> IResult<&str, ()> {
+pub fn varlist(input: &str) -> IResult<&str, VariableList> {
 	todo!()
 }
 
-pub fn funcname(input: &str) -> IResult<&str, ()> {
+pub fn var(input: &str) -> IResult<&str, Variable> {
 	todo!()
 }
 
-pub fn varlist(input: &str) -> IResult<&str, ()> {
+pub fn namelist(input: &str) -> IResult<&str, IdentifierList> {
 	todo!()
 }
 
-pub fn var(input: &str) -> IResult<&str, ()> {
+pub fn explist(input: &str) -> IResult<&str, ExpressionList> {
 	todo!()
 }
 
-pub fn namelist(input: &str) -> IResult<&str, ()> {
+pub fn exp(input: &str) -> IResult<&str, Expression> {
 	todo!()
 }
 
-pub fn explist(input: &str) -> IResult<&str, ()> {
+pub fn prefixexp(input: &str) -> IResult<&str, PrefixExpression> {
 	todo!()
 }
 
-pub fn exp(input: &str) -> IResult<&str, ()> {
+pub fn functioncall(input: &str) -> IResult<&str, FunctionCall> {
 	todo!()
 }
 
-pub fn prefixexp(input: &str) -> IResult<&str, ()> {
+pub fn args(input: &str) -> IResult<&str, Arguments> {
 	todo!()
 }
 
-pub fn functioncall(input: &str) -> IResult<&str, ()> {
+pub fn functiondef(input: &str) -> IResult<&str, FunctionDefinition> {
 	todo!()
 }
 
-pub fn args(input: &str) -> IResult<&str, ()> {
+pub fn funcbody(input: &str) -> IResult<&str, FunctionBody> {
 	todo!()
 }
 
-pub fn functiondef(input: &str) -> IResult<&str, ()> {
+pub fn parlist(input: &str) -> IResult<&str, ParameterList> {
 	todo!()
 }
 
-pub fn funcbody(input: &str) -> IResult<&str, ()> {
+pub fn tableconstructor(input: &str) -> IResult<&str, TableConstructor> {
 	todo!()
 }
 
-pub fn parlist(input: &str) -> IResult<&str, ()> {
+pub fn fieldlist(input: &str) -> IResult<&str, FieldList> {
 	todo!()
 }
 
-pub fn tableconstructor(input: &str) -> IResult<&str, ()> {
+pub fn field(input: &str) -> IResult<&str, Field> {
 	todo!()
 }
 
-pub fn fieldlist(input: &str) -> IResult<&str, ()> {
+pub fn fieldsep(input: &str) -> IResult<&str, &str> {
 	todo!()
 }
 
-pub fn field(input: &str) -> IResult<&str, ()> {
+pub fn binop(input: &str) -> IResult<&str, InfixOperation> {
 	todo!()
 }
 
-pub fn fieldsep(input: &str) -> IResult<&str, ()> {
-	todo!()
-}
-
-pub fn binop(input: &str) -> IResult<&str, ()> {
-	todo!()
-}
-
-pub fn unop(input: &str) -> IResult<&str, ()> {
+pub fn unop(input: &str) -> IResult<&str, PrefixOperation> {
 	todo!()
 }
 
@@ -110,7 +120,7 @@ pub fn unop(input: &str) -> IResult<&str, ()> {
 /// This function was taken from [the nom::recipes documentation][1]
 ///
 /// [1]: https://docs.rs/nom/latest/nom/recipes/index.html#whitespace
-pub fn whitespace<'a, T, F, O, E>(inner: F) -> impl FnMut(T) -> IResult<T, O, E>
+pub(crate) fn whitespace<'a, T, F, O, E>(inner: F) -> impl FnMut(T) -> IResult<T, O, E>
 where
 	F: Fn(T) -> IResult<T, O, E> + 'a,
 	E: ParseError<T>,

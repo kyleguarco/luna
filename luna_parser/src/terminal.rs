@@ -1,3 +1,4 @@
+use luna_ast::types::Identifier;
 use nom::{
 	branch::alt,
 	bytes::complete::tag,
@@ -17,11 +18,13 @@ pub(crate) mod keyword;
 /// This function was taken from [the nom::recipes documentation][1]
 ///
 /// [1]: https://docs.rs/nom/latest/nom/recipes/index.html#rust-style-identifiers
-pub fn identifier(input: &str) -> IResult<&str, &str> {
-	recognize(pair(
+pub fn identifier(input: &str) -> IResult<&str, Identifier<'_>> {
+	let (input, result) = recognize(pair(
 		alt((alpha1, tag("_"))),
 		many0_count(alt((alphanumeric1, tag("_")))),
-	))(input)
+	))(input)?;
+
+	Ok((input, Identifier(result)))
 }
 
 // https://github.com/rust-bakery/nom/blob/main/examples/string.rs

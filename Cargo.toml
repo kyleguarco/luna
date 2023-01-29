@@ -2,7 +2,7 @@
 
 members = [
 	"luna",
+	"luna_ast",
 	"luna_compiler",
 	"luna_parser",
-	"luna_types",
 ]
