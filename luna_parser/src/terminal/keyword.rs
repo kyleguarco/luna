@@ -1,5 +1,5 @@
 use nom::{bytes::complete::tag, IResult};
-use luna_ast::keyword::Keyword;
+use luna_ast::keyword;
 
 use crate::parse::whitespace;
 
@@ -10,9 +10,9 @@ macro_rules! build_keyword_tags {
 			#[doc = $tok]
 			#[doc = "` keyword."]
 			#[inline]
-			pub fn $name(input: &str) -> IResult<&str, Keyword> {
+			pub fn $name(input: &str) -> IResult<&str, keyword::$key> {
 				let (input, _) = whitespace(tag($tok))(input)?;
-				Ok((input, Keyword::$key))
+				Ok((input, keyword::$key))
 			}
 		)*
 	};

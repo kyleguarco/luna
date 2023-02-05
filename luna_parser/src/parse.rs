@@ -2,28 +2,18 @@ use luna_ast::types::{
 	Arguments, Attribute, AttributeNameList, Block, Expression, ExpressionList, Field, FieldList,
 	FunctionBody, FunctionCall, FunctionDefinition, FunctionIdentifier, Identifier, IdentifierList,
 	InfixOperation, Label, ParameterList, PrefixExpression, PrefixOperation, ReturnStatement,
-	Statement, TableConstructor, Variable, VariableList,
+	TableConstructor, Variable, VariableList,
 };
 use nom::{
-	branch::alt, character::complete::multispace0, error::ParseError, sequence::delimited, AsChar,
+	character::complete::multispace0, error::ParseError, sequence::delimited, AsChar,
 	IResult, InputTakeAtPosition,
 };
+use stat::stat;
 
-mod cstat;
+mod stat;
 
 pub fn block(input: &str) -> IResult<&str, Block> {
 	todo!()
-}
-
-pub fn stat(input: &str) -> IResult<&str, Statement> {
-	alt((
-		cstat::semicolon,
-		cstat::varlist_explist,
-		cstat::fcall,
-		cstat::label_state,
-		cstat::break_state,
-		cstat::goto_name,
-	))(input)
 }
 
 pub fn attnamelist(input: &str) -> IResult<&str, AttributeNameList> {

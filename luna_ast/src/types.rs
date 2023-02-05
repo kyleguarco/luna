@@ -2,7 +2,6 @@
 ///!
 ///! These are representations of source pub structure, which are generated
 ///! from the parser.
-
 use std::boxed::Box;
 
 #[derive(Debug)]
@@ -16,6 +15,13 @@ pub struct Chunk<'a>(pub Block<'a>);
 
 pub struct Block<'a>(pub Box<Statement<'a>>, pub ReturnStatement);
 
+pub enum IfStatement<'a> {
+	If(Expression, Block<'a>),
+	ElseIf(Expression, Block<'a>),
+	Else(Block<'a>),
+	End
+}
+
 pub enum Statement<'a> {
 	End,
 	Definition(VariableList, ExpressionList),
@@ -26,8 +32,9 @@ pub enum Statement<'a> {
 	Do(Box<Block<'a>>),
 	While(Expression, Block<'a>),
 	RepeatUntil(Block<'a>, Expression),
-	IfTree,
-	For,
+	IfStatement(Vec<IfStatement<'a>>),
+	ForExpression,
+	ForList,
 	FunctionDefinition(FunctionDefinition),
 	LocalFunctionDefinition(FunctionDefinition),
 	LocalDefinitionWithAttribute(AttributeNameList, Option<ExpressionList>),
@@ -40,6 +47,12 @@ pub struct Attribute;
 pub struct ReturnStatement;
 
 pub struct Label<'a>(pub Identifier<'a>);
+
+impl<'a> Into<Statement<'a>> for Label<'a> {
+	fn into(self) -> Statement<'a> {
+		Statement::Label(self)
+	}
+}
 
 pub struct FunctionIdentifier;
 
@@ -78,6 +91,12 @@ pub enum PrefixExpression {
 pub enum FunctionCall {
 	CallFunction,
 	CallObjectFunction,
+}
+
+impl<'a> Into<Statement<'a>> for FunctionCall {
+	fn into(self) -> Statement<'a> {
+		Statement::FunctionCall(self)
+	}
 }
 
 pub enum Arguments {

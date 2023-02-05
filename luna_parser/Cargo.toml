@@ -5,7 +5,7 @@ authors = ["Kyle Guarco <kyleguarco55@gmail.com>"]
 version = "5.4.4"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
 
 [dependencies]
 nom = "7.1.3"
