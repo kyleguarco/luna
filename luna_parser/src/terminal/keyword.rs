@@ -7,6 +7,7 @@ use nom::{
 
 use crate::parse::whitespace;
 
+/// A collection of the possible keywords in Lua.
 pub enum Keyword {
 	And,
 	Break,
@@ -33,6 +34,7 @@ pub enum Keyword {
 }
 
 impl Keyword {
+	/// Convert a keyword type to its corresponding string literal.
 	pub fn literal(&self) -> &'static str {
 		match self {
 			Keyword::And => "and",
@@ -61,6 +63,15 @@ impl Keyword {
 	}
 }
 
+/// An implementation of `Into` for convienence.
+impl Into<&'static str> for Keyword {
+	fn into(self) -> &'static str {
+		self.literal()
+	}
+}
+
+/// Strips the whitespace surrounding a keyword and returns the parsed input,
+/// along with the string literal corresponding to the keyword.
 pub fn keyword<Input, Error: ParseError<Input>>(
 	key: Keyword,
 ) -> impl FnMut(Input) -> IResult<Input, Input, Error>
