@@ -1,14 +1,14 @@
 use luna_ast::types::{
-	Arguments, Attribute, AttributeNameList, Block, Expression, ExpressionList, Field, FieldList,
-	FunctionBody, FunctionCall, FunctionDefinition, FunctionIdentifier, Identifier, IdentifierList,
-	InfixOperation, Label, ParameterList, PrefixExpression, PrefixOperation, ReturnStatement,
-	TableConstructor, Variable, VariableList,
+	AnonFunctionDefinition, Arguments, Attribute, AttributeNameList, Block, Expression,
+	ExpressionList, Field, FieldList, FunctionBody, FunctionCall, FunctionIdentifier, Identifier,
+	IdentifierList, InfixOperation, Label, ParameterList, PrefixExpression, PrefixOperation,
+	ReturnStatement, TableConstructor, Variable, VariableList,
 };
 use nom::{
-	character::complete::multispace0, error::ParseError, sequence::delimited, AsChar,
-	IResult, InputTakeAtPosition,
+	character::complete::multispace0, error::ParseError, sequence::delimited, AsChar, IResult,
+	InputTakeAtPosition,
 };
-use stat::stat;
+pub use stat::stat;
 
 mod stat;
 
@@ -68,7 +68,7 @@ pub fn args(input: &str) -> IResult<&str, Arguments> {
 	todo!()
 }
 
-pub fn functiondef(input: &str) -> IResult<&str, FunctionDefinition> {
+pub fn functiondef(input: &str) -> IResult<&str, AnonFunctionDefinition> {
 	todo!()
 }
 
@@ -110,12 +110,14 @@ pub fn unop(input: &str) -> IResult<&str, PrefixOperation> {
 /// This function was taken from [the nom::recipes documentation][1]
 ///
 /// [1]: https://docs.rs/nom/latest/nom/recipes/index.html#whitespace
-pub(crate) fn whitespace<'a, T, F, O, E>(inner: F) -> impl FnMut(T) -> IResult<T, O, E>
+pub(crate) fn whitespace<'a, F, Input, Output, Error>(
+	inner: F,
+) -> impl FnMut(Input) -> IResult<Input, Output, Error>
 where
-	F: Fn(T) -> IResult<T, O, E> + 'a,
-	E: ParseError<T>,
-	T: InputTakeAtPosition + 'a,
-	<T as InputTakeAtPosition>::Item: Clone + AsChar,
+	F: FnMut(Input) -> IResult<Input, Output, Error> + 'a,
+	Error: ParseError<Input>,
+	Input: InputTakeAtPosition + 'a,
+	<Input as InputTakeAtPosition>::Item: Clone + AsChar,
 {
 	delimited(multispace0, inner, multispace0)
 }

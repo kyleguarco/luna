@@ -1,104 +1,163 @@
-use luna_ast::types::{ElseStatementOption, ExpressionList, IfStatement, Statement, VariableList};
-use nom::{branch::alt, bytes::complete::tag, IResult, multi::many_till};
+use luna_ast::types::{ExpressionList, IfStatement, Statement, VariableList};
+use nom::{
+	branch::alt, bytes::complete::tag, combinator::opt, multi::many_till, sequence::tuple, IResult,
+};
 
 use crate::terminal::{
 	identifier,
-	keyword::{kbreak, kdo, kelseif, kend, kgoto, kif, krepeat, kthen, kuntil, kwhile, kelse},
+	keyword::{keyword, Keyword::*},
 	string::SEMICOLON,
 };
 
-use super::{block, exp, functioncall, label};
+use super::{attnamelist, block, exp, explist, funcbody, funcname, functioncall, label, namelist};
 
-fn semicolon(input: &str) -> IResult<&str, Statement> {
+type IResultStat<'a> = IResult<&'a str, Statement<'a>>;
+
+fn semicolon(input: &str) -> IResultStat {
 	let (input, _) = tag(SEMICOLON)(input)?;
 	Ok((input, Statement::End))
 }
 
-fn fcall(input: &str) -> IResult<&str, Statement> {
+fn fcall(input: &str) -> IResultStat {
 	let (input, fcall) = functioncall(input)?;
 	Ok((input, fcall.into()))
 }
 
-fn label_state(input: &str) -> IResult<&str, Statement> {
+fn label_state(input: &str) -> IResultStat {
 	let (input, lab) = label(input)?;
 	Ok((input, lab.into()))
 }
 
-fn break_state(input: &str) -> IResult<&str, Statement> {
-	let (input, _) = kbreak(input)?;
+fn break_state(input: &str) -> IResultStat {
+	let (input, _) = keyword(Break)(input)?;
 	Ok((input, Statement::Break))
 }
 
-fn varlist_explist(input: &str) -> IResult<&str, Statement> {
+fn varlist_explist(input: &str) -> IResultStat {
 	Ok((input, Statement::Definition(VariableList, ExpressionList)))
 }
 
-fn goto_name(input: &str) -> IResult<&str, Statement> {
-	let (input, _) = kgoto(input)?;
+fn goto_name(input: &str) -> IResultStat {
+	let (input, _) = keyword(Goto)(input)?;
 	let (input, id) = identifier(input)?;
 	Ok((input, Statement::Goto(id)))
 }
 
-fn do_block(input: &str) -> IResult<&str, Statement> {
-	let (input, _) = kdo(input)?;
+fn do_block(input: &str) -> IResultStat {
+	let (input, _) = keyword(Do)(input)?;
 	let (input, bl) = block(input)?;
-	let (input, _) = kend(input)?;
+	let (input, _) = keyword(End)(input)?;
 	Ok((input, Statement::Do(Box::new(bl))))
 }
 
-fn while_do(input: &str) -> IResult<&str, Statement> {
-	let (input, _) = kwhile(input)?;
+fn while_do(input: &str) -> IResultStat {
+	let (input, _) = keyword(While)(input)?;
 	let (input, exp) = exp(input)?;
-	let (input, _) = kdo(input)?;
+	let (input, _) = keyword(Do)(input)?;
 	let (input, bl) = block(input)?;
-	let (input, _) = kend(input)?;
+	let (input, _) = keyword(End)(input)?;
 	Ok((input, Statement::While(exp, bl)))
 }
 
-fn repeat_until(input: &str) -> IResult<&str, Statement> {
-	let (input, _) = krepeat(input)?;
+fn repeat_until(input: &str) -> IResultStat {
+	let (input, _) = keyword(Repeat)(input)?;
 	let (input, bl) = block(input)?;
-	let (input, _) = kuntil(input)?;
+	let (input, _) = keyword(Until)(input)?;
 	let (input, exp) = exp(input)?;
 	Ok((input, Statement::RepeatUntil(bl, exp)))
 }
 
-fn end_tree(input: &str) -> IResult<&str, IfStatement> {
-	let (input, _) = kend(input)?;
-	Ok((input, IfStatement::End))
-}
-
 fn else_tree(input: &str) -> IResult<&str, IfStatement> {
-	let (input, _) = alt((
-		kelse,
-		kend
-	))(input)?;
+	if let Ok((input, _)) = keyword::<&str, nom::error::Error<&str>>(End)(input) {
+		return Ok((input, IfStatement::End));
+	}
+
+	let (input, _) = keyword(Else)(input)?;
 	let (input, block) = block(input)?;
-	let (input, _) = kend(input)?;
+	let (input, _) = keyword(End)(input)?;
 	Ok((input, IfStatement::Else(block)))
 }
 
 fn else_if_tree(input: &str) -> IResult<&str, IfStatement> {
-	let (input, _) = kelseif(input)?;
+	let (input, _) = keyword(ElseIf)(input)?;
 	let (input, exp) = exp(input)?;
-	let (input, _) = kthen(input)?;
+	let (input, _) = keyword(Then)(input)?;
 	let (input, block) = block(input)?;
 	Ok((input, IfStatement::ElseIf(exp, block)))
 }
 
-fn if_tree(input: &str) -> IResult<&str, Statement> {
-	let (input, _) = kif(input)?;
+fn if_tree(input: &str) -> IResultStat {
+	let (input, _) = keyword(If)(input)?;
+
 	let (input, exp) = exp(input)?;
-	let (input, _) = kthen(input)?;
+	let (input, _) = keyword(Then)(input)?;
 	let (input, block) = block(input)?;
+	let initial = IfStatement::If(exp, block);
 
-	let (input, tree) = many_till(else_if_tree, else_tree)(input)?;
+	let (input, (tree, belse)) = many_till(else_if_tree, else_tree)(input)?;
 
-
-	Ok((input, Statement::IfStatement()))
+	Ok((
+		input,
+		Statement::IfStatement {
+			initial,
+			belse,
+			tree,
+		},
+	))
 }
 
-pub fn stat(input: &str) -> IResult<&str, Statement> {
+fn for_exp(input: &str) -> IResultStat {
+	let (input, _) = keyword(For)(input)?;
+	let (input, ident) = identifier(input)?;
+
+	let (input, exps) = tuple((exp, exp, opt(exp)))(input)?;
+	let (input, _) = keyword(Do)(input)?;
+	let (input, block) = block(input)?;
+	let (input, _) = keyword(End)(input)?;
+
+	Ok((input, Statement::ForExpression(ident, exps, block)))
+}
+
+fn for_list(input: &str) -> IResultStat {
+	let (input, _) = keyword(For)(input)?;
+
+	let (input, ilist) = namelist(input)?;
+	let (input, _) = keyword(In)(input)?;
+	let (input, elist) = explist(input)?;
+
+	let (input, _) = keyword(Do)(input)?;
+	let (input, block) = block(input)?;
+	let (input, _) = keyword(End)(input)?;
+
+	Ok((input, Statement::ForList(ilist, elist, block)))
+}
+
+fn fdec(input: &str) -> IResultStat {
+	let (input, _) = keyword(Function)(input)?;
+	let (input, fident) = funcname(input)?;
+	let (input, fblock) = funcbody(input)?;
+
+	Ok((input, Statement::FunctionDefinition(fident, fblock)))
+}
+
+fn flocaldec(input: &str) -> IResultStat {
+	let (input, _) = keyword(Local)(input)?;
+	let (input, _) = keyword(Function)(input)?;
+	let (input, ident) = identifier(input)?;
+	let (input, fblock) = funcbody(input)?;
+
+	Ok((input, Statement::LocalFunctionDefinition(ident, fblock)))
+}
+
+fn local_attlist(input: &str) -> IResultStat {
+	let (input, _) = keyword(Local)(input)?;
+	let (input, alist) = attnamelist(input)?;
+	let (input, elist) = opt(explist)(input)?;
+
+	Ok((input, Statement::LocalDefinitionWithAttribute(alist, elist)))
+}
+
+pub fn stat(input: &str) -> IResultStat {
 	alt((
 		semicolon,
 		varlist_explist,
@@ -109,5 +168,11 @@ pub fn stat(input: &str) -> IResult<&str, Statement> {
 		do_block,
 		while_do,
 		repeat_until,
+		if_tree,
+		for_exp,
+		for_list,
+		fdec,
+		flocaldec,
+		local_attlist,
 	))(input)
 }

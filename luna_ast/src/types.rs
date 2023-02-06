@@ -19,7 +19,7 @@ pub enum IfStatement<'a> {
 	If(Expression, Block<'a>),
 	ElseIf(Expression, Block<'a>),
 	Else(Block<'a>),
-	End
+	End,
 }
 
 pub enum Statement<'a> {
@@ -32,11 +32,19 @@ pub enum Statement<'a> {
 	Do(Box<Block<'a>>),
 	While(Expression, Block<'a>),
 	RepeatUntil(Block<'a>, Expression),
-	IfStatement(Vec<IfStatement<'a>>),
-	ForExpression,
-	ForList,
-	FunctionDefinition(FunctionDefinition),
-	LocalFunctionDefinition(FunctionDefinition),
+	IfStatement {
+		initial: IfStatement<'a>,
+		belse: IfStatement<'a>,
+		tree: Vec<IfStatement<'a>>,
+	},
+	ForExpression(
+		Identifier<'a>,
+		(Expression, Expression, Option<Expression>),
+		Block<'a>,
+	),
+	ForList(IdentifierList, ExpressionList, Block<'a>),
+	FunctionDefinition(FunctionIdentifier, FunctionBody),
+	LocalFunctionDefinition(Identifier<'a>, FunctionBody),
 	LocalDefinitionWithAttribute(AttributeNameList, Option<ExpressionList>),
 }
 
@@ -105,7 +113,7 @@ pub enum Arguments {
 	LiteralString,
 }
 
-pub struct FunctionDefinition;
+pub struct AnonFunctionDefinition(FunctionBody);
 
 pub struct FunctionBody;
 
