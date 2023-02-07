@@ -5,7 +5,7 @@ use nom::{
 	InputTake, InputTakeAtPosition, Offset, Slice,
 };
 
-use crate::parse::whitespace;
+use crate::combinator::whitespace;
 
 /// A collection of the possible keywords in Lua.
 pub enum Keyword {

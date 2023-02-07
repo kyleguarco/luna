@@ -42,7 +42,7 @@ pub enum Statement<'a> {
 		(Expression, Expression, Option<Expression>),
 		Block<'a>,
 	),
-	ForList(IdentifierList, ExpressionList, Block<'a>),
+	ForList(IdentifierList<'a>, ExpressionList, Block<'a>),
 	FunctionDefinition(FunctionIdentifier, FunctionBody),
 	LocalFunctionDefinition(Identifier<'a>, FunctionBody),
 	LocalDefinitionWithAttribute(AttributeNameList, Option<ExpressionList>),
@@ -72,9 +72,9 @@ pub enum Variable {
 	PrefixExpressionIdentifier,
 }
 
-pub struct IdentifierList;
+pub struct IdentifierList<'a>(pub Vec<Identifier<'a>>);
 
-pub struct ExpressionList;
+pub struct ExpressionList(pub Vec<Expression>);
 
 pub enum Expression {
 	Nil,
@@ -133,9 +133,10 @@ pub enum Field {
 	Expression,
 }
 
+#[derive(Clone)]
 pub enum InfixOperation {
 	Add,
-	Substract,
+	Subtract,
 	Multiply,
 	Divide,
 	FloorDivide,
@@ -157,6 +158,7 @@ pub enum InfixOperation {
 	Or,
 }
 
+#[derive(Clone)]
 pub enum PrefixOperation {
 	Negate,
 	Not,

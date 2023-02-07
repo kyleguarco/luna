@@ -1,4 +1,4 @@
-use luna_ast::types::{ExpressionList, IfStatement, Statement, VariableList};
+use luna_ast::types::{IfStatement, Statement};
 use nom::{
 	branch::alt, bytes::complete::tag, combinator::opt, multi::many_till, sequence::tuple, IResult,
 };
@@ -9,7 +9,9 @@ use crate::terminal::{
 	string::SEMICOLON,
 };
 
-use super::{attnamelist, block, exp, explist, funcbody, funcname, functioncall, label, namelist};
+use super::{
+	attnamelist, block, exp, explist, funcbody, funcname, functioncall, label, namelist, varlist,
+};
 
 type IResultStat<'a> = IResult<&'a str, Statement<'a>>;
 
@@ -34,7 +36,10 @@ fn break_state(input: &str) -> IResultStat {
 }
 
 fn varlist_explist(input: &str) -> IResultStat {
-	Ok((input, Statement::Definition(VariableList, ExpressionList)))
+	let (input, vlist) = varlist(input)?;
+	let (input, elist) = explist(input)?;
+
+	Ok((input, Statement::Definition(vlist, elist)))
 }
 
 fn goto_name(input: &str) -> IResultStat {

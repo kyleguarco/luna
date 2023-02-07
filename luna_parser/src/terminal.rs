@@ -9,8 +9,8 @@ use nom::{
 	IResult,
 };
 
-pub(crate) mod string;
 pub(crate) mod keyword;
+pub(crate) mod string;
 
 /// Parses identifiers (which share naming conventions with Rust).
 /// Lua refers to identifiers as "Names" in their documentation.

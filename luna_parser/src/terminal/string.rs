@@ -11,7 +11,7 @@ pub const PIPE: &str = "|";
 pub const SHIFTLEFT: &str = "<<";
 pub const SHIFTRIGHT: &str = ">>";
 pub const DOUBLESLASH: &str = "//";
-pub const SPACE: &str = " ";
+//pub const SPACE: &str = " ";
 pub const ISEQUAL: &str = "==";
 pub const NOTEQUAL: &str = "~=";
 pub const LESSEQUAL: &str = "<=";
