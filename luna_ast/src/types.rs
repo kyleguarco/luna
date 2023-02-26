@@ -13,7 +13,7 @@ pub struct LiteralString;
 
 pub struct Chunk<'a>(pub Block<'a>);
 
-pub struct Block<'a>(pub Box<Statement<'a>>, pub ReturnStatement);
+pub struct Block<'a>(pub Vec<Statement<'a>>, pub Option<ReturnStatement>);
 
 pub enum IfStatement<'a> {
 	If(Expression, Block<'a>),
@@ -43,16 +43,18 @@ pub enum Statement<'a> {
 		Block<'a>,
 	),
 	ForList(IdentifierList<'a>, ExpressionList, Block<'a>),
-	FunctionDefinition(FunctionIdentifier, FunctionBody),
+	FunctionDefinition(FunctionIdentifier<'a>, FunctionBody),
 	LocalFunctionDefinition(Identifier<'a>, FunctionBody),
-	LocalDefinitionWithAttribute(AttributeNameList, Option<ExpressionList>),
+	LocalDefinitionWithAttribute(AttributeNameList<'a>, Option<ExpressionList>),
 }
 
-pub struct AttributeNameList;
+pub struct AttributeName<'a>(pub Identifier<'a>, pub Attribute<'a>);
 
-pub struct Attribute;
+pub struct Attribute<'a>(pub Option<Identifier<'a>>);
 
-pub struct ReturnStatement;
+pub struct AttributeNameList<'a>(pub Vec<AttributeName<'a>>);
+
+pub struct ReturnStatement(pub Option<ExpressionList>);
 
 pub struct Label<'a>(pub Identifier<'a>);
 
@@ -62,7 +64,15 @@ impl<'a> Into<Statement<'a>> for Label<'a> {
 	}
 }
 
-pub struct FunctionIdentifier;
+pub struct FunctionIdentifier<'a> {
+	/// Initial identifier
+	pub ident: Identifier<'a>,
+	/// Identifiers that refer to elements of subtables
+	pub tabident: Vec<Identifier<'a>>,
+	/// Identifiers that refer to table functions that take `self`
+	/// as the first parameter.
+	pub objident: Option<Identifier<'a>>,
+}
 
 pub struct VariableList;
 

@@ -1,41 +1,58 @@
-use luna_ast::types::{
-	AnonFunctionDefinition, Arguments, Attribute, AttributeNameList, Block, Expression,
-	ExpressionList, Field, FieldList, FunctionBody, FunctionCall, FunctionIdentifier, Identifier,
-	IdentifierList, InfixOperation, Label, ParameterList, PrefixExpression, PrefixOperation,
-	ReturnStatement, TableConstructor, Variable, VariableList,
-};
-use nom::{
-	branch::alt, bytes::complete::tag, combinator::value, multi::many1, sequence::terminated,
-	IResult,
-};
-pub use stat::stat;
-
 use crate::terminal::{
 	identifier,
 	keyword::{keyword, Keyword},
 	string::{
 		AMPHERSAND, CARET, COMMA, DOUBLECOLON, DOUBLEDOT, DOUBLESLASH, GREATER, GREATEREQUAL,
-		ISEQUAL, LESS, LESSEQUAL, MINUS, NOTEQUAL, OCTOTHORPE, PERCENT, PIPE, PLUS, SHIFTLEFT,
-		SHIFTRIGHT, SLASH, STAR, TILDE, SEMICOLON,
+		ISEQUAL, LESS, LESSEQUAL, MINUS, NOTEQUAL, OCTOTHORPE, PERCENT, PIPE, PLUS, SEMICOLON,
+		SHIFTLEFT, SHIFTRIGHT, SLASH, STAR, TILDE,
 	},
 };
+use luna_ast::types::{
+	AnonFunctionDefinition, Arguments, Attribute, AttributeName, AttributeNameList, Block,
+	Expression, ExpressionList, Field, FieldList, FunctionBody, FunctionCall, FunctionIdentifier,
+	Identifier, IdentifierList, InfixOperation, Label, ParameterList, PrefixExpression,
+	PrefixOperation, ReturnStatement, TableConstructor, Variable, VariableList,
+};
+use nom::{
+	branch::alt,
+	bytes::complete::tag,
+	combinator::{opt, value},
+	multi::{many0, many1},
+	sequence::{delimited, terminated},
+	IResult,
+};
+
+pub use stat::stat;
 
 mod stat;
 
 pub fn block(input: &str) -> IResult<&str, Block> {
-	todo!()
+	let (input, slist) = many0(stat)(input)?;
+	let (input, ret) = opt(retstat)(input)?;
+	Ok((input, Block(slist, ret)))
 }
 
 pub fn attnamelist(input: &str) -> IResult<&str, AttributeNameList> {
-	todo!()
+	fn inner(input: &str) -> IResult<&str, AttributeName> {
+		let (input, ident) = identifier(input)?;
+		let (input, attr) = attrib(input)?;
+		Ok((input, AttributeName(ident, attr)))
+	}
+
+	let (input, alist) = many1(terminated(inner, tag(COMMA)))(input)?;
+	Ok((input, AttributeNameList(alist)))
 }
 
 pub fn attrib(input: &str) -> IResult<&str, Attribute> {
-	todo!()
+	let (input, attr) = opt(delimited(tag(LESS), identifier, tag(LESS)))(input)?;
+	Ok((input, Attribute(attr)))
 }
 
 pub fn retstat(input: &str) -> IResult<&str, ReturnStatement> {
-	todo!()
+	let (input, _) = keyword(Keyword::Return)(input)?;
+	let (input, elist) = opt(explist)(input)?;
+	let (input, _) = opt(tag(SEMICOLON))(input)?;
+	Ok((input, ReturnStatement(elist)))
 }
 
 pub fn label(input: &str) -> IResult<&str, Label> {
@@ -47,6 +64,7 @@ pub fn label(input: &str) -> IResult<&str, Label> {
 }
 
 pub fn funcname(input: &str) -> IResult<&str, FunctionIdentifier> {
+	let (input, ident) = identifier(input)?;
 	todo!()
 }
 
@@ -109,10 +127,7 @@ pub fn field(input: &str) -> IResult<&str, Field> {
 }
 
 pub fn fieldsep(input: &str) -> IResult<&str, &str> {
-	alt((
-		tag(COMMA),
-		tag(SEMICOLON),
-	))(input)
+	alt((tag(COMMA), tag(SEMICOLON)))(input)
 }
 
 pub fn binop(input: &str) -> IResult<&str, InfixOperation> {
