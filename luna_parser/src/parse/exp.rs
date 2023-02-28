@@ -15,7 +15,7 @@ use crate::terminal::{
 
 use super::{binop, functiondef, prefixexp, tableconstructor, unop};
 
-type IResultExp<'a> = IResult<&'a str, Expression>;
+type IResultExp<'a> = IResult<&'a str, Expression<'a>>;
 
 fn exp_num(input: &str) -> IResultExp {
 	let (input, num) = numeral(input)?;
@@ -34,7 +34,7 @@ fn exp_funcdef(input: &str) -> IResultExp {
 
 fn exp_prefexp(input: &str) -> IResultExp {
 	let (input, pexp) = prefixexp(input)?;
-	Ok((input, Expression::PrefixExpression(pexp)))
+	Ok((input, Expression::PrefixExpression(Box::new(pexp))))
 }
 
 fn exp_tabcon(input: &str) -> IResultExp {

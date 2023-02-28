@@ -3,22 +3,22 @@ use crate::terminal::{
 	keyword::{keyword, Keyword},
 	string::{
 		AMPHERSAND, CARET, COLON, COMMA, DOT, DOUBLECOLON, DOUBLEDOT, DOUBLESLASH, GREATER,
-		GREATEREQUAL, ISEQUAL, LESS, LESSEQUAL, MINUS, NOTEQUAL, OCTOTHORPE, PERCENT, PIPE, PLUS,
-		SEMICOLON, SHIFTLEFT, SHIFTRIGHT, SLASH, STAR, TILDE,
+		GREATEREQUAL, ISEQUAL, LEFTPAREN, LESS, LESSEQUAL, MINUS, NOTEQUAL, OCTOTHORPE, PERCENT,
+		PIPE, PLUS, RIGHTPAREN, SEMICOLON, SHIFTLEFT, SHIFTRIGHT, SLASH, STAR, TILDE,
 	},
 };
 use luna_ast::types::{
 	AnonFunctionDefinition, Arguments, Attribute, AttributeName, AttributeNameList, Block,
-	Expression, ExpressionList, Field, FieldList, FunctionBody, FunctionCall, FunctionIdentifier,
-	Identifier, IdentifierList, InfixOperation, Label, ParameterList, PrefixExpression,
-	PrefixOperation, ReturnStatement, TableConstructor, Variable, VariableList,
+	ExpressionList, Field, FieldList, FunctionBody, FunctionCall, FunctionIdentifier,
+	IdentifierList, InfixOperation, Label, ParameterList, PrefixExpression, PrefixOperation,
+	ReturnStatement, TableConstructor, VariableList,
 };
 use nom::{
 	branch::alt,
 	bytes::complete::tag,
-	combinator::{opt, value},
+	combinator::{map, opt, value},
 	multi::{many0, many1, separated_list1},
-	sequence::{delimited, preceded, terminated, tuple},
+	sequence::{delimited, pair, preceded, separated_pair, terminated},
 	IResult,
 };
 
@@ -90,11 +90,27 @@ pub fn explist(input: &str) -> IResult<&str, ExpressionList> {
 }
 
 pub fn prefixexp(input: &str) -> IResult<&str, PrefixExpression> {
-	todo!()
+	alt((
+		map(var, |v| PrefixExpression::Variable(v)),
+		map(functioncall, |fcall| {
+			PrefixExpression::FunctionCall(Box::new(fcall))
+		}),
+		map(delimited(tag(LEFTPAREN), exp, tag(RIGHTPAREN)), |ex| {
+			PrefixExpression::ClosedExpression(ex)
+		}),
+	))(input)
 }
 
 pub fn functioncall(input: &str) -> IResult<&str, FunctionCall> {
-	todo!()
+	alt((
+		map(pair(prefixexp, args), |(pexp, argu)| {
+			FunctionCall::CallFunction(pexp, argu)
+		}),
+		map(
+			pair(separated_pair(prefixexp, tag(COLON), identifier), args),
+			|((pexp, ident), argu)| FunctionCall::CallObjectFunction(pexp, ident, argu),
+		),
+	))(input)
 }
 
 pub fn args(input: &str) -> IResult<&str, Arguments> {

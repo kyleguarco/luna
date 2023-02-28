@@ -22,12 +22,12 @@ fn var_ident(input: &str) -> IResultVar {
 fn var_pexp(input: &str) -> IResultVar {
 	let (input, pref) = prefixexp(input)?;
 	let (input, pexp) = delimited(tag(LEFTBRACKET), exp, tag(RIGHTBRACKET))(input)?;
-	Ok((input, Variable::PrefixExpressionIndex(pref, pexp)))
+	Ok((input, Variable::PrefixExpressionIndex(Box::new(pref), Box::new(pexp))))
 }
 
 fn var_pident(input: &str) -> IResultVar {
 	let (input, pair) = separated_pair(prefixexp, tag(DOT), identifier)(input)?;
-	Ok((input, Variable::PrefixExpressionIdentifier(pair.0, pair.1)))
+	Ok((input, Variable::PrefixExpressionIdentifier(Box::new(pair.0), pair.1)))
 }
 
 pub fn var(input: &str) -> IResult<&str, Variable> {

@@ -4,8 +4,8 @@
 ///! from the parser.
 use std::boxed::Box;
 
-#[derive(Debug)]
-pub struct Identifier<'a>(pub &'a str);
+#[derive(Clone, Debug)]
+pub struct Identifier<'ident>(pub &'ident str);
 
 #[derive(Clone)]
 pub enum Numeral {
@@ -16,81 +16,93 @@ pub enum Numeral {
 #[derive(Clone)]
 pub struct LiteralString;
 
-pub struct Chunk<'a>(pub Block<'a>);
+pub struct Chunk<'ident>(pub Block<'ident>);
 
-pub struct Block<'a>(pub Vec<Statement<'a>>, pub Option<ReturnStatement>);
+pub struct Block<'ident>(
+	pub Vec<Statement<'ident>>,
+	pub Option<ReturnStatement<'ident>>,
+);
 
-pub enum IfStatement<'a> {
-	If(Expression, Block<'a>),
-	ElseIf(Expression, Block<'a>),
-	Else(Block<'a>),
+pub enum IfStatement<'ident> {
+	If(Expression<'ident>, Block<'ident>),
+	ElseIf(Expression<'ident>, Block<'ident>),
+	Else(Block<'ident>),
 	End,
 }
 
-pub enum Statement<'a> {
+pub enum Statement<'ident> {
 	End,
-	Definition(VariableList<'a>, ExpressionList),
-	FunctionCall(FunctionCall),
-	Label(Label<'a>),
+	Definition(VariableList<'ident>, ExpressionList<'ident>),
+	FunctionCall(FunctionCall<'ident>),
+	Label(Label<'ident>),
 	Break,
-	Goto(Identifier<'a>),
-	Do(Box<Block<'a>>),
-	While(Expression, Block<'a>),
-	RepeatUntil(Block<'a>, Expression),
+	Goto(Identifier<'ident>),
+	Do(Box<Block<'ident>>),
+	While(Expression<'ident>, Block<'ident>),
+	RepeatUntil(Block<'ident>, Expression<'ident>),
 	IfStatement {
-		initial: IfStatement<'a>,
-		belse: IfStatement<'a>,
-		tree: Vec<IfStatement<'a>>,
+		initial: IfStatement<'ident>,
+		belse: IfStatement<'ident>,
+		tree: Vec<IfStatement<'ident>>,
 	},
 	ForExpression(
-		Identifier<'a>,
-		(Expression, Expression, Option<Expression>),
-		Block<'a>,
+		Identifier<'ident>,
+		(
+			Expression<'ident>,
+			Expression<'ident>,
+			Option<Expression<'ident>>,
+		),
+		Block<'ident>,
 	),
-	ForList(IdentifierList<'a>, ExpressionList, Block<'a>),
-	FunctionDefinition(FunctionIdentifier<'a>, FunctionBody),
-	LocalFunctionDefinition(Identifier<'a>, FunctionBody),
-	LocalDefinitionWithAttribute(AttributeNameList<'a>, Option<ExpressionList>),
+	ForList(
+		IdentifierList<'ident>,
+		ExpressionList<'ident>,
+		Block<'ident>,
+	),
+	FunctionDefinition(FunctionIdentifier<'ident>, FunctionBody),
+	LocalFunctionDefinition(Identifier<'ident>, FunctionBody),
+	LocalDefinitionWithAttribute(AttributeNameList<'ident>, Option<ExpressionList<'ident>>),
 }
 
-pub struct AttributeName<'a>(pub Identifier<'a>, pub Attribute<'a>);
+pub struct AttributeName<'ident>(pub Identifier<'ident>, pub Attribute<'ident>);
 
-pub struct Attribute<'a>(pub Option<Identifier<'a>>);
+pub struct Attribute<'ident>(pub Option<Identifier<'ident>>);
 
-pub struct AttributeNameList<'a>(pub Vec<AttributeName<'a>>);
+pub struct AttributeNameList<'ident>(pub Vec<AttributeName<'ident>>);
 
-pub struct ReturnStatement(pub Option<ExpressionList>);
+pub struct ReturnStatement<'ident>(pub Option<ExpressionList<'ident>>);
 
-pub struct Label<'a>(pub Identifier<'a>);
+pub struct Label<'ident>(pub Identifier<'ident>);
 
-impl<'a> Into<Statement<'a>> for Label<'a> {
-	fn into(self) -> Statement<'a> {
+impl<'ident> Into<Statement<'ident>> for Label<'ident> {
+	fn into(self) -> Statement<'ident> {
 		Statement::Label(self)
 	}
 }
 
-pub struct FunctionIdentifier<'a> {
+pub struct FunctionIdentifier<'ident> {
 	/// Identifiers that refer to a single element or elements of subtables
-	pub ilist: Vec<Identifier<'a>>,
+	pub ilist: Vec<Identifier<'ident>>,
 	/// Identifiers that refer to table functions that take `self`
 	/// as the first parameter.
-	pub objident: Option<Identifier<'a>>,
+	pub objident: Option<Identifier<'ident>>,
 }
 
-pub struct VariableList<'a>(pub Vec<Variable<'a>>);
-
-pub enum Variable<'a> {
-	Identifier(Identifier<'a>),
-	PrefixExpressionIndex(PrefixExpression, Expression),
-	PrefixExpressionIdentifier(PrefixExpression, Identifier<'a>),
-}
-
-pub struct IdentifierList<'a>(pub Vec<Identifier<'a>>);
-
-pub struct ExpressionList(pub Vec<Expression>);
+pub struct VariableList<'ident>(pub Vec<Variable<'ident>>);
 
 #[derive(Clone)]
-pub enum Expression {
+pub enum Variable<'ident> {
+	Identifier(Identifier<'ident>),
+	PrefixExpressionIndex(Box<PrefixExpression<'ident>>, Box<Expression<'ident>>),
+	PrefixExpressionIdentifier(Box<PrefixExpression<'ident>>, Identifier<'ident>),
+}
+
+pub struct IdentifierList<'ident>(pub Vec<Identifier<'ident>>);
+
+pub struct ExpressionList<'ident>(pub Vec<Expression<'ident>>);
+
+#[derive(Clone)]
+pub enum Expression<'ident> {
 	Nil,
 	False,
 	True,
@@ -98,30 +110,36 @@ pub enum Expression {
 	LiteralString(LiteralString),
 	VarArgs,
 	AnonFunctionDefinition(AnonFunctionDefinition),
-	PrefixExpression(PrefixExpression),
+	PrefixExpression(Box<PrefixExpression<'ident>>),
 	TableConstructor(TableConstructor),
-	InfixOperation(Box<Expression>, InfixOperation, Box<Expression>),
-	PrefixOperation(PrefixOperation, Box<Expression>),
+	InfixOperation(
+		Box<Expression<'ident>>,
+		InfixOperation,
+		Box<Expression<'ident>>,
+	),
+	PrefixOperation(PrefixOperation, Box<Expression<'ident>>),
 }
 
 #[derive(Clone)]
-pub enum PrefixExpression {
-	Variable,
-	FunctionCall,
-	ClosedExpression,
+pub enum PrefixExpression<'ident> {
+	Variable(Variable<'ident>),
+	FunctionCall(Box<FunctionCall<'ident>>),
+	ClosedExpression(Expression<'ident>),
 }
 
-pub enum FunctionCall {
-	CallFunction,
-	CallObjectFunction,
+#[derive(Clone)]
+pub enum FunctionCall<'ident> {
+	CallFunction(PrefixExpression<'ident>, Arguments),
+	CallObjectFunction(PrefixExpression<'ident>, Identifier<'ident>, Arguments),
 }
 
-impl<'a> Into<Statement<'a>> for FunctionCall {
-	fn into(self) -> Statement<'a> {
+impl<'ident> Into<Statement<'ident>> for FunctionCall<'ident> {
+	fn into(self) -> Statement<'ident> {
 		Statement::FunctionCall(self)
 	}
 }
 
+#[derive(Clone)]
 pub enum Arguments {
 	ClosedExpressionList,
 	TableConstructor,
