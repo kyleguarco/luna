@@ -2,9 +2,9 @@ use crate::terminal::{
 	identifier,
 	keyword::{keyword, Keyword},
 	string::{
-		AMPHERSAND, CARET, COMMA, DOUBLECOLON, DOUBLEDOT, DOUBLESLASH, GREATER, GREATEREQUAL,
-		ISEQUAL, LESS, LESSEQUAL, MINUS, NOTEQUAL, OCTOTHORPE, PERCENT, PIPE, PLUS, SEMICOLON,
-		SHIFTLEFT, SHIFTRIGHT, SLASH, STAR, TILDE,
+		AMPHERSAND, CARET, COLON, COMMA, DOT, DOUBLECOLON, DOUBLEDOT, DOUBLESLASH, GREATER,
+		GREATEREQUAL, ISEQUAL, LESS, LESSEQUAL, MINUS, NOTEQUAL, OCTOTHORPE, PERCENT, PIPE, PLUS,
+		SEMICOLON, SHIFTLEFT, SHIFTRIGHT, SLASH, STAR, TILDE,
 	},
 };
 use luna_ast::types::{
@@ -17,14 +17,18 @@ use nom::{
 	branch::alt,
 	bytes::complete::tag,
 	combinator::{opt, value},
-	multi::{many0, many1},
-	sequence::{delimited, terminated},
+	multi::{many0, many1, separated_list1},
+	sequence::{delimited, preceded, terminated, tuple},
 	IResult,
 };
 
+pub use exp::exp;
 pub use stat::stat;
+pub use var::var;
 
+mod exp;
 mod stat;
+mod var;
 
 pub fn block(input: &str) -> IResult<&str, Block> {
 	let (input, slist) = many0(stat)(input)?;
@@ -64,16 +68,15 @@ pub fn label(input: &str) -> IResult<&str, Label> {
 }
 
 pub fn funcname(input: &str) -> IResult<&str, FunctionIdentifier> {
-	let (input, ident) = identifier(input)?;
-	todo!()
+	let (input, ilist) = separated_list1(tag(DOT), identifier)(input)?;
+	let (input, objident) = opt(preceded(tag(COLON), identifier))(input)?;
+	Ok((input, FunctionIdentifier { ilist, objident }))
 }
 
 pub fn varlist(input: &str) -> IResult<&str, VariableList> {
-	todo!()
-}
-
-pub fn var(input: &str) -> IResult<&str, Variable> {
-	todo!()
+	// let (input, vlist) = many0(preceded(tag(COMMA), var))(input)?;
+	let (input, vlist) = separated_list1(tag(COMMA), var)(input)?;
+	Ok((input, VariableList(vlist)))
 }
 
 pub fn namelist(input: &str) -> IResult<&str, IdentifierList> {
@@ -84,10 +87,6 @@ pub fn namelist(input: &str) -> IResult<&str, IdentifierList> {
 pub fn explist(input: &str) -> IResult<&str, ExpressionList> {
 	let (input, elist) = many1(terminated(exp, tag(COMMA)))(input)?;
 	Ok((input, ExpressionList(elist)))
-}
-
-pub fn exp(input: &str) -> IResult<&str, Expression> {
-	todo!()
 }
 
 pub fn prefixexp(input: &str) -> IResult<&str, PrefixExpression> {

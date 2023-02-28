@@ -7,8 +7,13 @@ use std::boxed::Box;
 #[derive(Debug)]
 pub struct Identifier<'a>(pub &'a str);
 
-pub struct Numeral;
+#[derive(Clone)]
+pub enum Numeral {
+	Integer(isize),
+	Float(f64),
+}
 
+#[derive(Clone)]
 pub struct LiteralString;
 
 pub struct Chunk<'a>(pub Block<'a>);
@@ -24,7 +29,7 @@ pub enum IfStatement<'a> {
 
 pub enum Statement<'a> {
 	End,
-	Definition(VariableList, ExpressionList),
+	Definition(VariableList<'a>, ExpressionList),
 	FunctionCall(FunctionCall),
 	Label(Label<'a>),
 	Break,
@@ -65,41 +70,41 @@ impl<'a> Into<Statement<'a>> for Label<'a> {
 }
 
 pub struct FunctionIdentifier<'a> {
-	/// Initial identifier
-	pub ident: Identifier<'a>,
-	/// Identifiers that refer to elements of subtables
-	pub tabident: Vec<Identifier<'a>>,
+	/// Identifiers that refer to a single element or elements of subtables
+	pub ilist: Vec<Identifier<'a>>,
 	/// Identifiers that refer to table functions that take `self`
 	/// as the first parameter.
 	pub objident: Option<Identifier<'a>>,
 }
 
-pub struct VariableList;
+pub struct VariableList<'a>(pub Vec<Variable<'a>>);
 
-pub enum Variable {
-	Identifier,
-	PrefixExpressionIndex,
-	PrefixExpressionIdentifier,
+pub enum Variable<'a> {
+	Identifier(Identifier<'a>),
+	PrefixExpressionIndex(PrefixExpression, Expression),
+	PrefixExpressionIdentifier(PrefixExpression, Identifier<'a>),
 }
 
 pub struct IdentifierList<'a>(pub Vec<Identifier<'a>>);
 
 pub struct ExpressionList(pub Vec<Expression>);
 
+#[derive(Clone)]
 pub enum Expression {
 	Nil,
 	False,
 	True,
-	Numeral,
-	LiteralString,
-	TripleDots,
-	FunctionDefinition,
-	PrefixExpression,
-	TableConstructor,
-	InfixOperation,
-	PrefixOperation,
+	Numeral(Numeral),
+	LiteralString(LiteralString),
+	VarArgs,
+	AnonFunctionDefinition(AnonFunctionDefinition),
+	PrefixExpression(PrefixExpression),
+	TableConstructor(TableConstructor),
+	InfixOperation(Box<Expression>, InfixOperation, Box<Expression>),
+	PrefixOperation(PrefixOperation, Box<Expression>),
 }
 
+#[derive(Clone)]
 pub enum PrefixExpression {
 	Variable,
 	FunctionCall,
@@ -123,8 +128,10 @@ pub enum Arguments {
 	LiteralString,
 }
 
+#[derive(Clone)]
 pub struct AnonFunctionDefinition(FunctionBody);
 
+#[derive(Clone)]
 pub struct FunctionBody;
 
 pub enum ParameterList {
@@ -133,6 +140,7 @@ pub enum ParameterList {
 	TripleDots,
 }
 
+#[derive(Clone)]
 pub struct TableConstructor;
 
 pub struct FieldList;
