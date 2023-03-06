@@ -6,6 +6,8 @@ use std::{
     io::{stdin, BufRead, Write},
 };
 
+use luna_parser::chunk;
+
 fn main() {
     let mut args = args();
 
@@ -42,7 +44,7 @@ fn repl() {
             break;
         }
 
-        // let lexer: Result<Vec<_>, _> = Lexer::new(&line).collect();
-        // println!("{lexer:?}");
+        let chunk = chunk(&line);
+        println!("{chunk:?}")
     }
 }

@@ -1,28 +1,31 @@
 ///! Compiler types.
 ///!
-///! These are representations of source pub structure, which are generated
+///! These are representations of source structure, which are generated
 ///! from the parser.
 use std::boxed::Box;
 
 #[derive(Clone, Debug)]
 pub struct Identifier<'ident>(pub &'ident str);
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Numeral {
 	Integer(isize),
 	Float(f64),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LiteralString;
 
+#[derive(Clone, Debug)]
 pub struct Chunk<'ident>(pub Block<'ident>);
 
+#[derive(Clone, Debug)]
 pub struct Block<'ident>(
 	pub Vec<Statement<'ident>>,
 	pub Option<ReturnStatement<'ident>>,
 );
 
+#[derive(Clone, Debug)]
 pub enum IfStatement<'ident> {
 	If(Expression<'ident>, Block<'ident>),
 	ElseIf(Expression<'ident>, Block<'ident>),
@@ -30,6 +33,7 @@ pub enum IfStatement<'ident> {
 	End,
 }
 
+#[derive(Clone, Debug)]
 pub enum Statement<'ident> {
 	End,
 	Definition(VariableList<'ident>, ExpressionList<'ident>),
@@ -59,19 +63,24 @@ pub enum Statement<'ident> {
 		ExpressionList<'ident>,
 		Block<'ident>,
 	),
-	FunctionDefinition(FunctionIdentifier<'ident>, FunctionBody),
-	LocalFunctionDefinition(Identifier<'ident>, FunctionBody),
+	FunctionDefinition(FunctionIdentifier<'ident>, FunctionBody<'ident>),
+	LocalFunctionDefinition(Identifier<'ident>, FunctionBody<'ident>),
 	LocalDefinitionWithAttribute(AttributeNameList<'ident>, Option<ExpressionList<'ident>>),
 }
 
+#[derive(Clone, Debug)]
 pub struct AttributeName<'ident>(pub Identifier<'ident>, pub Attribute<'ident>);
 
+#[derive(Clone, Debug)]
 pub struct Attribute<'ident>(pub Option<Identifier<'ident>>);
 
+#[derive(Clone, Debug)]
 pub struct AttributeNameList<'ident>(pub Vec<AttributeName<'ident>>);
 
+#[derive(Clone, Debug)]
 pub struct ReturnStatement<'ident>(pub Option<ExpressionList<'ident>>);
 
+#[derive(Clone, Debug)]
 pub struct Label<'ident>(pub Identifier<'ident>);
 
 impl<'ident> Into<Statement<'ident>> for Label<'ident> {
@@ -80,6 +89,7 @@ impl<'ident> Into<Statement<'ident>> for Label<'ident> {
 	}
 }
 
+#[derive(Clone, Debug)]
 pub struct FunctionIdentifier<'ident> {
 	/// Identifiers that refer to a single element or elements of subtables
 	pub ilist: Vec<Identifier<'ident>>,
@@ -88,20 +98,23 @@ pub struct FunctionIdentifier<'ident> {
 	pub objident: Option<Identifier<'ident>>,
 }
 
+#[derive(Clone, Debug)]
 pub struct VariableList<'ident>(pub Vec<Variable<'ident>>);
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Variable<'ident> {
 	Identifier(Identifier<'ident>),
 	PrefixExpressionIndex(Box<PrefixExpression<'ident>>, Box<Expression<'ident>>),
 	PrefixExpressionIdentifier(Box<PrefixExpression<'ident>>, Identifier<'ident>),
 }
 
+#[derive(Clone, Debug)]
 pub struct IdentifierList<'ident>(pub Vec<Identifier<'ident>>);
 
+#[derive(Clone, Debug)]
 pub struct ExpressionList<'ident>(pub Vec<Expression<'ident>>);
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Expression<'ident> {
 	Nil,
 	False,
@@ -109,9 +122,9 @@ pub enum Expression<'ident> {
 	Numeral(Numeral),
 	LiteralString(LiteralString),
 	VarArgs,
-	AnonFunctionDefinition(AnonFunctionDefinition),
+	AnonFunctionDefinition(AnonFunctionDefinition<'ident>),
 	PrefixExpression(Box<PrefixExpression<'ident>>),
-	TableConstructor(TableConstructor),
+	TableConstructor(TableConstructor<'ident>),
 	InfixOperation(
 		Box<Expression<'ident>>,
 		InfixOperation,
@@ -120,17 +133,21 @@ pub enum Expression<'ident> {
 	PrefixOperation(PrefixOperation, Box<Expression<'ident>>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum PrefixExpression<'ident> {
 	Variable(Variable<'ident>),
 	FunctionCall(Box<FunctionCall<'ident>>),
 	ClosedExpression(Expression<'ident>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum FunctionCall<'ident> {
-	CallFunction(PrefixExpression<'ident>, Arguments),
-	CallObjectFunction(PrefixExpression<'ident>, Identifier<'ident>, Arguments),
+	CallFunction(PrefixExpression<'ident>, Arguments<'ident>),
+	CallObjectFunction(
+		PrefixExpression<'ident>,
+		Identifier<'ident>,
+		Arguments<'ident>,
+	),
 }
 
 impl<'ident> Into<Statement<'ident>> for FunctionCall<'ident> {
@@ -139,37 +156,40 @@ impl<'ident> Into<Statement<'ident>> for FunctionCall<'ident> {
 	}
 }
 
-#[derive(Clone)]
-pub enum Arguments {
-	ClosedExpressionList,
-	TableConstructor,
-	LiteralString,
+#[derive(Clone, Debug)]
+pub enum Arguments<'ident> {
+	ClosedExpressionList(Option<ExpressionList<'ident>>),
+	TableConstructor(TableConstructor<'ident>),
+	LiteralString(LiteralString),
 }
 
-#[derive(Clone)]
-pub struct AnonFunctionDefinition(FunctionBody);
+#[derive(Clone, Debug)]
+pub struct AnonFunctionDefinition<'ident>(pub FunctionBody<'ident>);
 
-#[derive(Clone)]
-pub struct FunctionBody;
+#[derive(Clone, Debug)]
+pub struct FunctionBody<'ident>(pub Option<ParameterList<'ident>>, pub Block<'ident>);
 
-pub enum ParameterList {
-	IdentifierList,
-	IdentifierListTripleDots,
-	TripleDots,
+#[derive(Clone, Debug)]
+pub enum ParameterList<'ident> {
+	IdentifierList(IdentifierList<'ident>),
+	IdentifierListWithVarArgs(IdentifierList<'ident>),
+	VarArgs,
 }
 
-#[derive(Clone)]
-pub struct TableConstructor;
+#[derive(Clone, Debug)]
+pub struct TableConstructor<'ident>(pub Option<FieldList<'ident>>);
 
-pub struct FieldList;
+#[derive(Clone, Debug)]
+pub struct FieldList<'ident>(pub Vec<Field<'ident>>);
 
-pub enum Field {
-	BracketExpression,
-	IdentifierExpression,
-	Expression,
+#[derive(Clone, Debug)]
+pub enum Field<'ident> {
+	BracketField(Expression<'ident>, Expression<'ident>),
+	IdentifierField(Identifier<'ident>, Expression<'ident>),
+	Expression(Expression<'ident>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum InfixOperation {
 	Add,
 	Subtract,
@@ -194,7 +214,7 @@ pub enum InfixOperation {
 	Or,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum PrefixOperation {
 	Negate,
 	Not,

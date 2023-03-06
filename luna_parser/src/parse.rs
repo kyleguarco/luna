@@ -1,10 +1,12 @@
 use crate::terminal::{
 	identifier,
 	keyword::{keyword, Keyword},
+	literal_string,
 	string::{
-		AMPHERSAND, CARET, COLON, COMMA, DOT, DOUBLECOLON, DOUBLEDOT, DOUBLESLASH, GREATER,
-		GREATEREQUAL, ISEQUAL, LEFTPAREN, LESS, LESSEQUAL, MINUS, NOTEQUAL, OCTOTHORPE, PERCENT,
-		PIPE, PLUS, RIGHTPAREN, SEMICOLON, SHIFTLEFT, SHIFTRIGHT, SLASH, STAR, TILDE,
+		AMPHERSAND, CARET, COLON, COMMA, DOT, DOUBLECOLON, DOUBLEDOT, DOUBLESLASH, EQUALS, GREATER,
+		GREATEREQUAL, ISEQUAL, LEFTBRACE, LEFTBRACKET, LEFTPAREN, LESS, LESSEQUAL, MINUS, NOTEQUAL,
+		OCTOTHORPE, PERCENT, PIPE, PLUS, RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN, SEMICOLON,
+		SHIFTLEFT, SHIFTRIGHT, SLASH, STAR, TILDE, TRIPLEDOT,
 	},
 };
 use luna_ast::types::{
@@ -16,7 +18,7 @@ use luna_ast::types::{
 use nom::{
 	branch::alt,
 	bytes::complete::tag,
-	combinator::{map, opt, value},
+	combinator::{map, opt, recognize, value},
 	multi::{many0, many1, separated_list1},
 	sequence::{delimited, pair, preceded, separated_pair, terminated},
 	IResult,
@@ -114,31 +116,71 @@ pub fn functioncall(input: &str) -> IResult<&str, FunctionCall> {
 }
 
 pub fn args(input: &str) -> IResult<&str, Arguments> {
-	todo!()
+	alt((
+		map(
+			delimited(tag(LEFTPAREN), opt(explist), tag(RIGHTPAREN)),
+			|elist| Arguments::ClosedExpressionList(elist),
+		),
+		map(tableconstructor, |tbc| Arguments::TableConstructor(tbc)),
+		map(literal_string, |ls| Arguments::LiteralString(ls)),
+	))(input)
 }
 
 pub fn functiondef(input: &str) -> IResult<&str, AnonFunctionDefinition> {
-	todo!()
+	map(preceded(keyword(Keyword::Function), funcbody), |fbody| {
+		AnonFunctionDefinition(fbody)
+	})(input)
 }
 
 pub fn funcbody(input: &str) -> IResult<&str, FunctionBody> {
-	todo!()
+	let (input, plist) = delimited(tag(LEFTPAREN), opt(parlist), tag(RIGHTPAREN))(input)?;
+	let (input, bl) = block(input)?;
+	let (input, _) = keyword(Keyword::End)(input)?;
+	Ok((input, FunctionBody(plist, bl)))
 }
 
 pub fn parlist(input: &str) -> IResult<&str, ParameterList> {
-	todo!()
+	alt((
+		map(
+			pair(namelist, opt(recognize(pair(tag(COMMA), tag(TRIPLEDOT))))),
+			|(nlist, vargs)| match vargs {
+				Some(_) => ParameterList::IdentifierListWithVarArgs(nlist),
+				None => ParameterList::IdentifierList(nlist),
+			},
+		),
+		value(ParameterList::VarArgs, recognize(tag(TRIPLEDOT))),
+	))(input)
 }
 
 pub fn tableconstructor(input: &str) -> IResult<&str, TableConstructor> {
-	todo!()
+	map(
+		delimited(tag(LEFTBRACE), opt(fieldlist), tag(RIGHTBRACE)),
+		|flist| TableConstructor(flist),
+	)(input)
 }
 
 pub fn fieldlist(input: &str) -> IResult<&str, FieldList> {
-	todo!()
+	map(
+		terminated(separated_list1(fieldsep, field), opt(fieldsep)),
+		|flist| FieldList(flist),
+	)(input)
 }
 
 pub fn field(input: &str) -> IResult<&str, Field> {
-	todo!()
+	alt((
+		map(
+			separated_pair(
+				delimited(tag(LEFTBRACKET), exp, tag(RIGHTBRACKET)),
+				tag(EQUALS),
+				exp,
+			),
+			|(ex1, ex2)| Field::BracketField(ex1, ex2),
+		),
+		map(
+			separated_pair(identifier, tag(EQUALS), exp),
+			|(ident, ex)| Field::IdentifierField(ident, ex),
+		),
+	))(input)
 }
 
 pub fn fieldsep(input: &str) -> IResult<&str, &str> {
