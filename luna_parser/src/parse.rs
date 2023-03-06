@@ -9,28 +9,26 @@ use crate::{
 			GREATER, GREATEREQUAL, ISEQUAL, LEFTBRACE, LEFTBRACKET, LEFTPAREN, LESS, LESSEQUAL,
 			MINUS, NOTEQUAL, OCTOTHORPE, PERCENT, PIPE, PLUS, RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN,
 			SEMICOLON, SHIFTLEFT, SHIFTRIGHT, SLASH, STAR, TILDE, TRIPLEDOT,
-		},
+		}, numeral,
 	},
 };
 use luna_ast::types::{
 	AnonFunctionDefinition, Arguments, Attribute, AttributeName, AttributeNameList, Block,
 	ExpressionList, Field, FieldList, FunctionBody, FunctionCall, FunctionIdentifier,
 	IdentifierList, InfixOperation, Label, ParameterList, PrefixExpression, PrefixOperation,
-	ReturnStatement, TableConstructor, VariableList,
+	ReturnStatement, TableConstructor, VariableList, Expression,
 };
 use nom::{
 	branch::alt,
 	combinator::{map, opt, recognize, value},
 	multi::{many0, many1, separated_list1},
-	sequence::{delimited, pair, preceded, separated_pair, terminated},
+	sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
 	IResult,
 };
 
-pub use exp::exp;
 pub use stat::stat;
 pub use var::var;
 
-mod exp;
 mod stat;
 mod var;
 
@@ -90,6 +88,28 @@ pub fn namelist(input: &str) -> IResult<&str, IdentifierList> {
 pub fn explist(input: &str) -> IResult<&str, ExpressionList> {
 	let (input, elist) = many1(terminated(exp, whitetag(COMMA)))(input)?;
 	Ok((input, ExpressionList(elist)))
+}
+
+pub fn exp(input: &str) -> IResult<&str, Expression> {
+	alt((
+		value(Expression::Nil, keyword(Keyword::Nil)),
+		value(Expression::False, keyword(Keyword::False)),
+		value(Expression::True, keyword(Keyword::True)),
+		map(numeral, Expression::Numeral),
+		map(literal_string, Expression::LiteralString),
+		value(Expression::VarArgs, whitetag(TRIPLEDOT)),
+		map(functiondef, Expression::AnonFunctionDefinition),
+		map(prefixexp, |pexp| {
+			Expression::PrefixExpression(Box::new(pexp))
+		}),
+		map(tableconstructor, Expression::TableConstructor),
+		map(tuple((exp, binop, exp)), |(expa, itype, expb)| {
+			Expression::InfixOperation(Box::new(expa), itype, Box::new(expb))
+		}),
+		map(pair(unop, exp), |(utype, exp)| {
+			Expression::PrefixOperation(utype, Box::new(exp))
+		}),
+	))(input)
 }
 
 pub fn prefixexp(input: &str) -> IResult<&str, PrefixExpression> {
