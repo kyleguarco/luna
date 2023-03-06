@@ -82,3 +82,8 @@ fn test_keywords() {
 
 	assert!(input.is_empty());
 }
+
+#[test]
+fn check_numerals() {
+	let input = r#""#;
+}
