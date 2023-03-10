@@ -13,7 +13,7 @@ use super::{
 	attnamelist, block, exp, explist, funcbody, funcname, functioncall, label, namelist, varlist,
 };
 
-type IResultStat<'a> = IResult<&'a str, Statement<'a>>;
+type IResultStat<'a> = IResult<&'a str, Statement>;
 
 fn semicolon(input: &str) -> IResultStat {
 	let (input, _) = tag(SEMICOLON)(input)?;

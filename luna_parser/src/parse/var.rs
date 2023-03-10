@@ -12,7 +12,7 @@ use crate::terminal::{
 
 use super::{exp, prefixexp};
 
-type IResultVar<'a> = IResult<&'a str, Variable<'a>>;
+type IResultVar<'a> = IResult<&'a str, Variable>;
 
 fn var_ident(input: &str) -> IResultVar {
 	let (input, ident) = identifier(input)?;
