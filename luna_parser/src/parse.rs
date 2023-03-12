@@ -3,23 +3,24 @@ use crate::{
 	terminal::{
 		identifier,
 		keyword::{keyword, Keyword},
-		literal_string,
+		literal_string, numeral,
 		string::{
 			AMPHERSAND, CARET, COLON, COMMA, DOT, DOUBLECOLON, DOUBLEDOT, DOUBLESLASH, EQUALS,
 			GREATER, GREATEREQUAL, ISEQUAL, LEFTBRACE, LEFTBRACKET, LEFTPAREN, LESS, LESSEQUAL,
 			MINUS, NOTEQUAL, OCTOTHORPE, PERCENT, PIPE, PLUS, RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN,
 			SEMICOLON, SHIFTLEFT, SHIFTRIGHT, SLASH, STAR, TILDE, TRIPLEDOT,
-		}, numeral,
+		},
 	},
 };
 use luna_ast::types::{
 	AnonFunctionDefinition, Arguments, Attribute, AttributeName, AttributeNameList, Block,
-	ExpressionList, Field, FieldList, FunctionBody, FunctionCall, FunctionIdentifier,
+	Expression, ExpressionList, Field, FieldList, FunctionBody, FunctionCall, FunctionIdentifier,
 	IdentifierList, InfixOperation, Label, ParameterList, PrefixExpression, PrefixOperation,
-	ReturnStatement, TableConstructor, VariableList, Expression,
+	ReturnStatement, TableConstructor, Variable, VariableList,
 };
 use nom::{
 	branch::alt,
+	bytes::complete::tag,
 	combinator::{map, opt, recognize, value},
 	multi::{many0, many1, separated_list1},
 	sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
@@ -27,10 +28,8 @@ use nom::{
 };
 
 pub use stat::stat;
-pub use var::var;
 
 mod stat;
-mod var;
 
 pub fn block(input: &str) -> IResult<&str, Block> {
 	let (input, slist) = many0(stat)(input)?;
@@ -50,7 +49,7 @@ pub fn attnamelist(input: &str) -> IResult<&str, AttributeNameList> {
 }
 
 pub fn attrib(input: &str) -> IResult<&str, Attribute> {
-	let (input, attr) = opt(delimited(whitetag(LESS), identifier, whitetag(LESS)))(input)?;
+	let (input, attr) = opt(delimited(whitetag(LESS), identifier, whitetag(GREATER)))(input)?;
 	Ok((input, Attribute(attr)))
 }
 
@@ -78,6 +77,23 @@ pub fn funcname(input: &str) -> IResult<&str, FunctionIdentifier> {
 pub fn varlist(input: &str) -> IResult<&str, VariableList> {
 	let (input, vlist) = separated_list1(whitetag(COMMA), var)(input)?;
 	Ok((input, VariableList(vlist)))
+}
+
+pub fn var(input: &str) -> IResult<&str, Variable> {
+	alt((
+		map(identifier, Variable::Identifier),
+		map(
+			pair(
+				prefixexp,
+				delimited(tag(LEFTBRACKET), exp, tag(RIGHTBRACKET)),
+			),
+			|(pexp, exp)| Variable::PrefixExpressionIndex(Box::new(pexp), Box::new(exp)),
+		),
+		map(
+			separated_pair(prefixexp, tag(DOT), identifier),
+			|(pexp, ident)| Variable::PrefixExpressionIdentifier(Box::new(pexp), ident),
+		),
+	))(input)
 }
 
 pub fn namelist(input: &str) -> IResult<&str, IdentifierList> {

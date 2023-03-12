@@ -165,6 +165,8 @@ fn local_attlist(input: &str) -> IResultStat {
 pub fn stat(input: &str) -> IResultStat {
 	alt((
 		semicolon,
+		// This comes before 'varlist' to detect the presence of 'local'
+		local_attlist,
 		varlist_explist,
 		fcall,
 		label_state,
@@ -178,6 +180,5 @@ pub fn stat(input: &str) -> IResultStat {
 		for_list,
 		fdec,
 		flocaldec,
-		local_attlist,
 	))(input)
 }
