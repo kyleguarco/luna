@@ -36,20 +36,20 @@ pub enum IfStatement {
 #[derive(Clone, Debug)]
 pub enum Statement {
 	End,
-	Definition(VariableList, ExpressionList),
+	Definition((VariableList, ExpressionList)),
 	FunctionCall(FunctionCall),
 	Label(Label),
 	Break,
 	Goto(Identifier),
 	Do(Box<Block>),
-	While(Expression, Block),
+	While((Expression, Block)),
 	RepeatUntil(Block, Expression),
 	IfStatement {
 		initial: IfStatement,
 		belse: IfStatement,
 		tree: Vec<IfStatement>,
 	},
-	ForExpression(
+	ForExpression((
 		Identifier,
 		(
 			Expression,
@@ -57,15 +57,14 @@ pub enum Statement {
 			Option<Expression>,
 		),
 		Block,
-	),
-	ForList(
-		IdentifierList,
-		ExpressionList,
+	)),
+	ForList((
+		(IdentifierList, ExpressionList),
 		Block,
-	),
-	FunctionDefinition(FunctionIdentifier, FunctionBody),
-	LocalFunctionDefinition(Identifier, FunctionBody),
-	LocalDefinitionWithAttribute(AttributeNameList, Option<ExpressionList>),
+	)),
+	FunctionDefinition((FunctionIdentifier, FunctionBody)),
+	LocalFunctionDefinition((Identifier, FunctionBody)),
+	LocalDefinitionWithAttribute((AttributeNameList, Option<ExpressionList>)),
 }
 
 #[derive(Clone, Debug)]
