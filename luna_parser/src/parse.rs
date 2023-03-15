@@ -15,8 +15,8 @@ use crate::{
 use luna_ast::types::{
 	AnonFunctionDefinition, Arguments, Attribute, AttributeName, AttributeNameList, Block,
 	Expression, ExpressionList, Field, FieldList, FunctionBody, FunctionCall, FunctionIdentifier,
-	IdentifierList, InfixOperation, Label, ParameterList, PrefixExpression, PrefixOperation,
-	ReturnStatement, TableConstructor, Variable, VariableList,
+	IdentifierList, IfTree, InfixOperation, Label, ParameterList, PrefixExpression,
+	PrefixOperation, ReturnStatement, Statement, TableConstructor, Variable, VariableList,
 };
 use nom::{
 	branch::alt,
@@ -27,14 +27,99 @@ use nom::{
 	IResult,
 };
 
-pub use stat::stat;
-
-mod stat;
-
 pub fn block(input: &str) -> IResult<&str, Block> {
 	let (input, slist) = many0(stat)(input)?;
 	let (input, ret) = opt(retstat)(input)?;
 	Ok((input, Block(slist, ret)))
+}
+
+pub fn stat(input: &str) -> IResult<&str, Statement> {
+	fn do_block(input: &str) -> IResult<&str, Block> {
+		delimited(keyword(Keyword::Do), block, keyword(Keyword::End))(input)
+	}
+
+	fn if_tree(input: &str) -> IResult<&str, IfTree> {
+		let (input, initial) = pair(
+			delimited(keyword(Keyword::If), exp, keyword(Keyword::Then)),
+			block,
+		)(input)?;
+		let (input, elseifs) = many0(pair(
+			delimited(keyword(Keyword::ElseIf), exp, keyword(Keyword::Then)),
+			block,
+		))(input)?;
+		let (input, otherwise) = opt(delimited(
+			keyword(Keyword::Else),
+			block,
+			keyword(Keyword::End),
+		))(input)?;
+		Ok((
+			input,
+			IfTree {
+				initial,
+				elseifs,
+				otherwise,
+			},
+		))
+	}
+
+	alt((
+		value(Statement::End, tag(SEMICOLON)),
+		// This comes before 'varlist' to detect the presence of 'local'
+		map(
+			preceded(keyword(Keyword::Local), pair(attnamelist, opt(explist))),
+			Statement::LocalDefinitionWithAttribute,
+		),
+		map(pair(varlist, explist), Statement::Definition),
+		map(functioncall, Statement::FunctionCall),
+		map(label, Statement::Label),
+		value(Statement::Break, keyword(Keyword::Break)),
+		map(
+			preceded(keyword(Keyword::Goto), identifier),
+			Statement::Goto,
+		),
+		map(do_block, |bl| Statement::Do(Box::new(bl))),
+		map(
+			pair(preceded(keyword(Keyword::While), exp), do_block),
+			Statement::While,
+		),
+		map(
+			pair(
+				preceded(keyword(Keyword::Repeat), block),
+				preceded(keyword(Keyword::Until), exp),
+			),
+			|(bl, ex)| Statement::RepeatUntil(bl, ex),
+		),
+		map(if_tree, Statement::IfTree),
+		map(
+			tuple((
+				preceded(keyword(Keyword::For), identifier),
+				tuple((exp, exp, opt(exp))),
+				do_block,
+			)),
+			Statement::ForExpression,
+		),
+		map(
+			pair(
+				preceded(
+					keyword(Keyword::For),
+					separated_pair(namelist, keyword(Keyword::In), explist),
+				),
+				do_block,
+			),
+			Statement::ForList,
+		),
+		map(
+			preceded(keyword(Keyword::Function), pair(funcname, funcbody)),
+			Statement::FunctionDefinition,
+		),
+		map(
+			preceded(
+				keyword(Keyword::Local),
+				preceded(keyword(Keyword::Function), pair(identifier, funcbody)),
+			),
+			Statement::LocalFunctionDefinition,
+		),
+	))(input)
 }
 
 pub fn attnamelist(input: &str) -> IResult<&str, AttributeNameList> {

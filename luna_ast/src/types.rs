@@ -20,17 +20,16 @@ pub struct LiteralString(pub String);
 pub struct Chunk(pub Block);
 
 #[derive(Clone, Debug)]
-pub struct Block(
-	pub Vec<Statement>,
-	pub Option<ReturnStatement>,
-);
+pub struct Block(pub Vec<Statement>, pub Option<ReturnStatement>);
 
 #[derive(Clone, Debug)]
-pub enum IfStatement {
-	If(Expression, Block),
-	ElseIf(Expression, Block),
-	Else(Block),
-	End,
+pub struct IfTree {
+	/// The initial condition (if .. then ..)
+	pub initial: (Expression, Block),
+	/// The tree of statements that follow (executed in order)
+	pub elseifs: Vec<(Expression, Block)>,
+	/// The last statement to execute of all other conditions are false
+	pub otherwise: Option<Block>,
 }
 
 #[derive(Clone, Debug)]
@@ -44,24 +43,15 @@ pub enum Statement {
 	Do(Box<Block>),
 	While((Expression, Block)),
 	RepeatUntil(Block, Expression),
-	IfStatement {
-		initial: IfStatement,
-		belse: IfStatement,
-		tree: Vec<IfStatement>,
-	},
-	ForExpression((
-		Identifier,
+	IfTree(IfTree),
+	ForExpression(
 		(
-			Expression,
-			Expression,
-			Option<Expression>,
+			Identifier,
+			(Expression, Expression, Option<Expression>),
+			Block,
 		),
-		Block,
-	)),
-	ForList((
-		(IdentifierList, ExpressionList),
-		Block,
-	)),
+	),
+	ForList(((IdentifierList, ExpressionList), Block)),
 	FunctionDefinition((FunctionIdentifier, FunctionBody)),
 	LocalFunctionDefinition((Identifier, FunctionBody)),
 	LocalDefinitionWithAttribute((AttributeNameList, Option<ExpressionList>)),
@@ -124,11 +114,7 @@ pub enum Expression {
 	AnonFunctionDefinition(AnonFunctionDefinition),
 	PrefixExpression(Box<PrefixExpression>),
 	TableConstructor(TableConstructor),
-	InfixOperation(
-		Box<Expression>,
-		InfixOperation,
-		Box<Expression>,
-	),
+	InfixOperation(Box<Expression>, InfixOperation, Box<Expression>),
 	PrefixOperation(PrefixOperation, Box<Expression>),
 }
 
@@ -142,11 +128,7 @@ pub enum PrefixExpression {
 #[derive(Clone, Debug)]
 pub enum FunctionCall {
 	CallFunction(PrefixExpression, Arguments),
-	CallObjectFunction(
-		PrefixExpression,
-		Identifier,
-		Arguments,
-	),
+	CallObjectFunction(PrefixExpression, Identifier, Arguments),
 }
 
 impl Into<Statement> for FunctionCall {
