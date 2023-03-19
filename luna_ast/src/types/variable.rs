@@ -1,3 +1,8 @@
+use super::{
+	expression::{Expression, PrefixExpression},
+	Identifier,
+};
+
 #[derive(Clone, Debug)]
 pub struct VariableList(pub Vec<Variable>);
 

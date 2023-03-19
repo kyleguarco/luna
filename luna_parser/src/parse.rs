@@ -12,11 +12,18 @@ use crate::{
 		},
 	},
 };
+use luna_ast::types::expression::{Expression, ExpressionList, PrefixExpression, ReturnStatement};
+use luna_ast::types::function::{FunctionBody, FunctionCall, FunctionIdentifier};
+use luna_ast::types::operation::{InfixOperation, PrefixOperation};
+use luna_ast::types::statement::{IfTree, Statement};
+use luna_ast::types::variable::{Variable, VariableList};
 use luna_ast::types::{
-	AnonFunctionDefinition, Arguments, Attribute, AttributeName, AttributeNameList, Block,
-	Expression, ExpressionList, Field, FieldList, FunctionBody, FunctionCall, FunctionIdentifier,
-	IdentifierList, IfTree, InfixOperation, Label, ParameterList, PrefixExpression,
-	PrefixOperation, ReturnStatement, Statement, TableConstructor, Variable, VariableList,
+	attribute::{Attribute, AttributeName},
+	statement::ForExpression,
+};
+use luna_ast::types::{
+	AnonFunctionDefinition, Arguments, AttributeNameList, Block, Field, FieldList, IdentifierList,
+	Label, ParameterList, TableConstructor,
 };
 use nom::{
 	branch::alt,
@@ -52,14 +59,7 @@ pub fn stat(input: &str) -> IResult<&str, Statement> {
 			block,
 			keyword(Keyword::End),
 		))(input)?;
-		Ok((
-			input,
-			IfTree {
-				initial,
-				elseifs,
-				otherwise,
-			},
-		))
+		Ok((input, IfTree { initial, elseifs, otherwise }))
 	}
 
 	alt((
@@ -96,7 +96,9 @@ pub fn stat(input: &str) -> IResult<&str, Statement> {
 				tuple((exp, exp, opt(exp))),
 				do_block,
 			)),
-			Statement::ForExpression,
+			|(ident, (start, stop, step), bl)| {
+				ForExpression { ident, start, stop, step, bl }.into()
+			},
 		),
 		map(
 			pair(

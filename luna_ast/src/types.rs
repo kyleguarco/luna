@@ -2,12 +2,16 @@
 ///!
 ///! These are representations of source structure, which are generated
 ///! from the parser.
-use self::statement::Statement;
+use self::{
+	attribute::AttributeName,
+	expression::{Expression, ExpressionList, ReturnStatement},
+	function::FunctionBody,
+	statement::Statement,
+};
 
 pub mod attribute;
 pub mod expression;
 pub mod function;
-pub mod if_tree;
 pub mod operation;
 pub mod statement;
 pub mod variable;
@@ -74,5 +78,3 @@ pub enum Field {
 	IdentifierField(Identifier, Expression),
 	Expression(Expression),
 }
-
-
