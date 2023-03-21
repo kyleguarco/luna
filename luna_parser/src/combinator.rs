@@ -1,5 +1,5 @@
 use nom::{
-	bytes::streaming::tag, character::complete::multispace0, error::ParseError,
+	bytes::streaming::tag, character::streaming::multispace0, error::ParseError,
 	sequence::delimited, AsChar, Compare, IResult, InputLength, InputTake, InputTakeAtPosition,
 };
 

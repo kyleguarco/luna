@@ -1,12 +1,8 @@
 use luna_ast::types::{Identifier, LiteralString, Numeral};
 use nom::{
 	branch::alt,
-	bytes::complete::{is_not, tag, take_while_m_n},
-	character::{
-		complete::char,
-		complete::digit1,
-		complete::{alpha1, alphanumeric1, multispace1},
-	},
+	bytes::streaming::{is_not, tag, take_while_m_n},
+	character::streaming::{alpha1, alphanumeric1, char, digit1, multispace1},
 	combinator::{map, map_opt, map_res, recognize, value, verify},
 	error::{FromExternalError, ParseError},
 	multi::{fold_many0, many0_count},
@@ -28,13 +24,8 @@ pub(crate) mod string;
 ///
 /// [1]: https://docs.rs/nom/latest/nom/recipes/index.html#rust-style-identifiers
 pub fn identifier(input: &str) -> IResult<&str, Identifier> {
-	fn alpha_test(input: &str) -> IResult<&str, &str> {
-		dbg!(input);
-		alpha1(input)
-	}
-
 	let (input, result) = recognize(whitespace(pair(
-		alt((alpha_test, tag("_"))),
+		alt((alpha1, tag("_"))),
 		many0_count(alt((alphanumeric1, tag("_")))),
 	)))(input)?;
 

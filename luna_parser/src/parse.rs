@@ -12,22 +12,19 @@ use crate::{
 		},
 	},
 };
-use luna_ast::types::expression::{Expression, ExpressionList, PrefixExpression, ReturnStatement};
-use luna_ast::types::function::{FunctionBody, FunctionCall, FunctionIdentifier};
-use luna_ast::types::operation::{InfixOperation, PrefixOperation};
-use luna_ast::types::statement::{IfTree, Statement};
-use luna_ast::types::variable::{Variable, VariableList};
 use luna_ast::types::{
 	attribute::{Attribute, AttributeName},
-	statement::ForExpression,
-};
-use luna_ast::types::{
+	expression::{Expression, ExpressionList, PrefixExpression, ReturnStatement},
+	function::{FunctionBody, FunctionCall, FunctionIdentifier},
+	operation::{InfixOperation, PrefixOperation},
+	statement::{ForExpression, IfTree, Statement},
+	variable::{Variable, VariableList},
 	AnonFunctionDefinition, Arguments, AttributeNameList, Block, Field, FieldList, IdentifierList,
 	Label, ParameterList, TableConstructor,
 };
 use nom::{
 	branch::alt,
-	bytes::complete::tag,
+	bytes::streaming::tag,
 	combinator::{map, opt, recognize, value},
 	multi::{many0, many1, separated_list1},
 	sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
@@ -151,7 +148,6 @@ pub fn label(input: &str) -> IResult<&str, Label> {
 	let (input, _) = whitetag(DOUBLECOLON)(input)?;
 	let (input, ident) = identifier(input)?;
 	let (input, _) = whitetag(DOUBLECOLON)(input)?;
-
 	Ok((input, Label(ident)))
 }
 
@@ -162,8 +158,7 @@ pub fn funcname(input: &str) -> IResult<&str, FunctionIdentifier> {
 }
 
 pub fn varlist(input: &str) -> IResult<&str, VariableList> {
-	let (input, vlist) = separated_list1(whitetag(COMMA), var)(input)?;
-	Ok((input, VariableList(vlist)))
+	map(separated_list1(whitetag(COMMA), var), VariableList)(input)
 }
 
 pub fn var(input: &str) -> IResult<&str, Variable> {
@@ -184,8 +179,10 @@ pub fn var(input: &str) -> IResult<&str, Variable> {
 }
 
 pub fn namelist(input: &str) -> IResult<&str, IdentifierList> {
-	let (input, ilist) = many1(terminated(identifier, whitetag(COMMA)))(input)?;
-	Ok((input, IdentifierList(ilist)))
+	map(
+		many1(terminated(identifier, whitetag(COMMA))),
+		IdentifierList,
+	)(input)
 }
 
 pub fn explist(input: &str) -> IResult<&str, ExpressionList> {
@@ -217,13 +214,13 @@ pub fn exp(input: &str) -> IResult<&str, Expression> {
 
 pub fn prefixexp(input: &str) -> IResult<&str, PrefixExpression> {
 	alt((
-		map(var, |v| PrefixExpression::Variable(v)),
+		map(var, PrefixExpression::Variable),
 		map(functioncall, |fcall| {
 			PrefixExpression::FunctionCall(Box::new(fcall))
 		}),
 		map(
 			delimited(whitetag(LEFTPAREN), exp, whitetag(RIGHTPAREN)),
-			|ex| PrefixExpression::ClosedExpression(ex),
+			PrefixExpression::ClosedExpression,
 		),
 	))(input)
 }
@@ -244,17 +241,18 @@ pub fn args(input: &str) -> IResult<&str, Arguments> {
 	alt((
 		map(
 			delimited(whitetag(LEFTPAREN), opt(explist), whitetag(RIGHTPAREN)),
-			|elist| Arguments::ClosedExpressionList(elist),
+			Arguments::ClosedExpressionList,
 		),
-		map(tableconstructor, |tbc| Arguments::TableConstructor(tbc)),
-		map(literal_string, |ls| Arguments::LiteralString(ls)),
+		map(tableconstructor, Arguments::TableConstructor),
+		map(literal_string, Arguments::LiteralString),
 	))(input)
 }
 
 pub fn functiondef(input: &str) -> IResult<&str, AnonFunctionDefinition> {
-	map(preceded(keyword(Keyword::Function), funcbody), |fbody| {
-		AnonFunctionDefinition(fbody)
-	})(input)
+	map(
+		preceded(keyword(Keyword::Function), funcbody),
+		AnonFunctionDefinition,
+	)(input)
 }
 
 pub fn funcbody(input: &str) -> IResult<&str, FunctionBody> {
@@ -290,7 +288,7 @@ pub fn tableconstructor(input: &str) -> IResult<&str, TableConstructor> {
 pub fn fieldlist(input: &str) -> IResult<&str, FieldList> {
 	map(
 		terminated(separated_list1(fieldsep, field), opt(fieldsep)),
-		|flist| FieldList(flist),
+		FieldList,
 	)(input)
 }
 

@@ -1,8 +1,8 @@
 use std::ops::RangeTo;
 
 use nom::{
-	bytes::complete::tag, combinator::recognize, error::ParseError, AsChar, Compare, IResult,
-	InputTake, InputTakeAtPosition, Offset, Slice,
+	bytes::streaming::tag, combinator::recognize, error::ParseError, AsChar, Compare, IResult,
+	InputLength, InputTake, InputTakeAtPosition, Offset, Slice,
 };
 
 use crate::combinator::whitespace;
@@ -81,6 +81,7 @@ where
 		+ Offset
 		+ InputTake
 		+ InputTakeAtPosition
+		+ InputLength
 		+ Compare<&'static str>,
 	<Input as InputTakeAtPosition>::Item: Clone + AsChar,
 {
