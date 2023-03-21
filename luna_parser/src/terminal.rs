@@ -10,8 +10,6 @@ use nom::{
 	IResult,
 };
 
-use crate::combinator::whitespace;
-
 pub(crate) mod keyword;
 pub(crate) mod string;
 
@@ -24,10 +22,10 @@ pub(crate) mod string;
 ///
 /// [1]: https://docs.rs/nom/latest/nom/recipes/index.html#rust-style-identifiers
 pub fn identifier(input: &str) -> IResult<&str, Identifier> {
-	let (input, result) = recognize(whitespace(pair(
+	let (input, result) = recognize(pair(
 		alt((alpha1, tag("_"))),
 		many0_count(alt((alphanumeric1, tag("_")))),
-	)))(input)?;
+	))(input)?;
 
 	Ok((input, Identifier(String::from(result))))
 }

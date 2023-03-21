@@ -1,8 +1,6 @@
-use std::ops::RangeTo;
-
 use nom::{
-	bytes::streaming::tag, combinator::recognize, error::ParseError, AsChar, Compare, IResult,
-	InputLength, InputTake, InputTakeAtPosition, Offset, Slice,
+	bytes::streaming::tag, error::ParseError, AsChar, Compare, IResult, InputLength, InputTake,
+	InputTakeAtPosition,
 };
 
 use crate::combinator::whitespace;
@@ -76,16 +74,10 @@ pub fn keyword<Input, Error: ParseError<Input>>(
 	key: Keyword,
 ) -> impl FnMut(Input) -> IResult<Input, Input, Error>
 where
-	Input: Clone
-		+ Slice<RangeTo<usize>>
-		+ Offset
-		+ InputTake
-		+ InputTakeAtPosition
-		+ InputLength
-		+ Compare<&'static str>,
+	Input: Clone + InputTake + InputTakeAtPosition + InputLength + Compare<&'static str>,
 	<Input as InputTakeAtPosition>::Item: Clone + AsChar,
 {
-	whitespace(recognize(tag(key.literal())))
+	whitespace(tag(key.literal()))
 }
 
 // const KAND: &str = "and";

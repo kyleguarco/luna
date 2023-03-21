@@ -1,3 +1,72 @@
+pub enum SingleSymbol {
+	Plus,
+	Minus,
+	Star,
+	Slash,
+	Percent,
+	Caret,
+	Octothorpe,
+	Amphersand,
+	Tilde,
+	Pipe,
+	Less,
+	Greater,
+	Equals,
+	LeftParen,
+	RightParen,
+	LeftBrace,
+	RightBrace,
+	LeftBracket,
+	RightBracket,
+	Semicolon,
+	Colon,
+	Comma,
+	Dot,
+}
+
+impl SingleSymbol {
+	pub const fn literal(&self) -> char {
+		match self {
+			Self::Plus => '+',
+			Self::Minus => '-',
+			Self::Star => '*',
+			Self::Slash => '/',
+			Self::Percent => '%',
+			Self::Caret => '^',
+			Self::Octothorpe => '#',
+			Self::Amphersand => '&',
+			Self::Tilde => '~',
+			Self::Pipe => '|',
+			Self::Less => '<',
+			Self::Greater => '>',
+			Self::Equals => '=',
+			Self::LeftParen => '(',
+			Self::RightParen => ')',
+			Self::LeftBrace => '{',
+			Self::RightBrace => '}',
+			Self::LeftBracket => '[',
+			Self::RightBracket => ']',
+			Self::Semicolon => ';',
+			Self::Colon => ':',
+			Self::Comma => ',',
+			Self::Dot => '.',
+		}
+	}
+}
+
+pub enum LongSymbol {
+	ShiftLeft,
+	ShiftRight,
+	DoubleSlash,
+	IsEqual,
+	NotEqual,
+	LessEqual,
+	GreaterEqual,
+	DoubleColon,
+	DoubleDot,
+	TripleDot,
+}
+
 pub const PLUS: &str = "+";
 pub const MINUS: &str = "-";
 pub const STAR: &str = "*";
@@ -11,7 +80,6 @@ pub const PIPE: &str = "|";
 pub const SHIFTLEFT: &str = "<<";
 pub const SHIFTRIGHT: &str = ">>";
 pub const DOUBLESLASH: &str = "//";
-//pub const SPACE: &str = " ";
 pub const ISEQUAL: &str = "==";
 pub const NOTEQUAL: &str = "~=";
 pub const LESSEQUAL: &str = "<=";
