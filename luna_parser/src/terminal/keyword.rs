@@ -1,9 +1,8 @@
+use crate::combinator::ws1;
 use nom::{
 	bytes::streaming::tag, error::ParseError, AsChar, Compare, IResult, InputLength, InputTake,
 	InputTakeAtPosition,
 };
-
-use crate::combinator::whitespace;
 
 /// A collection of the possible keywords in Lua.
 pub enum Keyword {
@@ -77,7 +76,7 @@ where
 	Input: Clone + InputTake + InputTakeAtPosition + InputLength + Compare<&'static str>,
 	<Input as InputTakeAtPosition>::Item: Clone + AsChar,
 {
-	whitespace(tag(key.literal()))
+	ws1(tag(key.literal()))
 }
 
 // const KAND: &str = "and";

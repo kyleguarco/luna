@@ -22,6 +22,7 @@ pub(crate) mod string;
 ///
 /// [1]: https://docs.rs/nom/latest/nom/recipes/index.html#rust-style-identifiers
 pub fn identifier(input: &str) -> IResult<&str, Identifier> {
+	dbg!(input);
 	let (input, result) = recognize(pair(
 		alt((alpha1, tag("_"))),
 		many0_count(alt((alphanumeric1, tag("_")))),

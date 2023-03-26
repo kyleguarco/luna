@@ -1,5 +1,5 @@
 use crate::{
-	combinator::whitespace,
+	combinator::ws0,
 	terminal::{
 		identifier,
 		keyword::{keyword, Keyword},
@@ -32,12 +32,31 @@ use nom::{
 	IResult,
 };
 
+/// Grammar: `block ::= {stat} [retstat]`
 pub fn block(input: &str) -> IResult<&str, Block> {
 	dbg!(input);
-	let (input, (slist, ret)) = whitespace(pair(many0(stat), opt(retstat)))(input)?;
+	let (input, (slist, ret)) = ws0(pair(many0(stat), opt(retstat)))(input)?;
 	Ok((input, Block(slist, ret)))
 }
 
+/// Grammar:
+/// ```!
+/// stat ::=  ‘;’ |
+///	varlist ‘=’ explist |
+///	functioncall |
+///	label |
+///	break |
+///	goto Name |
+///	do block end |
+///	while exp do block end |
+///	repeat block until exp |
+///	if exp then block {elseif exp then block} [else block] end |
+///	for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end |
+///	for namelist in explist do block end |
+///	function funcname funcbody |
+///	local function Name funcbody |
+///	local attnamelist [‘=’ explist]
+/// ```
 pub fn stat(input: &str) -> IResult<&str, Statement> {
 	dbg!(input);
 	fn do_block(input: &str) -> IResult<&str, Block> {
@@ -64,12 +83,7 @@ pub fn stat(input: &str) -> IResult<&str, Statement> {
 	}
 
 	alt((
-		value(Statement::End, tag(SEMICOLON)),
-		// This comes before 'varlist' to detect the presence of 'local'
-		map(
-			preceded(keyword(Keyword::Local), pair(attnamelist, opt(explist))),
-			Statement::LocalDefinitionWithAttribute,
-		),
+		value(Statement::End, char(SEMICOLON)),
 		map(pair(varlist, explist), Statement::Definition),
 		map(functioncall, Statement::FunctionCall),
 		map(label, Statement::Label),
@@ -122,9 +136,14 @@ pub fn stat(input: &str) -> IResult<&str, Statement> {
 			),
 			Statement::LocalFunctionDefinition,
 		),
+		map(
+			preceded(keyword(Keyword::Local), pair(attnamelist, opt(explist))),
+			Statement::LocalDefinitionWithAttribute,
+		),
 	))(input)
 }
 
+/// Grammar: `attnamelist ::=  Name attrib {‘,’ Name attrib}`
 pub fn attnamelist(input: &str) -> IResult<&str, AttributeNameList> {
 	dbg!(input);
 	fn inner(input: &str) -> IResult<&str, AttributeName> {
@@ -134,24 +153,27 @@ pub fn attnamelist(input: &str) -> IResult<&str, AttributeNameList> {
 		Ok((input, AttributeName(ident, attr)))
 	}
 
-	let (input, alist) = many1(terminated(inner, tag(COMMA)))(input)?;
+	let (input, alist) = many1(terminated(inner, char(COMMA)))(input)?;
 	Ok((input, AttributeNameList(alist)))
 }
 
+/// Grammar: `attrib ::= [‘<’ Name ‘>’]`
 pub fn attrib(input: &str) -> IResult<&str, Attribute> {
 	dbg!(input);
-	let (input, attr) = opt(delimited(tag(LESS), identifier, tag(GREATER)))(input)?;
+	let (input, attr) = opt(delimited(char(LESS), identifier, char(GREATER)))(input)?;
 	Ok((input, Attribute(attr)))
 }
 
+/// Grammar: `retstat ::= return [explist] [‘;’]`
 pub fn retstat(input: &str) -> IResult<&str, ReturnStatement> {
 	dbg!(input);
 	let (input, _) = keyword(Keyword::Return)(input)?;
 	let (input, elist) = opt(explist)(input)?;
-	let (input, _) = opt(tag(SEMICOLON))(input)?;
+	let (input, _) = opt(char(SEMICOLON))(input)?;
 	Ok((input, ReturnStatement(elist)))
 }
 
+/// Grammar: `label ::= ‘::’ Name ‘::’`
 pub fn label(input: &str) -> IResult<&str, Label> {
 	dbg!(input);
 	let (input, _) = tag(DOUBLECOLON)(input)?;
@@ -160,18 +182,21 @@ pub fn label(input: &str) -> IResult<&str, Label> {
 	Ok((input, Label(ident)))
 }
 
+/// Grammar: `funcname ::= Name {‘.’ Name} [‘:’ Name]`
 pub fn funcname(input: &str) -> IResult<&str, FunctionIdentifier> {
 	dbg!(input);
-	let (input, ilist) = separated_list1(tag(DOT), identifier)(input)?;
-	let (input, objident) = opt(preceded(tag(COLON), identifier))(input)?;
+	let (input, ilist) = separated_list1(ws0(char(DOT)), identifier)(input)?;
+	let (input, objident) = opt(preceded(ws0(char(COLON)), identifier))(input)?;
 	Ok((input, FunctionIdentifier { ilist, objident }))
 }
 
+/// Grammar: `varlist ::= var {‘,’ var}`
 pub fn varlist(input: &str) -> IResult<&str, VariableList> {
 	dbg!(input);
-	map(separated_list1(tag(COMMA), var), VariableList)(input)
+	map(separated_list1(ws0(char(COMMA)), var), VariableList)(input)
 }
 
+/// Grammar: `var ::= Name | prefixexp ‘[’ exp ‘]’ | prefixexp ‘.’ Name `
 pub fn var(input: &str) -> IResult<&str, Variable> {
 	dbg!(input);
 	alt((
@@ -179,28 +204,35 @@ pub fn var(input: &str) -> IResult<&str, Variable> {
 		map(
 			pair(
 				prefixexp,
-				delimited(tag(LEFTBRACKET), exp, tag(RIGHTBRACKET)),
+				delimited(ws0(char(LEFTBRACKET)), exp, ws0(char(RIGHTBRACKET))),
 			),
 			|(pexp, exp)| Variable::PrefixExpressionIndex(Box::new(pexp), Box::new(exp)),
 		),
 		map(
-			separated_pair(prefixexp, tag(DOT), identifier),
+			separated_pair(prefixexp, char(DOT), identifier),
 			|(pexp, ident)| Variable::PrefixExpressionIdentifier(Box::new(pexp), ident),
 		),
 	))(input)
 }
 
+/// Grammar: `namelist ::= Name {‘,’ Name}`
 pub fn namelist(input: &str) -> IResult<&str, IdentifierList> {
 	dbg!(input);
-	map(many1(terminated(identifier, tag(COMMA))), IdentifierList)(input)
+	map(many1(terminated(identifier, char(COMMA))), IdentifierList)(input)
 }
 
+/// Grammar: `explist ::= exp {‘,’ exp}`
 pub fn explist(input: &str) -> IResult<&str, ExpressionList> {
 	dbg!(input);
-	let (input, elist) = many1(terminated(exp, tag(COMMA)))(input)?;
+	let (input, elist) = many1(terminated(exp, char(COMMA)))(input)?;
 	Ok((input, ExpressionList(elist)))
 }
 
+/// Grammar:
+/// ```!
+/// exp ::= nil | false | true | Numeral | LiteralString | ‘...’ |
+/// functiondef | prefixexp | tableconstructor | exp binop exp | unop exp
+/// ```
 pub fn exp(input: &str) -> IResult<&str, Expression> {
 	dbg!(input);
 	alt((
@@ -224,6 +256,7 @@ pub fn exp(input: &str) -> IResult<&str, Expression> {
 	))(input)
 }
 
+/// Grammar: `prefixexp ::= var | functioncall | ‘(’ exp ‘)’`
 pub fn prefixexp(input: &str) -> IResult<&str, PrefixExpression> {
 	dbg!(input);
 	alt((
@@ -232,12 +265,13 @@ pub fn prefixexp(input: &str) -> IResult<&str, PrefixExpression> {
 			PrefixExpression::FunctionCall(Box::new(fcall))
 		}),
 		map(
-			delimited(tag(LEFTPAREN), exp, tag(RIGHTPAREN)),
+			delimited(char(LEFTPAREN), exp, char(RIGHTPAREN)),
 			PrefixExpression::ClosedExpression,
 		),
 	))(input)
 }
 
+/// Grammar: `functioncall ::=  prefixexp args | prefixexp ‘:’ Name args `
 pub fn functioncall(input: &str) -> IResult<&str, FunctionCall> {
 	dbg!(input);
 	alt((
@@ -245,17 +279,18 @@ pub fn functioncall(input: &str) -> IResult<&str, FunctionCall> {
 			FunctionCall::CallFunction(pexp, argu)
 		}),
 		map(
-			pair(separated_pair(prefixexp, tag(COLON), identifier), args),
+			pair(separated_pair(prefixexp, char(COLON), identifier), args),
 			|((pexp, ident), argu)| FunctionCall::CallObjectFunction(pexp, ident, argu),
 		),
 	))(input)
 }
 
+/// Grammar: `args ::=  ‘(’ [explist] ‘)’ | tableconstructor | LiteralString `
 pub fn args(input: &str) -> IResult<&str, Arguments> {
 	dbg!(input);
 	alt((
 		map(
-			delimited(char('('), opt(explist), tag(RIGHTPAREN)),
+			delimited(char('('), opt(explist), char(RIGHTPAREN)),
 			Arguments::ClosedExpressionList,
 		),
 		map(tableconstructor, Arguments::TableConstructor),
@@ -263,6 +298,7 @@ pub fn args(input: &str) -> IResult<&str, Arguments> {
 	))(input)
 }
 
+/// Grammar: `functiondef ::= function funcbody`
 pub fn functiondef(input: &str) -> IResult<&str, AnonFunctionDefinition> {
 	dbg!(input);
 	map(
@@ -271,19 +307,21 @@ pub fn functiondef(input: &str) -> IResult<&str, AnonFunctionDefinition> {
 	)(input)
 }
 
+/// Grammar: `funcbody ::= ‘(’ [parlist] ‘)’ block end`
 pub fn funcbody(input: &str) -> IResult<&str, FunctionBody> {
 	dbg!(input);
-	let (input, plist) = delimited(tag(LEFTPAREN), opt(parlist), tag(RIGHTPAREN))(input)?;
+	let (input, plist) = delimited(char(LEFTPAREN), opt(parlist), char(RIGHTPAREN))(input)?;
 	let (input, bl) = block(input)?;
 	let (input, _) = keyword(Keyword::End)(input)?;
 	Ok((input, FunctionBody(plist, bl)))
 }
 
+/// Grammar: `parlist ::= namelist [‘,’ ‘...’] | ‘...’`
 pub fn parlist(input: &str) -> IResult<&str, ParameterList> {
 	dbg!(input);
 	alt((
 		map(
-			pair(namelist, opt(recognize(pair(tag(COMMA), tag(TRIPLEDOT))))),
+			pair(namelist, opt(recognize(pair(char(COMMA), tag(TRIPLEDOT))))),
 			|(nlist, vargs)| match vargs {
 				Some(_) => ParameterList::IdentifierListWithVarArgs(nlist),
 				None => ParameterList::IdentifierList(nlist),
@@ -293,14 +331,16 @@ pub fn parlist(input: &str) -> IResult<&str, ParameterList> {
 	))(input)
 }
 
+/// Grammar: `tableconstructor ::= ‘{’ [fieldlist] ‘}’`
 pub fn tableconstructor(input: &str) -> IResult<&str, TableConstructor> {
 	dbg!(input);
 	map(
-		delimited(tag(LEFTBRACE), opt(fieldlist), tag(RIGHTBRACE)),
+		delimited(char(LEFTBRACE), opt(fieldlist), char(RIGHTBRACE)),
 		|flist| TableConstructor(flist),
 	)(input)
 }
 
+/// Grammar: `fieldlist ::= field {fieldsep field} [fieldsep]`
 pub fn fieldlist(input: &str) -> IResult<&str, FieldList> {
 	dbg!(input);
 	map(
@@ -309,48 +349,57 @@ pub fn fieldlist(input: &str) -> IResult<&str, FieldList> {
 	)(input)
 }
 
+/// Grammar: `field ::= ‘[’ exp ‘]’ ‘=’ exp | Name ‘=’ exp | exp`
 pub fn field(input: &str) -> IResult<&str, Field> {
 	dbg!(input);
 	alt((
 		map(
 			separated_pair(
-				delimited(tag(LEFTBRACKET), exp, tag(RIGHTBRACKET)),
-				tag(EQUALS),
+				delimited(char(LEFTBRACKET), exp, char(RIGHTBRACKET)),
+				char(EQUALS),
 				exp,
 			),
 			|(ex1, ex2)| Field::BracketField(ex1, ex2),
 		),
 		map(
-			separated_pair(identifier, tag(EQUALS), exp),
+			separated_pair(identifier, char(EQUALS), exp),
 			|(ident, ex)| Field::IdentifierField(ident, ex),
 		),
 	))(input)
 }
 
-pub fn fieldsep(input: &str) -> IResult<&str, &str> {
+/// Grammar: `fieldsep ::= ‘,’ | ‘;’`
+pub fn fieldsep(input: &str) -> IResult<&str, char> {
 	dbg!(input);
-	alt((tag(COMMA), tag(SEMICOLON)))(input)
+	alt((char(COMMA), char(SEMICOLON)))(input)
 }
 
+/// Grammar:
+/// ```!
+/// binop ::=  ‘+’ | ‘-’ | ‘*’ | ‘/’ | ‘//’ | ‘^’ | ‘%’ |
+///	‘&’ | ‘~’ | ‘|’ | ‘>>’ | ‘<<’ | ‘..’ |
+///	‘<’ | ‘<=’ | ‘>’ | ‘>=’ | ‘==’ | ‘~=’ |
+///	and | or
+/// ```
 pub fn binop(input: &str) -> IResult<&str, InfixOperation> {
 	dbg!(input);
 	alt((
-		value(InfixOperation::Add, tag(PLUS)),
-		value(InfixOperation::Subtract, tag(MINUS)),
-		value(InfixOperation::Multiply, tag(STAR)),
-		value(InfixOperation::Divide, tag(SLASH)),
+		value(InfixOperation::Add, char(PLUS)),
+		value(InfixOperation::Subtract, char(MINUS)),
+		value(InfixOperation::Multiply, char(STAR)),
+		value(InfixOperation::Divide, char(SLASH)),
 		value(InfixOperation::FloorDivide, tag(DOUBLESLASH)),
-		value(InfixOperation::Power, tag(CARET)),
-		value(InfixOperation::Modulo, tag(PERCENT)),
-		value(InfixOperation::BitwiseAnd, tag(AMPHERSAND)),
-		value(InfixOperation::BitwiseXor, tag(TILDE)),
-		value(InfixOperation::BitwiseOr, tag(PIPE)),
+		value(InfixOperation::Power, char(CARET)),
+		value(InfixOperation::Modulo, char(PERCENT)),
+		value(InfixOperation::BitwiseAnd, char(AMPHERSAND)),
+		value(InfixOperation::BitwiseXor, char(TILDE)),
+		value(InfixOperation::BitwiseOr, char(PIPE)),
 		value(InfixOperation::BitwiseRightShift, tag(SHIFTRIGHT)),
 		value(InfixOperation::BitwiseLeftShift, tag(SHIFTLEFT)),
 		value(InfixOperation::Concat, tag(DOUBLEDOT)),
-		value(InfixOperation::LessThan, tag(LESS)),
+		value(InfixOperation::LessThan, char(LESS)),
 		value(InfixOperation::LessEqual, tag(LESSEQUAL)),
-		value(InfixOperation::GreaterThan, tag(GREATER)),
+		value(InfixOperation::GreaterThan, char(GREATER)),
 		value(InfixOperation::GreaterEqual, tag(GREATEREQUAL)),
 		value(InfixOperation::IsEqual, tag(ISEQUAL)),
 		value(InfixOperation::IsNotEqual, tag(NOTEQUAL)),
@@ -359,12 +408,13 @@ pub fn binop(input: &str) -> IResult<&str, InfixOperation> {
 	))(input)
 }
 
+/// Grammar: `unop ::= ‘-’ | not | ‘#’ | ‘~’`
 pub fn unop(input: &str) -> IResult<&str, PrefixOperation> {
 	dbg!(input);
 	alt((
-		value(PrefixOperation::Not, tag(MINUS)),
+		value(PrefixOperation::Not, char(MINUS)),
 		value(PrefixOperation::Negate, keyword(Keyword::Not)),
-		value(PrefixOperation::Length, tag(OCTOTHORPE)),
-		value(PrefixOperation::BitwiseNot, tag(TILDE)),
+		value(PrefixOperation::Length, char(OCTOTHORPE)),
+		value(PrefixOperation::BitwiseNot, char(TILDE)),
 	))(input)
 }

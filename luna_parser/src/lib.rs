@@ -6,6 +6,7 @@ mod combinator;
 pub mod parse;
 pub mod terminal;
 
+/// Grammar: `chunk ::= block`
 pub fn chunk(input: &str) -> Result<Chunk, &str> {
 	block(input)
 		.finish()
