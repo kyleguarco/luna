@@ -1,8 +1,8 @@
 use luna_ast::types::{Identifier, LiteralString, Numeral};
 use nom::{
 	branch::alt,
-	bytes::streaming::{is_not, tag, take_while_m_n},
-	character::streaming::{alpha1, alphanumeric1, char, digit1, multispace1},
+	bytes::complete::{is_not, tag, take_while_m_n},
+	character::complete::{alpha1, alphanumeric1, char, digit1, multispace1},
 	combinator::{map, map_opt, map_res, recognize, value, verify},
 	error::{FromExternalError, ParseError},
 	multi::{fold_many0, many0_count},

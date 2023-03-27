@@ -1,5 +1,5 @@
 use nom::{
-	character::streaming::{multispace0, multispace1},
+	character::complete::{multispace0, multispace1},
 	error::ParseError,
 	sequence::delimited,
 	AsChar, IResult, InputTakeAtPosition,

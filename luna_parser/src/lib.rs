@@ -2,6 +2,9 @@ use luna_ast::types::Chunk;
 use nom::Finish;
 use parse::block;
 
+#[cfg(test)]
+mod test;
+
 mod combinator;
 pub mod parse;
 pub mod terminal;

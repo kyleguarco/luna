@@ -1,6 +1,6 @@
-use crate::combinator::ws1;
+use crate::combinator::ws0;
 use nom::{
-	bytes::streaming::tag, error::ParseError, AsChar, Compare, IResult, InputLength, InputTake,
+	bytes::complete::tag, error::ParseError, AsChar, Compare, IResult, InputLength, InputTake,
 	InputTakeAtPosition,
 };
 
@@ -76,7 +76,7 @@ where
 	Input: Clone + InputTake + InputTakeAtPosition + InputLength + Compare<&'static str>,
 	<Input as InputTakeAtPosition>::Item: Clone + AsChar,
 {
-	ws1(tag(key.literal()))
+	ws0(tag(key.literal()))
 }
 
 // const KAND: &str = "and";
