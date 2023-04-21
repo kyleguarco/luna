@@ -23,8 +23,8 @@ use nom::{
 	branch::alt,
 	bytes::complete::tag,
 	character::complete::char,
-	combinator::{map, opt, recognize, value},
-	multi::{many0, many1, separated_list1},
+	combinator::{map, opt, value},
+	multi::{many0, separated_list1},
 	sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
 	IResult,
 };
@@ -82,62 +82,62 @@ pub fn stat(input: &str) -> IResult<&str, Statement> {
 
 	alt((
 		value(Statement::End, char(SEMICOLON)),
-		// map(pair(varlist, explist), Statement::Definition),
-		// map(functioncall, Statement::FunctionCall),
-		// map(label, Statement::Label),
-		// value(Statement::Break, keyword(Keyword::Break)),
-		// map(
-		// 	preceded(keyword(Keyword::Goto), identifier),
-		// 	Statement::Goto,
-		// ),
-		// map(do_block, |bl| Statement::Do(Box::new(bl))),
-		// map(
-		// 	pair(preceded(keyword(Keyword::While), exp), do_block),
-		// 	Statement::While,
-		// ),
-		// map(
-		// 	pair(
-		// 		preceded(keyword(Keyword::Repeat), block),
-		// 		preceded(keyword(Keyword::Until), exp),
-		// 	),
-		// 	|(bl, ex)| Statement::RepeatUntil(bl, ex),
-		// ),
-		// map(if_tree, Statement::IfTree),
-		// map(
-		// 	tuple((
-		// 		preceded(keyword(Keyword::For), identifier),
-		// 		tuple((exp, exp, opt(exp))),
-		// 		do_block,
-		// 	)),
-		// 	|(ident, (start, stop, step), bl)| {
-		// 		ForExpression { ident, start, stop, step, bl }.into()
-		// 	},
-		// ),
-		// map(
-		// 	pair(
-		// 		preceded(
-		// 			keyword(Keyword::For),
-		// 			separated_pair(namelist, keyword(Keyword::In), explist),
-		// 		),
-		// 		do_block,
-		// 	),
-		// 	Statement::ForList,
-		// ),
-		// map(
-		// 	preceded(keyword(Keyword::Function), pair(funcname, funcbody)),
-		// 	Statement::FunctionDefinition,
-		// ),
-		// map(
-		// 	preceded(
-		// 		keyword(Keyword::Local),
-		// 		preceded(keyword(Keyword::Function), pair(identifier, funcbody)),
-		// 	),
-		// 	Statement::LocalFunctionDefinition,
-		// ),
-		// map(
-		// 	preceded(keyword(Keyword::Local), pair(attnamelist, opt(explist))),
-		// 	Statement::LocalDefinitionWithAttribute,
-		// ),
+		map(pair(varlist, explist), Statement::Definition),
+		map(functioncall, Statement::FunctionCall),
+		map(label, Statement::Label),
+		value(Statement::Break, keyword(Keyword::Break)),
+		map(
+			preceded(keyword(Keyword::Goto), identifier),
+			Statement::Goto,
+		),
+		map(do_block, |bl| Statement::Do(Box::new(bl))),
+		map(
+			pair(preceded(keyword(Keyword::While), exp), do_block),
+			Statement::While,
+		),
+		map(
+			pair(
+				preceded(keyword(Keyword::Repeat), block),
+				preceded(keyword(Keyword::Until), exp),
+			),
+			|(bl, ex)| Statement::RepeatUntil(bl, ex),
+		),
+		map(if_tree, Statement::IfTree),
+		map(
+			tuple((
+				preceded(keyword(Keyword::For), identifier),
+				tuple((exp, exp, opt(exp))),
+				do_block,
+			)),
+			|(ident, (start, stop, step), bl)| {
+				ForExpression { ident, start, stop, step, bl }.into()
+			},
+		),
+		map(
+			pair(
+				preceded(
+					keyword(Keyword::For),
+					separated_pair(namelist, keyword(Keyword::In), explist),
+				),
+				do_block,
+			),
+			Statement::ForList,
+		),
+		map(
+			preceded(keyword(Keyword::Function), pair(funcname, funcbody)),
+			Statement::FunctionDefinition,
+		),
+		map(
+			preceded(
+				keyword(Keyword::Local),
+				preceded(keyword(Keyword::Function), pair(identifier, funcbody)),
+			),
+			Statement::LocalFunctionDefinition,
+		),
+		map(
+			preceded(keyword(Keyword::Local), pair(attnamelist, opt(explist))),
+			Statement::LocalDefinitionWithAttribute,
+		),
 	))(input)
 }
 
@@ -193,23 +193,24 @@ pub fn funcname(input: &str) -> IResult<&str, FunctionIdentifier> {
 /// Grammar: `varlist ::= var {‘,’ var}`
 pub fn varlist(input: &str) -> IResult<&str, VariableList> {
 	dbg!(input);
-	map(separated_list1(char(COMMA), var), VariableList)(input)
-}
 
-/// Grammar: `var ::= Name | prefixexp ‘[’ exp ‘]’ | prefixexp ‘.’ Name `
-pub fn var(input: &str) -> IResult<&str, Variable> {
-	dbg!(input);
-	alt((
-		map(identifier, Variable::Identifier),
-		map(
-			pair(prefixexp, delimited(char(LBRACKET), exp, char(RBRACKET))),
-			|(pexp, exp)| Variable::PrefixExpressionIndex(Box::new(pexp), Box::new(exp)),
-		),
-		map(
-			separated_pair(prefixexp, char(DOT), identifier),
-			|(pexp, ident)| Variable::PrefixExpressionIdentifier(Box::new(pexp), ident),
-		),
-	))(input)
+	/// Grammar: `var ::= Name | prefixexp ‘[’ exp ‘]’ | prefixexp ‘.’ Name `
+	fn var(input: &str) -> IResult<&str, Variable> {
+		dbg!(input);
+		alt((
+			map(identifier, Variable::Identifier),
+			map(
+				pair(prefixexp, delimited(char(LBRACKET), exp, char(RBRACKET))),
+				|(pexp, exp)| Variable::PrefixExpressionIndex(Box::new(pexp), Box::new(exp)),
+			),
+			map(
+				separated_pair(prefixexp, char(DOT), identifier),
+				|(pexp, ident)| Variable::PrefixExpressionIdentifier(Box::new(pexp), ident),
+			),
+		))(input)
+	}
+
+	map(separated_list1(char(COMMA), var), VariableList)(input)
 }
 
 /// Grammar: `namelist ::= Name {‘,’ Name}`
@@ -255,6 +256,23 @@ pub fn exp(input: &str) -> IResult<&str, Expression> {
 /// Grammar: `prefixexp ::= var | functioncall | ‘(’ exp ‘)’`
 pub fn prefixexp(input: &str) -> IResult<&str, PrefixExpression> {
 	dbg!(input);
+
+	/// Grammar: `var ::= Name | prefixexp ‘[’ exp ‘]’ | prefixexp ‘.’ Name `
+	fn var(input: &str) -> IResult<&str, Variable> {
+		dbg!(input);
+		alt((
+			map(identifier, Variable::Identifier),
+			map(
+				pair(prefixexp, delimited(char(LBRACKET), exp, char(RBRACKET))),
+				|(pexp, exp)| Variable::PrefixExpressionIndex(Box::new(pexp), Box::new(exp)),
+			),
+			map(
+				separated_pair(prefixexp, char(DOT), identifier),
+				|(pexp, ident)| Variable::PrefixExpressionIdentifier(Box::new(pexp), ident),
+			),
+		))(input)
+	}
+
 	alt((
 		map(var, PrefixExpression::Variable),
 		map(functioncall, |fcall| {
