@@ -15,9 +15,9 @@ pub enum FunctionCall {
 	CallObjectFunction(PrefixExpression, Identifier, Arguments),
 }
 
-impl Into<Statement> for FunctionCall {
-	fn into(self) -> Statement {
-		Statement::FunctionCall(self)
+impl From<FunctionCall> for Statement {
+	fn from(val: FunctionCall) -> Self {
+		Statement::FunctionCall(val)
 	}
 }
 

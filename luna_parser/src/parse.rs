@@ -350,7 +350,7 @@ pub fn tableconstructor(input: &str) -> IResult<&str, TableConstructor> {
 	dbg!(input);
 	map(
 		delimited(char(LBRACE), opt(fieldlist), char(RBRACE)),
-		|flist| TableConstructor(flist),
+		TableConstructor,
 	)(input)
 }
 

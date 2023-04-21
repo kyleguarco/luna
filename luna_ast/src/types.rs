@@ -40,9 +40,9 @@ pub struct AttributeNameList(pub Vec<AttributeName>);
 #[derive(Clone, Debug)]
 pub struct Label(pub Identifier);
 
-impl Into<Statement> for Label {
-	fn into(self) -> Statement {
-		Statement::Label(self)
+impl From<Label> for Statement {
+	fn from(val: Label) -> Self {
+		Statement::Label(val)
 	}
 }
 

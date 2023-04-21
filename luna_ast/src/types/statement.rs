@@ -27,9 +27,9 @@ pub struct ForExpression {
 	pub bl: Block,
 }
 
-impl Into<Statement> for ForExpression {
-	fn into(self) -> Statement {
-		Statement::ForExpression(self)
+impl From<ForExpression> for Statement {
+	fn from(val: ForExpression) -> Self {
+		Statement::ForExpression(val)
 	}
 }
 

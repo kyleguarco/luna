@@ -85,5 +85,5 @@ fn test_keywords() {
 
 #[test]
 fn check_numerals() {
-	let input = r#""#;
+	let _input = r#""#;
 }

@@ -61,9 +61,9 @@ impl Keyword {
 }
 
 /// An implementation of `Into` for convienence.
-impl Into<&'static str> for Keyword {
-	fn into(self) -> &'static str {
-		self.literal()
+impl From<Keyword> for &'static str {
+	fn from(val: Keyword) -> Self {
+		val.literal()
 	}
 }
 
