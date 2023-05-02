@@ -1,18 +1,7 @@
-use luna_ast::types::Chunk;
-use nom::Finish;
-use parse::block;
+mod parse;
+mod terminal;
 
-#[cfg(test)]
-mod test;
+/// The input type for all of the parsers.
+pub(crate) type In<'a> = &'a str;
 
-mod combinator;
-pub mod parse;
-pub mod terminal;
-
-/// Grammar: `chunk ::= block`
-pub fn chunk(input: &str) -> Result<Chunk, &str> {
-	block(input)
-		.finish()
-		.map(|(_, bl)| Chunk(bl))
-		.map_err(|e| e.input)
-}
+pub use parse::chunk;

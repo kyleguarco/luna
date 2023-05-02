@@ -1,4 +1,5 @@
-use super::{Identifier, expression::PrefixExpression, Arguments, statement::Statement, ParameterList, Block};
+use crate::{types::{Identifier, Arguments, ParameterList, Block}, expression::PrefixExpression, statement::Statement};
+
 
 #[derive(Clone, Debug)]
 pub struct FunctionIdentifier {
@@ -10,9 +11,15 @@ pub struct FunctionIdentifier {
 }
 
 #[derive(Clone, Debug)]
+pub struct CallFunction(PrefixExpression, Arguments);
+
+#[derive(Clone, Debug)]
+pub struct CallObjectFunction(PrefixExpression, Identifier, Arguments);
+
+#[derive(Clone, Debug)]
 pub enum FunctionCall {
-	CallFunction(PrefixExpression, Arguments),
-	CallObjectFunction(PrefixExpression, Identifier, Arguments),
+	CallFunction(CallFunction),
+	CallObjectFunction(CallObjectFunction),
 }
 
 impl From<FunctionCall> for Statement {
@@ -22,4 +29,7 @@ impl From<FunctionCall> for Statement {
 }
 
 #[derive(Clone, Debug)]
-pub struct FunctionBody(pub Option<ParameterList>, pub Block);
+pub struct FunctionBody {
+	pub plist: Option<ParameterList>,
+	pub block: Block,
+}

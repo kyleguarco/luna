@@ -1,6 +1,6 @@
-use super::{
+use crate::{
 	expression::{Expression, PrefixExpression},
-	Identifier,
+	types::Identifier,
 };
 
 #[derive(Clone, Debug)]

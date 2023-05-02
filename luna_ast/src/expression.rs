@@ -1,7 +1,15 @@
-use super::{AnonFunctionDefinition, LiteralString, Numeral, TableConstructor, operation::{InfixOperation, PrefixOperation}, variable::Variable, function::FunctionCall};
+use crate::{
+	function::FunctionCall,
+	operation::{InfixOperation, PrefixOperation},
+	types::{AnonFunctionDefinition, LiteralString, Numeral, TableConstructor},
+	variable::Variable,
+};
 
 #[derive(Clone, Debug)]
 pub struct ExpressionList(pub Vec<Expression>);
+
+#[derive(Clone, Debug)]
+pub struct ReturnStatement(Option<ExpressionList>);
 
 #[derive(Clone, Debug)]
 pub enum Expression {
@@ -24,6 +32,3 @@ pub enum PrefixExpression {
 	FunctionCall(Box<FunctionCall>),
 	ClosedExpression(Expression),
 }
-
-#[derive(Clone, Debug)]
-pub struct ReturnStatement(pub Option<ExpressionList>);

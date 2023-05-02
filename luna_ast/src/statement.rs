@@ -1,8 +1,10 @@
-use super::{
+use std::ops::Range;
+
+use crate::{
 	expression::{Expression, ExpressionList},
 	function::{FunctionBody, FunctionCall, FunctionIdentifier},
+	types::{AttributeNameList, Block, Identifier, IdentifierList, Label},
 	variable::VariableList,
-	AttributeNameList, Block, Identifier, IdentifierList, Label,
 };
 
 /// **if** exp **then** block {**elseif** exp **then** block} \[**else** block\] **end**
@@ -21,8 +23,7 @@ pub struct IfTree {
 pub struct ForExpression {
 	/// The identifier used in this loop context
 	pub ident: Identifier,
-	pub start: Expression,
-	pub stop: Expression,
+	pub range: Range<Expression>,
 	pub step: Option<Expression>,
 	pub bl: Block,
 }
@@ -34,20 +35,42 @@ impl From<ForExpression> for Statement {
 }
 
 #[derive(Clone, Debug)]
+pub struct ForList {
+	pub ilist: IdentifierList,
+	pub elist: ExpressionList,
+	pub bl: Block,
+}
+
+#[derive(Clone, Debug)]
+pub struct While(Expression, Block);
+
+#[derive(Clone, Debug)]
+pub struct Definition(VariableList, ExpressionList);
+
+#[derive(Clone, Debug)]
+pub struct FunctionDefinition(FunctionIdentifier, FunctionBody);
+
+#[derive(Clone, Debug)]
+pub struct LocalFunctionDefinition(Identifier, FunctionBody);
+
+#[derive(Clone, Debug)]
+pub struct LocalDefinitionWithAttribute(AttributeNameList, Option<ExpressionList>);
+
+#[derive(Clone, Debug)]
 pub enum Statement {
 	End,
-	Definition((VariableList, ExpressionList)),
+	Definition(Definition),
 	FunctionCall(FunctionCall),
 	Label(Label),
 	Break,
 	Goto(Identifier),
 	Do(Box<Block>),
-	While((Expression, Block)),
+	While(While),
 	RepeatUntil(Block, Expression),
 	IfTree(IfTree),
 	ForExpression(ForExpression),
-	ForList(((IdentifierList, ExpressionList), Block)),
-	FunctionDefinition((FunctionIdentifier, FunctionBody)),
-	LocalFunctionDefinition((Identifier, FunctionBody)),
-	LocalDefinitionWithAttribute((AttributeNameList, Option<ExpressionList>)),
+	ForList(ForList),
+	FunctionDefinition(FunctionDefinition),
+	LocalFunctionDefinition(LocalFunctionDefinition),
+	LocalDefinitionWithAttribute(LocalDefinitionWithAttribute),
 }
