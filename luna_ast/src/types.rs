@@ -26,7 +26,18 @@ pub struct LiteralString(pub String);
 pub struct Chunk(pub Block);
 
 #[derive(Clone, Debug)]
-pub struct Block(pub Vec<Statement>, pub Option<ReturnStatement>);
+pub struct Block {
+	/// The statements within this block.
+	pub stlist: Vec<Statement>,
+	/// The return statement, if any. Void if `None`.
+	pub oret: Option<ReturnStatement>,
+}
+
+impl Block {
+	pub fn from_parser(arg: (Vec<Statement>, Option<ReturnStatement>)) -> Self {
+		Self { stlist: arg.0, oret: arg.1 }
+	}
+}
 
 #[derive(Clone, Debug)]
 pub struct AttributeNameList(pub Vec<AttributeName>);
@@ -40,8 +51,7 @@ impl From<Label> for Statement {
 	}
 }
 
-#[derive(Clone, Debug)]
-pub struct IdentifierList(pub Vec<Identifier>);
+pub type IdentifierList = Vec<Identifier>;
 
 #[derive(Clone, Debug)]
 pub enum Arguments {
@@ -63,12 +73,11 @@ pub enum ParameterList {
 #[derive(Clone, Debug)]
 pub struct TableConstructor(pub Option<FieldList>);
 
-#[derive(Clone, Debug)]
-pub struct FieldList(pub Vec<Field>);
+pub type FieldList = Vec<Field>;
 
 #[derive(Clone, Debug)]
 pub enum Field {
-	BracketField(Expression, Expression),
-	IdentifierField(Identifier, Expression),
+	BracketField((Expression, Expression)),
+	IdentifierField((Identifier, Expression)),
 	Expression(Expression),
 }

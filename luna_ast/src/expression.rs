@@ -5,11 +5,10 @@ use crate::{
 	variable::Variable,
 };
 
-#[derive(Clone, Debug)]
-pub struct ExpressionList(pub Vec<Expression>);
+pub type ExpressionList = Vec<Expression>;
 
 #[derive(Clone, Debug)]
-pub struct ReturnStatement(Option<ExpressionList>);
+pub struct ReturnStatement(pub Option<ExpressionList>);
 
 #[derive(Clone, Debug)]
 pub enum Expression {

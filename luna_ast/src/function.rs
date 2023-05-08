@@ -1,5 +1,8 @@
-use crate::{types::{Identifier, Arguments, ParameterList, Block}, expression::PrefixExpression, statement::Statement};
-
+use crate::{
+	expression::PrefixExpression,
+	statement::Statement,
+	types::{Arguments, Block, Identifier, ParameterList},
+};
 
 #[derive(Clone, Debug)]
 pub struct FunctionIdentifier {
@@ -8,6 +11,12 @@ pub struct FunctionIdentifier {
 	/// Identifiers that refer to table functions that take `self`
 	/// as the first parameter.
 	pub objident: Option<Identifier>,
+}
+
+impl FunctionIdentifier {
+	pub fn from_parser(arg: (Vec<Identifier>, Option<Identifier>)) -> Self {
+		Self { ilist: arg.0, objident: arg.1 }
+	}
 }
 
 #[derive(Clone, Debug)]
