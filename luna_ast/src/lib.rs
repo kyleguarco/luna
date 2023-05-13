@@ -1,15 +1,15 @@
-use expression::ReturnStatement;
+use misc::ReturnStatement;
 use statement::Statement;
-use terminal::Identifier;
 
-pub mod terminal;
 pub mod attribute;
 pub mod expression;
 pub mod function;
+pub mod misc;
 pub mod operation;
 pub mod statement;
-pub mod variable;
 pub mod table;
+pub mod terminal;
+pub mod variable;
 
 #[derive(Clone, Debug)]
 pub struct Chunk(pub Block);
@@ -21,13 +21,3 @@ pub struct Block {
 	/// The return statement, if any. Void if `None`.
 	pub oret: Option<ReturnStatement>,
 }
-
-#[derive(Clone, Debug)]
-pub struct Label(pub Identifier);
-
-impl From<Label> for Statement {
-	fn from(val: Label) -> Self {
-		Statement::Label(val)
-	}
-}
-

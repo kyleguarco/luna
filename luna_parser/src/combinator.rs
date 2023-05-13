@@ -35,17 +35,6 @@ where
 	delimited(multispace1, parser, multispace1)
 }
 
-/// Abbreivated list combinator for the list grammar rules.
-#[inline(always)]
-pub fn list<F, I, O>(parser: F) -> impl FnMut(I) -> IResult<I, Vec<O>>
-where
-	F: Fn(I) -> IResult<I, O>,
-	I: Clone + InputLength + InputIter + InputTake + Slice<Range<usize>> + Slice<RangeFrom<usize>>,
-	<I as InputIter>::Item: AsChar,
-{
-	separated_list1(tchar(COMMA), parser)
-}
-
 /// Matches an object from `parser` encased in parenthesis.
 #[inline(always)]
 pub fn paren<F, I, O>(parser: F) -> impl FnMut(I) -> IResult<I, O>

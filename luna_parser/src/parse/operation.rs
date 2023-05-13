@@ -1,4 +1,4 @@
-use luna_ast::operation::{InfixOperation, PrefixOperation};
+use luna_ast::operation::{InfixOperation, UnaryOperation};
 use nom::{
 	branch::alt, bytes::complete::tag, character::complete::char as tchar, combinator::value,
 };
@@ -36,8 +36,8 @@ pub fn infix_op(input: In) -> IRes<InfixOperation> {
 	))(input)
 }
 
-pub fn prefix_op(input: In) -> IRes<PrefixOperation> {
-	use PrefixOperation::*;
+pub fn unary_op(input: In) -> IRes<UnaryOperation> {
+	use UnaryOperation::*;
 
 	alt((
 		value(Not, tchar(MINUS)),

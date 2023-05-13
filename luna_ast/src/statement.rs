@@ -1,10 +1,13 @@
 use std::ops::Range;
 
 use crate::{
+	attribute::AttributeNameList,
 	expression::{Expression, ExpressionList},
 	function::{FunctionBody, FunctionCall, FunctionIdentifier},
+	misc::Label,
 	terminal::{Identifier, IdentifierList},
-	variable::VariableList, attribute::AttributeNameList, Block, Label,
+	variable::VariableList,
+	Block,
 };
 
 /// **if** exp **then** block {**elseif** exp **then** block} \[**else** block\] **end**
@@ -73,7 +76,7 @@ impl From<Definition> for Statement {
 
 #[derive(Clone, Debug)]
 pub struct FunctionDefinition {
-	pub ident: FunctionIdentifier,
+	pub fident: FunctionIdentifier,
 	pub body: FunctionBody,
 }
 

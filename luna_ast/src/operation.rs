@@ -24,7 +24,7 @@ pub enum InfixOperation {
 }
 
 #[derive(Clone, Debug)]
-pub enum PrefixOperation {
+pub enum UnaryOperation {
 	Negate,
 	Not,
 	Length,
