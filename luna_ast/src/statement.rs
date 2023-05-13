@@ -3,8 +3,8 @@ use std::ops::Range;
 use crate::{
 	expression::{Expression, ExpressionList},
 	function::{FunctionBody, FunctionCall, FunctionIdentifier},
-	types::{AttributeNameList, Block, Identifier, IdentifierList, Label},
-	variable::VariableList,
+	terminal::{Identifier, IdentifierList},
+	variable::VariableList, attribute::AttributeNameList, Block, Label,
 };
 
 /// **if** exp **then** block {**elseif** exp **then** block} \[**else** block\] **end**
@@ -30,7 +30,7 @@ pub struct ForExpression {
 
 impl From<ForExpression> for Statement {
 	fn from(val: ForExpression) -> Self {
-		Statement::ForExpression(val)
+		Self::ForExpression(val)
 	}
 }
 
@@ -41,20 +41,71 @@ pub struct ForList {
 	pub bl: Block,
 }
 
-#[derive(Clone, Debug)]
-pub struct While(Expression, Block);
+impl From<ForList> for Statement {
+	fn from(value: ForList) -> Self {
+		Self::ForList(value)
+	}
+}
 
 #[derive(Clone, Debug)]
-pub struct Definition(VariableList, ExpressionList);
+pub struct While {
+	pub exp: Expression,
+	pub bl: Block,
+}
+
+impl From<While> for Statement {
+	fn from(value: While) -> Self {
+		Self::While(value)
+	}
+}
 
 #[derive(Clone, Debug)]
-pub struct FunctionDefinition(FunctionIdentifier, FunctionBody);
+pub struct Definition {
+	pub varlist: VariableList,
+	pub explist: ExpressionList,
+}
+
+impl From<Definition> for Statement {
+	fn from(value: Definition) -> Self {
+		Self::Definition(value)
+	}
+}
 
 #[derive(Clone, Debug)]
-pub struct LocalFunctionDefinition(Identifier, FunctionBody);
+pub struct FunctionDefinition {
+	pub ident: FunctionIdentifier,
+	pub body: FunctionBody,
+}
+
+impl From<FunctionDefinition> for Statement {
+	fn from(value: FunctionDefinition) -> Self {
+		Self::FunctionDefinition(value)
+	}
+}
 
 #[derive(Clone, Debug)]
-pub struct LocalDefinitionWithAttribute(AttributeNameList, Option<ExpressionList>);
+pub struct LocalFunctionDefinition {
+	pub ident: Identifier,
+	pub body: FunctionBody,
+}
+
+impl From<LocalFunctionDefinition> for Statement {
+	fn from(value: LocalFunctionDefinition) -> Self {
+		Self::LocalFunctionDefinition(value)
+	}
+}
+
+#[derive(Clone, Debug)]
+pub struct LocalDefinitionWithAttribute {
+	pub atlist: AttributeNameList,
+	pub oelist: Option<ExpressionList>,
+}
+
+impl From<LocalDefinitionWithAttribute> for Statement {
+	fn from(value: LocalDefinitionWithAttribute) -> Self {
+		Self::LocalDefinitionWithAttribute(value)
+	}
+}
 
 #[derive(Clone, Debug)]
 pub enum Statement {

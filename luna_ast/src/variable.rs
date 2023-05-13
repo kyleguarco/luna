@@ -1,10 +1,9 @@
 use crate::{
 	expression::{Expression, PrefixExpression},
-	types::Identifier,
+	terminal::Identifier,
 };
 
-#[derive(Clone, Debug)]
-pub struct VariableList(pub Vec<Variable>);
+pub type VariableList = Vec<Variable>;
 
 #[derive(Clone, Debug)]
 pub enum Variable {

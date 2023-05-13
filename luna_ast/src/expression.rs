@@ -1,14 +1,17 @@
 use crate::{
-	function::FunctionCall,
+	function::{AnonFunctionDefinition, FunctionCall},
 	operation::{InfixOperation, PrefixOperation},
-	types::{AnonFunctionDefinition, LiteralString, Numeral, TableConstructor},
+	table::TableConstructor,
+	terminal::{LiteralString, Numeral},
 	variable::Variable,
 };
 
 pub type ExpressionList = Vec<Expression>;
 
 #[derive(Clone, Debug)]
-pub struct ReturnStatement(pub Option<ExpressionList>);
+pub struct ReturnStatement {
+	pub oelist: Option<ExpressionList>,
+}
 
 #[derive(Clone, Debug)]
 pub enum Expression {

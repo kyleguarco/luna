@@ -1,7 +1,8 @@
 use crate::{
-	expression::PrefixExpression,
+	expression::{ExpressionList, PrefixExpression},
 	statement::Statement,
-	types::{Arguments, Block, Identifier, ParameterList},
+	table::TableConstructor,
+	terminal::{Identifier, IdentifierList, LiteralString}, Block,
 };
 
 #[derive(Clone, Debug)]
@@ -13,17 +14,18 @@ pub struct FunctionIdentifier {
 	pub objident: Option<Identifier>,
 }
 
-impl FunctionIdentifier {
-	pub fn from_parser(arg: (Vec<Identifier>, Option<Identifier>)) -> Self {
-		Self { ilist: arg.0, objident: arg.1 }
-	}
+#[derive(Clone, Debug)]
+pub struct CallFunction {
+	pub prefix: PrefixExpression,
+	pub args: Arguments,
 }
 
 #[derive(Clone, Debug)]
-pub struct CallFunction(PrefixExpression, Arguments);
-
-#[derive(Clone, Debug)]
-pub struct CallObjectFunction(PrefixExpression, Identifier, Arguments);
+pub struct CallObjectFunction {
+	pub prefix: PrefixExpression,
+	pub ident: Identifier,
+	pub args: Arguments,
+}
 
 #[derive(Clone, Debug)]
 pub enum FunctionCall {
@@ -41,4 +43,23 @@ impl From<FunctionCall> for Statement {
 pub struct FunctionBody {
 	pub plist: Option<ParameterList>,
 	pub block: Block,
+}
+
+#[derive(Clone, Debug)]
+pub enum Arguments {
+	ClosedExpressionList(Option<ExpressionList>),
+	TableConstructor(TableConstructor),
+	LiteralString(LiteralString),
+}
+
+#[derive(Clone, Debug)]
+pub struct AnonFunctionDefinition {
+	pub body: FunctionBody,
+}
+
+#[derive(Clone, Debug)]
+pub enum ParameterList {
+	IdentifierList(IdentifierList),
+	IdentifierListWithVarArgs(IdentifierList),
+	VarArgs,
 }
