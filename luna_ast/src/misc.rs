@@ -4,8 +4,8 @@ use crate::{expression::ExpressionList, statement::Statement, terminal::Name};
 pub struct Label(pub Name);
 
 impl From<Label> for Statement {
-	fn from(val: Label) -> Self {
-		Self::Label(val)
+	fn from(value: Label) -> Self {
+		Self::Label(value)
 	}
 }
 

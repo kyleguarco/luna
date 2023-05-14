@@ -1,15 +1,24 @@
 use crate::{
-	expression::{ExpressionList, PrefixExpression},
+	expression::{Expression, ExpressionList, PrefixExpression},
 	statement::Statement,
 	table::TableConstructor,
-	terminal::{Name, NameList, LiteralString},
+	terminal::{LiteralString, Name, NameList},
 	Block,
 };
 
 #[derive(Clone, Debug)]
+pub struct VarArgs;
+
+impl From<VarArgs> for Expression {
+	fn from(_: VarArgs) -> Self {
+		Self::VarArgs
+	}
+}
+
+#[derive(Clone, Debug)]
 pub struct FunctionName {
 	/// Names that refer to a single element or elements of subtables
-	pub ilist: Vec<Name>,
+	pub nlist: Vec<Name>,
 	/// Names that refer to table functions that take `self`
 	/// as the first parameter.
 	pub objname: Option<Name>,
@@ -17,21 +26,33 @@ pub struct FunctionName {
 
 #[derive(Clone, Debug)]
 pub struct AsFunction {
-	pub prefix: PrefixExpression,
-	pub args: Arguments,
+	pub pexp: PrefixExpression,
+	pub argu: Arguments,
+}
+
+impl From<AsFunction> for FunctionCall {
+	fn from(value: AsFunction) -> Self {
+		Self::AsFunction(value)
+	}
 }
 
 #[derive(Clone, Debug)]
 pub struct AsMethod {
-	pub prefix: PrefixExpression,
+	pub pexp: PrefixExpression,
 	pub name: Name,
-	pub args: Arguments,
+	pub argu: Arguments,
+}
+
+impl From<AsMethod> for FunctionCall {
+	fn from(value: AsMethod) -> Self {
+		Self::AsMethod(value)
+	}
 }
 
 #[derive(Clone, Debug)]
 pub struct FunctionBody {
-	pub plist: Option<ParameterList>,
-	pub block: Block,
+	pub oplist: Option<ParameterList>,
+	pub bl: Block,
 }
 
 #[derive(Clone, Debug)]
@@ -61,9 +82,39 @@ pub enum Arguments {
 	LiteralString(LiteralString),
 }
 
+impl From<Option<ExpressionList>> for Arguments {
+	fn from(value: Option<ExpressionList>) -> Self {
+		Self::ClosedExpressionList(value)
+	}
+}
+
 #[derive(Clone, Debug)]
 pub enum ParameterList {
 	NameList(NameList),
 	NameListWithVarArgs(NameList),
 	VarArgs,
+}
+
+impl From<NameList> for ParameterList {
+	fn from(value: NameList) -> Self {
+		Self::NameList(value)
+	}
+}
+
+impl From<(NameList, VarArgs)> for ParameterList {
+	fn from(value: (NameList, VarArgs)) -> Self {
+		Self::NameListWithVarArgs(value.0)
+	}
+}
+
+impl From<(VarArgs, NameList)> for ParameterList {
+	fn from(value: (VarArgs, NameList)) -> Self {
+		Self::NameListWithVarArgs(value.1)
+	}
+}
+
+impl From<VarArgs> for ParameterList {
+	fn from(_: VarArgs) -> Self {
+		Self::VarArgs
+	}
 }

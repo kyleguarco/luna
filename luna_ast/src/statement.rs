@@ -10,15 +10,27 @@ use crate::{
 	Block,
 };
 
+#[derive(Clone, Debug)]
+pub struct IfBlock {
+	pub cond: Expression,
+	pub bl: Block,
+}
+
 /// **if** exp **then** block {**elseif** exp **then** block} \[**else** block\] **end**
 #[derive(Clone, Debug)]
 pub struct IfTree {
 	/// The initial condition (if .. then ..)
-	pub initial: (Expression, Block),
+	pub initial: IfBlock,
 	/// The tree of statements that follow (executed in order)
-	pub elseifs: Vec<(Expression, Block)>,
+	pub elseifs: Vec<IfBlock>,
 	/// The last statement to execute of all other conditions are false
 	pub otherwise: Option<Block>,
+}
+
+impl From<IfTree> for Statement {
+	fn from(value: IfTree) -> Self {
+		Self::IfTree(value)
+	}
 }
 
 /// **for** `name` **in** `start`, `stop` \[, `step`\] **do** `block` **end**
@@ -52,13 +64,25 @@ impl From<ForList> for Statement {
 
 #[derive(Clone, Debug)]
 pub struct While {
-	pub exp: Expression,
+	pub cond: Expression,
 	pub bl: Block,
 }
 
 impl From<While> for Statement {
 	fn from(value: While) -> Self {
 		Self::While(value)
+	}
+}
+
+#[derive(Clone, Debug)]
+pub struct RepeatUntil {
+	pub cond: Expression,
+	pub bl: Block,
+}
+
+impl From<RepeatUntil> for Statement {
+	fn from(value: RepeatUntil) -> Self {
+		Self::RepeatUntil(value)
 	}
 }
 
@@ -120,7 +144,7 @@ pub enum Statement {
 	Goto(Name),
 	Do(Box<Block>),
 	While(While),
-	RepeatUntil(Block, Expression),
+	RepeatUntil(RepeatUntil),
 	IfTree(IfTree),
 	ForExpression(ForExpression),
 	ForList(ForList),

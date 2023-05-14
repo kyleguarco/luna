@@ -14,13 +14,12 @@ use crate::{
 	terminal::{
 		keyword::{KFALSE, KFUNCTION, KNIL, KTRUE},
 		literal_string, numeral,
-		string::TRIPLEDOT,
 	},
 	IRes, In,
 };
 
 use super::{
-	function::{func_body, func_call},
+	function::{func_body, func_call, var_args},
 	operation::{infix_op, unary_op},
 	table::table_cons,
 	variable::var,
@@ -51,7 +50,7 @@ pub fn exp(input: In) -> IRes<Expression> {
 		value(Expression::True, tag(KTRUE)),
 		numeral.map(Expression::from),
 		literal_string.map(Expression::from),
-		value(Expression::VarArgs, tag(TRIPLEDOT)),
+		var_args.map(Expression::from),
 		anon_func_def.map(Expression::from),
 		prefix_exp.map(Expression::from),
 		table_cons.map(Expression::from),

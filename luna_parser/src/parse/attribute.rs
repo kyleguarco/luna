@@ -10,8 +10,7 @@ use crate::{
 };
 
 pub fn attrib_name(input: In) -> IRes<AttributeName> {
-	name
-		.and(attrib)
+	name.and(attrib)
 		.map(|(name, attr)| AttributeName { name, attr })
 		.parse(input)
 }

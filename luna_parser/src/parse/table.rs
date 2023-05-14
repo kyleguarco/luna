@@ -3,13 +3,12 @@ use nom::{
 	branch::alt,
 	character::complete::char as tchar,
 	combinator::{opt, recognize},
-	multi::separated_list1,
 	sequence::terminated,
 	Parser,
 };
 
 use crate::{
-	combinator::{assign, braces, bracket},
+	combinator::{assign, braces, bracket, list},
 	terminal::{
 		name,
 		string::{COMMA, SEMICOLON},
@@ -38,7 +37,7 @@ pub fn name_field(input: In) -> IRes<NameField> {
 }
 
 pub fn fieldlist(input: In) -> IRes<FieldList> {
-	terminated(separated_list1(fieldsep, field), opt(fieldsep))(input)
+	terminated(list(fieldsep, field), opt(fieldsep))(input)
 }
 
 pub fn field(input: In) -> IRes<Field> {

@@ -1,4 +1,4 @@
-use crate::{expression::Expression, terminal::Name};
+use crate::{expression::Expression, function::Arguments, terminal::Name};
 
 pub type FieldList = Vec<Field>;
 
@@ -8,6 +8,12 @@ pub struct TableConstructor {
 }
 
 impl From<TableConstructor> for Expression {
+	fn from(value: TableConstructor) -> Self {
+		Self::TableConstructor(value)
+	}
+}
+
+impl From<TableConstructor> for Arguments {
 	fn from(value: TableConstructor) -> Self {
 		Self::TableConstructor(value)
 	}

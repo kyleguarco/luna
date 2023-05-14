@@ -7,7 +7,19 @@ use nom::{
 	AsChar, IResult, InputIter, InputLength, InputTake, Slice, UnspecializedInput,
 };
 
-use crate::terminal::string::{COMMA, EQUALS, LBRACE, LBRACKET, LPAREN, RBRACE, RBRACKET, RPAREN};
+use crate::terminal::string::{EQUALS, LBRACE, LBRACKET, LPAREN, RBRACE, RBRACKET, RPAREN};
+
+/// Abbreivated list combinator for the list grammar rules.
+#[inline(always)]
+pub fn list<F, G, I, O1, O2>(sep: F, parser: G) -> impl FnMut(I) -> IResult<I, Vec<O2>>
+where
+	F: FnMut(I) -> IResult<I, O1>,
+	G: FnMut(I) -> IResult<I, O2>,
+	I: Clone + InputLength + InputIter + InputTake + Slice<Range<usize>> + Slice<RangeFrom<usize>>,
+	<I as InputIter>::Item: AsChar,
+{
+	separated_list1(sep, parser)
+}
 
 /// Strips the whitespace on both sides of `parser`.
 ///
