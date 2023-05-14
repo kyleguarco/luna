@@ -1,18 +1,18 @@
-use luna_ast::terminal::{Name, Numeral, LiteralString};
+use luna_ast::terminal::{LiteralString, Name, Numeral};
 
-use crate::{In, IRes};
+use crate::{IRes, In};
 
 pub mod keyword;
 pub mod string;
 
-pub fn name(input: In) -> IRes<Name> {
+pub(crate) fn name(input: In) -> IRes<Name> {
 	todo!()
 }
 
-pub fn numeral(input: In) -> IRes<Numeral> {
+pub(crate) fn numeral(input: In) -> IRes<Numeral> {
 	todo!()
 }
 
-pub fn literal_string(input: In) -> IRes<LiteralString> {
+pub(crate) fn literal_string(input: In) -> IRes<LiteralString> {
 	todo!()
 }

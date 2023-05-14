@@ -1,5 +1,5 @@
 use luna_ast::statement::{
-	Definition, ForExpression, ForList, FunctionDefinition, IfBlock, IfTree,
+	Definition, ForExpression, ForList, FunctionDefinition, IfBlock, IfTree, Label,
 	LocalDefinitionWithAttribute, LocalFunctionDefinition, RepeatUntil, Statement, While,
 };
 use nom::{
@@ -7,21 +7,27 @@ use nom::{
 	bytes::complete::tag,
 	character::complete::char as tchar,
 	combinator::value,
-	sequence::{delimited, preceded},
+	sequence::{delimited, preceded, separated_pair},
 	Parser,
 };
 
 use crate::{
 	block,
 	terminal::{
-		keyword::{KBREAK, KEND, KGOTO, KWHILE},
+		keyword::{KBREAK, KDO, KEND, KGOTO, KREPEAT, KUNTIL, KWHILE},
 		name,
-		string::SEMICOLON,
+		string::{DOUBLECOLON, SEMICOLON},
 	},
 	IRes, In,
 };
 
-use super::{function::func_call, misc::label};
+use super::{expression::exp, function::func_call};
+
+pub fn label(input: In) -> IRes<Label> {
+	delimited(tag(DOUBLECOLON), name, tag(DOUBLECOLON))
+		.map(|name| Label(name))
+		.parse(input)
+}
 
 pub fn if_block(input: In) -> IRes<IfBlock> {
 	todo!()
@@ -40,11 +46,15 @@ pub fn for_list(input: In) -> IRes<ForList> {
 }
 
 pub fn pwhile(input: In) -> IRes<While> {
-	todo!()
+	delimited(tag(KWHILE), separated_pair(exp, tag(KDO), block), tag(KEND))
+		.map(|(cond, bl)| While { cond, bl })
+		.parse(input)
 }
 
 pub fn repeat_until(input: In) -> IRes<RepeatUntil> {
-	todo!()
+	preceded(tag(KREPEAT), separated_pair(block, tag(KUNTIL), exp))
+		.map(|(bl, cond)| RepeatUntil { cond, bl })
+		.parse(input)
 }
 
 pub fn definition(input: In) -> IRes<Definition> {

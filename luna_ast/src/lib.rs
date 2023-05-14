@@ -1,10 +1,9 @@
-use misc::ReturnStatement;
+use expression::ExpressionList;
 use statement::Statement;
 
 pub mod attribute;
 pub mod expression;
 pub mod function;
-pub mod misc;
 pub mod operation;
 pub mod statement;
 pub mod table;
@@ -20,4 +19,9 @@ pub struct Block {
 	pub stlist: Vec<Statement>,
 	/// The return statement, if any. Void if `None`.
 	pub oret: Option<ReturnStatement>,
+}
+
+#[derive(Clone, Debug)]
+pub struct ReturnStatement {
+	pub oelist: Option<ExpressionList>,
 }

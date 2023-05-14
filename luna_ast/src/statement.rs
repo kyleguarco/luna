@@ -4,11 +4,19 @@ use crate::{
 	attribute::AttributeNameList,
 	expression::{Expression, ExpressionList},
 	function::{FunctionBody, FunctionCall, FunctionName},
-	misc::Label,
 	terminal::{Name, NameList},
 	variable::VariableList,
 	Block,
 };
+
+#[derive(Clone, Debug)]
+pub struct Label(pub Name);
+
+impl From<Label> for Statement {
+	fn from(value: Label) -> Self {
+		Self::Label(value)
+	}
+}
 
 #[derive(Clone, Debug)]
 pub struct IfBlock {
