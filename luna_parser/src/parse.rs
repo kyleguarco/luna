@@ -37,7 +37,7 @@ mod variable;
 // 		map(functioncall, Statement::FunctionCall),
 // 		map(label, Statement::Label),
 // 		value(Statement::Break, tag(KBREAK)),
-// 		map(preceded(tag(KGOTO), identifier), Statement::Goto),
+// 		map(preceded(tag(KGOTO), name), Statement::Goto),
 // 		map(do_block, |bl| Statement::Do(Box::new(bl))),
 // 		map(pair(preceded(tag(KWHILE), exp), do_block), Statement::While),
 // 		map(
@@ -47,7 +47,7 @@ mod variable;
 // 		map(if_tree, Statement::IfTree),
 // 		map(
 // 			tuple((
-// 				preceded(tag(KFOR), identifier),
+// 				preceded(tag(KFOR), name),
 // 				tuple((exp, exp, opt(exp))),
 // 				do_block,
 // 			)),
@@ -57,7 +57,7 @@ mod variable;
 // 			pair(
 // 				preceded(
 // 					tag(KFOR),
-// 					separated_pair(list(identifier), tag(KIN), list(exp)),
+// 					separated_pair(list(name), tag(KIN), list(exp)),
 // 				),
 // 				do_block,
 // 			),
@@ -70,14 +70,14 @@ mod variable;
 // 		map(
 // 			preceded(
 // 				tag(KLOCAL),
-// 				preceded(tag(KFUNCTION), pair(identifier, funcbody)),
+// 				preceded(tag(KFUNCTION), pair(name, funcbody)),
 // 			),
 // 			Statement::LocalFunctionDefinition,
 // 		),
 // 		map(
 // 			preceded(
 // 				tag(KLOCAL),
-// 				pair(list(pair(identifier, attrib)), opt(list(exp))),
+// 				pair(list(pair(name, attrib)), opt(list(exp))),
 // 			),
 // 			Statement::LocalDefinitionWithAttribute,
 // 		),
@@ -86,7 +86,7 @@ mod variable;
 
 // pub(crate) fn attrib(input: In) -> IRes<Attribute> {
 // 	map(
-// 		opt(delimited(tchar(LESS), identifier, tchar(GREATER))),
+// 		opt(delimited(tchar(LESS), name, tchar(GREATER))),
 // 		Attribute,
 // 	)(input)
 // }
@@ -100,18 +100,18 @@ mod variable;
 
 // pub(crate) fn label(input: In) -> IRes<Label> {
 // 	map(
-// 		delimited(tag(DOUBLECOLON), identifier, tag(DOUBLECOLON)),
+// 		delimited(tag(DOUBLECOLON), name, tag(DOUBLECOLON)),
 // 		Label,
 // 	)(input)
 // }
 
-// pub(crate) fn funcname(input: In) -> IRes<FunctionIdentifier> {
+// pub(crate) fn funcname(input: In) -> IRes<FunctionName> {
 // 	map(
 // 		pair(
-// 			separated_list1(tchar(DOT), identifier),
-// 			opt(preceded(tchar(COLON), identifier)),
+// 			separated_list1(tchar(DOT), name),
+// 			opt(preceded(tchar(COLON), name)),
 // 		),
-// 		FunctionIdentifier::from_parser,
+// 		FunctionName::from_parser,
 // 	)(input)
 // }
 
@@ -120,13 +120,13 @@ mod variable;
 // 	use Variable::*;
 
 // 	alt((
-// 		map(identifier, Identifier),
+// 		map(name, Name),
 // 		map(pair(prefixexp, bracket(exp)), |(pexp, exp)| {
 // 			PrefixExpressionIndex(Box::new(pexp), Box::new(exp))
 // 		}),
 // 		map(
-// 			separated_pair(prefixexp, tchar(DOT), identifier),
-// 			|(pexp, ident)| PrefixExpressionIdentifier(Box::new(pexp), ident),
+// 			separated_pair(prefixexp, tchar(DOT), name),
+// 			|(pexp, name)| PrefixExpressionName(Box::new(pexp), name),
 // 		),
 // 	))(input)
 // }
@@ -162,10 +162,10 @@ mod variable;
 
 // 	alt((
 // 		map(
-// 			separated_pair(list(identifier), tchar(COMMA), tag(TRIPLEDOT)),
-// 			|(ilist, _)| IdentifierListWithVarArgs(ilist),
+// 			separated_pair(list(name), tchar(COMMA), tag(TRIPLEDOT)),
+// 			|(ilist, _)| NameListWithVarArgs(ilist),
 // 		),
-// 		map(list(identifier), IdentifierList),
+// 		map(list(name), NameList),
 // 		value(VarArgs, tag(TRIPLEDOT)),
 // 	))(input)
 // }

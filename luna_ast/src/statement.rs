@@ -3,9 +3,9 @@ use std::ops::Range;
 use crate::{
 	attribute::AttributeNameList,
 	expression::{Expression, ExpressionList},
-	function::{FunctionBody, FunctionCall, FunctionIdentifier},
+	function::{FunctionBody, FunctionCall, FunctionName},
 	misc::Label,
-	terminal::{Identifier, IdentifierList},
+	terminal::{Name, NameList},
 	variable::VariableList,
 	Block,
 };
@@ -21,11 +21,11 @@ pub struct IfTree {
 	pub otherwise: Option<Block>,
 }
 
-/// **for** `ident` **in** `start`, `stop` \[, `step`\] **do** `block` **end**
+/// **for** `name` **in** `start`, `stop` \[, `step`\] **do** `block` **end**
 #[derive(Clone, Debug)]
 pub struct ForExpression {
-	/// The identifier used in this loop context
-	pub ident: Identifier,
+	/// The name used in this loop context
+	pub name: Name,
 	pub range: Range<Expression>,
 	pub step: Option<Expression>,
 	pub bl: Block,
@@ -39,7 +39,7 @@ impl From<ForExpression> for Statement {
 
 #[derive(Clone, Debug)]
 pub struct ForList {
-	pub ilist: IdentifierList,
+	pub ilist: NameList,
 	pub elist: ExpressionList,
 	pub bl: Block,
 }
@@ -76,7 +76,7 @@ impl From<Definition> for Statement {
 
 #[derive(Clone, Debug)]
 pub struct FunctionDefinition {
-	pub fident: FunctionIdentifier,
+	pub fname: FunctionName,
 	pub body: FunctionBody,
 }
 
@@ -88,7 +88,7 @@ impl From<FunctionDefinition> for Statement {
 
 #[derive(Clone, Debug)]
 pub struct LocalFunctionDefinition {
-	pub ident: Identifier,
+	pub name: Name,
 	pub body: FunctionBody,
 }
 
@@ -117,7 +117,7 @@ pub enum Statement {
 	FunctionCall(FunctionCall),
 	Label(Label),
 	Break,
-	Goto(Identifier),
+	Goto(Name),
 	Do(Box<Block>),
 	While(While),
 	RepeatUntil(Block, Expression),

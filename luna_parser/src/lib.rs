@@ -16,5 +16,6 @@ pub fn chunk(input: In) -> IRes<Chunk> {
 }
 
 pub fn block(input: In) -> IRes<Block> {
+	// pair(many0(stat), opt())
 	todo!()
 }

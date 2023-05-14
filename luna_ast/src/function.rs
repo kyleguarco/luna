@@ -2,17 +2,17 @@ use crate::{
 	expression::{ExpressionList, PrefixExpression},
 	statement::Statement,
 	table::TableConstructor,
-	terminal::{Identifier, IdentifierList, LiteralString},
+	terminal::{Name, NameList, LiteralString},
 	Block,
 };
 
 #[derive(Clone, Debug)]
-pub struct FunctionIdentifier {
-	/// Identifiers that refer to a single element or elements of subtables
-	pub ilist: Vec<Identifier>,
-	/// Identifiers that refer to table functions that take `self`
+pub struct FunctionName {
+	/// Names that refer to a single element or elements of subtables
+	pub ilist: Vec<Name>,
+	/// Names that refer to table functions that take `self`
 	/// as the first parameter.
-	pub objident: Option<Identifier>,
+	pub objname: Option<Name>,
 }
 
 #[derive(Clone, Debug)]
@@ -24,7 +24,7 @@ pub struct AsFunction {
 #[derive(Clone, Debug)]
 pub struct AsMethod {
 	pub prefix: PrefixExpression,
-	pub ident: Identifier,
+	pub name: Name,
 	pub args: Arguments,
 }
 
@@ -63,7 +63,7 @@ pub enum Arguments {
 
 #[derive(Clone, Debug)]
 pub enum ParameterList {
-	IdentifierList(IdentifierList),
-	IdentifierListWithVarArgs(IdentifierList),
+	NameList(NameList),
+	NameListWithVarArgs(NameList),
 	VarArgs,
 }

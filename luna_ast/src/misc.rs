@@ -1,7 +1,7 @@
-use crate::{expression::ExpressionList, statement::Statement, terminal::Identifier};
+use crate::{expression::ExpressionList, statement::Statement, terminal::Name};
 
 #[derive(Clone, Debug)]
-pub struct Label(pub Identifier);
+pub struct Label(pub Name);
 
 impl From<Label> for Statement {
 	fn from(val: Label) -> Self {

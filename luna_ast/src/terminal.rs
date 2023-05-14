@@ -5,14 +5,14 @@
 
 use crate::{expression::Expression, variable::Variable};
 
-pub type IdentifierList = Vec<Identifier>;
+pub type NameList = Vec<Name>;
 
 #[derive(Clone, Debug)]
-pub struct Identifier(pub String);
+pub struct Name(pub String);
 
-impl From<Identifier> for Variable {
-	fn from(value: Identifier) -> Self {
-		Self::Identifier(value)
+impl From<Name> for Variable {
+	fn from(value: Name) -> Self {
+		Self::Name(value)
 	}
 }
 

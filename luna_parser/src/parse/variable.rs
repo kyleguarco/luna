@@ -1,4 +1,4 @@
-use luna_ast::variable::{PrefixExpressionIdentifier, PrefixExpressionIndex, Variable};
+use luna_ast::variable::{PrefixExpressionName, PrefixExpressionIndex, Variable};
 use nom::{
 	branch::alt,
 	character::complete::char as tchar,
@@ -9,7 +9,7 @@ use nom::{
 use crate::{
 	combinator::bracket,
 	parse::expression::{exp, prefix_exp},
-	terminal::{identifier, string::DOT},
+	terminal::{name, string::DOT},
 	IRes, In,
 };
 
@@ -19,17 +19,17 @@ pub fn prefix_exp_index(input: In) -> IRes<PrefixExpressionIndex> {
 		.parse(input)
 }
 
-pub fn prefix_exp_ident(input: In) -> IRes<PrefixExpressionIdentifier> {
-	separated_pair(prefix_exp.map(Box::from), tchar(DOT), identifier)
-		.map(|(pexp, ident)| PrefixExpressionIdentifier { pexp, ident })
+pub fn prefix_exp_name(input: In) -> IRes<PrefixExpressionName> {
+	separated_pair(prefix_exp.map(Box::from), tchar(DOT), name)
+		.map(|(pexp, name)| PrefixExpressionName { pexp, name })
 		.parse(input)
 }
 
 pub fn var(input: In) -> IRes<Variable> {
 	alt((
-		identifier.map(Variable::from),
+		name.map(Variable::from),
 		prefix_exp_index.map(Variable::from),
-		prefix_exp_ident.map(Variable::from),
+		prefix_exp_name.map(Variable::from),
 	))
 	.parse(input)
 }

@@ -1,14 +1,14 @@
-use crate::terminal::Identifier;
+use crate::terminal::Name;
 
 pub type AttributeNameList = Vec<AttributeName>;
 
 #[derive(Clone, Debug)]
 pub struct AttributeName {
-	pub ident: Identifier,
+	pub name: Name,
 	pub attr: Attribute,
 }
 
 #[derive(Clone, Debug)]
 pub struct Attribute {
-	pub oident: Option<Identifier>,
+	pub oname: Option<Name>,
 }

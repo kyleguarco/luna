@@ -1,4 +1,4 @@
-use luna_ast::table::{BracketField, Field, FieldList, IdentifierField, TableConstructor};
+use luna_ast::table::{BracketField, Field, FieldList, NameField, TableConstructor};
 use nom::{
 	branch::alt,
 	character::complete::char as tchar,
@@ -11,7 +11,7 @@ use nom::{
 use crate::{
 	combinator::{assign, braces, bracket},
 	terminal::{
-		identifier,
+		name,
 		string::{COMMA, SEMICOLON},
 	},
 	IRes, In,
@@ -31,9 +31,9 @@ pub fn bracket_field(input: In) -> IRes<BracketField> {
 		.parse(input)
 }
 
-pub fn identifier_field(input: In) -> IRes<IdentifierField> {
-	assign(identifier, exp)
-		.map(|(tabident, val)| IdentifierField { tabident, val })
+pub fn name_field(input: In) -> IRes<NameField> {
+	assign(name, exp)
+		.map(|(tabname, val)| NameField { tabname, val })
 		.parse(input)
 }
 
@@ -44,7 +44,7 @@ pub fn fieldlist(input: In) -> IRes<FieldList> {
 pub fn field(input: In) -> IRes<Field> {
 	alt((
 		bracket_field.map(Field::from),
-		identifier_field.map(Field::from),
+		name_field.map(Field::from),
 		exp.map(Field::from),
 	))
 	.parse(input)

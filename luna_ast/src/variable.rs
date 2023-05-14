@@ -1,6 +1,6 @@
 use crate::{
 	expression::{Expression, PrefixExpression},
-	terminal::Identifier,
+	terminal::Name,
 };
 
 pub type VariableList = Vec<Variable>;
@@ -18,22 +18,22 @@ impl From<PrefixExpressionIndex> for Variable {
 }
 
 #[derive(Clone, Debug)]
-pub struct PrefixExpressionIdentifier {
+pub struct PrefixExpressionName {
 	pub pexp: Box<PrefixExpression>,
-	pub ident: Identifier,
+	pub name: Name,
 }
 
-impl From<PrefixExpressionIdentifier> for Variable {
-	fn from(value: PrefixExpressionIdentifier) -> Self {
-		Self::PrefixExpressionIdentifier(value)
+impl From<PrefixExpressionName> for Variable {
+	fn from(value: PrefixExpressionName) -> Self {
+		Self::PrefixExpressionName(value)
 	}
 }
 
 #[derive(Clone, Debug)]
 pub enum Variable {
-	Identifier(Identifier),
+	Name(Name),
 	PrefixExpressionIndex(PrefixExpressionIndex),
-	PrefixExpressionIdentifier(PrefixExpressionIdentifier),
+	PrefixExpressionName(PrefixExpressionName),
 }
 
 impl From<Variable> for PrefixExpression {

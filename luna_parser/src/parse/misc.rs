@@ -14,7 +14,7 @@ use crate::{
 
 use super::expression::exp;
 
-pub fn return_statement(input: In) -> IRes<ReturnStatement> {
+pub fn return_stat(input: In) -> IRes<ReturnStatement> {
 	delimited(
 		tag(KRETURN),
 		opt(separated_list1(tchar(COMMA), exp)),

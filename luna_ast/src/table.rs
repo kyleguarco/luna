@@ -1,4 +1,4 @@
-use crate::{expression::Expression, terminal::Identifier};
+use crate::{expression::Expression, terminal::Name};
 
 pub type FieldList = Vec<Field>;
 
@@ -26,20 +26,20 @@ impl From<BracketField> for Field {
 }
 
 #[derive(Clone, Debug)]
-pub struct IdentifierField {
-	pub tabident: Identifier,
+pub struct NameField {
+	pub tabname: Name,
 	pub val: Expression,
 }
 
-impl From<IdentifierField> for Field {
-	fn from(value: IdentifierField) -> Self {
-		Self::IdentifierField(value)
+impl From<NameField> for Field {
+	fn from(value: NameField) -> Self {
+		Self::NameField(value)
 	}
 }
 
 #[derive(Clone, Debug)]
 pub enum Field {
 	BracketField(BracketField),
-	IdentifierField(IdentifierField),
+	NameField(NameField),
 	Expression(Expression),
 }

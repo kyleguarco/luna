@@ -1,11 +1,11 @@
-use luna_ast::terminal::{Identifier, Numeral, LiteralString};
+use luna_ast::terminal::{Name, Numeral, LiteralString};
 
 use crate::{In, IRes};
 
 pub mod keyword;
 pub mod string;
 
-pub fn identifier(input: In) -> IRes<Identifier> {
+pub fn name(input: In) -> IRes<Name> {
 	todo!()
 }
 

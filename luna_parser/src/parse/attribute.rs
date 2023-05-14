@@ -3,21 +3,21 @@ use nom::{character::complete::char as tchar, combinator::opt, sequence::delimit
 
 use crate::{
 	terminal::{
-		identifier,
+		name,
 		string::{GREATER, LESS},
 	},
 	IRes, In,
 };
 
 pub fn attrib_name(input: In) -> IRes<AttributeName> {
-	identifier
+	name
 		.and(attrib)
-		.map(|(ident, attr)| AttributeName { ident, attr })
+		.map(|(name, attr)| AttributeName { name, attr })
 		.parse(input)
 }
 
 pub fn attrib(input: In) -> IRes<Attribute> {
-	delimited(tchar(LESS), opt(identifier), tchar(GREATER))
-		.map(|oident| Attribute { oident })
+	delimited(tchar(LESS), opt(name), tchar(GREATER))
+		.map(|oname| Attribute { oname })
 		.parse(input)
 }

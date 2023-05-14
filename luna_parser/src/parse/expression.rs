@@ -5,7 +5,7 @@ use nom::{
 	branch::alt,
 	bytes::complete::tag,
 	combinator::value,
-	sequence::{delimited, pair, preceded, tuple},
+	sequence::{pair, preceded, tuple},
 	Parser,
 };
 
