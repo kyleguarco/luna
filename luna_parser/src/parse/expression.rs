@@ -4,16 +4,18 @@ use luna_ast::expression::{
 use nom::{
 	branch::alt,
 	bytes::complete::tag,
+	character::complete::char as tchar,
 	combinator::value,
 	sequence::{pair, preceded, tuple},
 	Parser,
 };
 
 use crate::{
-	combinator::braces,
+	combinator::{braces, list},
 	terminal::{
 		keyword::{KFALSE, KFUNCTION, KNIL, KTRUE},
 		literal_string, numeral,
+		string::COMMA,
 	},
 	IRes, In,
 };
@@ -68,4 +70,8 @@ pub fn prefix_exp(input: In) -> IRes<PrefixExpression> {
 		braces(exp).map(PrefixExpression::from),
 	))
 	.parse(input)
+}
+
+pub fn exp_list(input: In) -> IRes<Vec<Expression>> {
+	list(tchar(COMMA), exp)(input)
 }

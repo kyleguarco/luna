@@ -4,9 +4,9 @@ use nom::{character::complete::char as tchar, combinator::opt, sequence::delimit
 use crate::{
 	terminal::{
 		name,
-		string::{GREATER, LESS},
+		string::{GREATER, LESS, COMMA},
 	},
-	IRes, In,
+	IRes, In, combinator::list,
 };
 
 pub fn attrib_name(input: In) -> IRes<AttributeName> {
@@ -19,4 +19,8 @@ pub fn attrib(input: In) -> IRes<Attribute> {
 	delimited(tchar(LESS), opt(name), tchar(GREATER))
 		.map(|oname| Attribute { oname })
 		.parse(input)
+}
+
+pub fn att_name_list(input: In) -> IRes<Vec<AttributeName>> {
+	list(tchar(COMMA), attrib_name)(input)
 }

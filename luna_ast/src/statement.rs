@@ -1,4 +1,4 @@
-use std::ops::Range;
+use std::ops::RangeInclusive;
 
 use crate::{
 	attribute::AttributeNameList,
@@ -46,7 +46,7 @@ impl From<IfTree> for Statement {
 pub struct ForExpression {
 	/// The name used in this loop context
 	pub name: Name,
-	pub range: Range<Expression>,
+	pub range: RangeInclusive<Expression>,
 	pub step: Option<Expression>,
 	pub bl: Block,
 }
@@ -59,7 +59,7 @@ impl From<ForExpression> for Statement {
 
 #[derive(Clone, Debug)]
 pub struct ForList {
-	pub ilist: NameList,
+	pub nlist: NameList,
 	pub elist: ExpressionList,
 	pub bl: Block,
 }
@@ -96,8 +96,8 @@ impl From<RepeatUntil> for Statement {
 
 #[derive(Clone, Debug)]
 pub struct Definition {
-	pub varlist: VariableList,
-	pub explist: ExpressionList,
+	pub vlist: VariableList,
+	pub elist: ExpressionList,
 }
 
 impl From<Definition> for Statement {
@@ -109,7 +109,7 @@ impl From<Definition> for Statement {
 #[derive(Clone, Debug)]
 pub struct FunctionDefinition {
 	pub fname: FunctionName,
-	pub body: FunctionBody,
+	pub fbody: FunctionBody,
 }
 
 impl From<FunctionDefinition> for Statement {
@@ -121,7 +121,7 @@ impl From<FunctionDefinition> for Statement {
 #[derive(Clone, Debug)]
 pub struct LocalFunctionDefinition {
 	pub name: Name,
-	pub body: FunctionBody,
+	pub fbody: FunctionBody,
 }
 
 impl From<LocalFunctionDefinition> for Statement {

@@ -7,9 +7,9 @@ use nom::{
 };
 
 use crate::{
-	combinator::bracket,
+	combinator::{bracket, list},
 	parse::expression::{exp, prefix_exp},
-	terminal::{name, string::DOT},
+	terminal::{name, string::{DOT, COMMA}},
 	IRes, In,
 };
 
@@ -33,4 +33,8 @@ pub fn var(input: In) -> IRes<Variable> {
 		prefix_exp_name.map(Variable::from),
 	))
 	.parse(input)
+}
+
+pub fn var_list(input: In) -> IRes<Vec<Variable>> {
+	list(tchar(COMMA), var)(input)
 }

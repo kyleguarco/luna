@@ -9,23 +9,21 @@ use nom::{
 	bytes::complete::tag,
 	character::complete::char as tchar,
 	combinator::{opt, value},
-	multi::separated_list1,
 	sequence::{pair, preceded, separated_pair},
 	Parser,
 };
 
 use crate::{
 	block,
-	combinator::list,
 	terminal::{
-		literal_string, name,
+		literal_string, name, name_list,
 		string::{COLON, COMMA, TRIPLEDOT},
 	},
 	IRes, In,
 };
 
 use super::{
-	expression::{exp, prefix_exp},
+	expression::{exp_list, prefix_exp},
 	table::table_cons,
 };
 
@@ -34,7 +32,7 @@ pub fn var_args(input: In) -> IRes<VarArgs> {
 }
 
 pub fn func_name(input: In) -> IRes<FunctionName> {
-	pair(list(tchar(COMMA), name), opt(preceded(tchar(COLON), name)))
+	pair(name_list, opt(preceded(tchar(COLON), name)))
 		.map(|(nlist, objname)| FunctionName { nlist, objname })
 		.parse(input)
 }
@@ -67,7 +65,7 @@ pub fn func_call(input: In) -> IRes<FunctionCall> {
 
 pub fn args(input: In) -> IRes<Arguments> {
 	alt((
-		opt(list(tchar(COMMA), exp)).map(Arguments::from),
+		opt(exp_list).map(Arguments::from),
 		table_cons.map(Arguments::from),
 		literal_string.map(Arguments::from),
 	))
@@ -76,7 +74,7 @@ pub fn args(input: In) -> IRes<Arguments> {
 
 pub fn par_list(input: In) -> IRes<ParameterList> {
 	alt((
-		separated_pair(list(tchar(COMMA), name), tchar(COMMA), var_args).map(ParameterList::from),
+		separated_pair(name_list, tchar(COMMA), var_args).map(ParameterList::from),
 		var_args.map(ParameterList::from),
 	))
 	.parse(input)
