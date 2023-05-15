@@ -1,7 +1,7 @@
 use luna_ast::terminal::{LiteralString, Name, Numeral};
 use nom::{
 	bytes::complete::is_not,
-	character::complete::{anychar, char as tchar, digit1},
+	character::complete::{alpha1, char as tchar, digit1},
 	combinator::{map_res, verify},
 	sequence::delimited,
 	Parser,
@@ -15,11 +15,13 @@ pub mod keyword;
 pub mod string;
 
 pub(crate) fn name(input: In) -> IRes<Name> {
+	dbg!(input);
 	// TODO: Support ASCII symbols and numbers.
-	anychar.map(String::from).map(Name).parse(input)
+	alpha1.map(String::from).map(Name).parse(input)
 }
 
 pub(crate) fn numeral(input: In) -> IRes<Numeral> {
+	dbg!(input);
 	// TODO: Support floats! And Hex!
 	map_res(digit1, str::parse)
 		.map(Numeral::Integer)
@@ -27,6 +29,7 @@ pub(crate) fn numeral(input: In) -> IRes<Numeral> {
 }
 
 pub(crate) fn literal_string(input: In) -> IRes<LiteralString> {
+	dbg!(input);
 	// TODO: Support escpaed strings and multiline strings.
 	delimited(tchar('"'), parse_literal, tchar('"'))
 		.map(String::from)
@@ -35,12 +38,14 @@ pub(crate) fn literal_string(input: In) -> IRes<LiteralString> {
 }
 
 pub fn name_list(input: In) -> IRes<Vec<Name>> {
+	dbg!(input);
 	list(tchar(COMMA), name)(input)
 }
 
 /// Parse a non-empty block of text that doesn't include \ or "
 /// From https://github.com/rust-bakery/nom/blob/main/examples/string.rs
 fn parse_literal(input: In) -> IRes<In> {
+	dbg!(input);
 	// `is_not` parses a string of 0 or more characters that aren't one of the
 	// given characters.
 	let not_quote_slash = is_not("\"\\");

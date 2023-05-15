@@ -21,12 +21,15 @@ use terminal::{
 	string::{COMMA, SEMICOLON},
 };
 
+use crate::combinator::ws0;
+
 mod combinator;
 pub mod error;
 mod parse;
 pub mod terminal;
 
 pub fn chunk(input: In) -> Result<Chunk, ParseError<&str>> {
+	dbg!(input);
 	all_consuming(block.map(Chunk))
 		.parse(input)
 		.finish()
@@ -36,12 +39,14 @@ pub fn chunk(input: In) -> Result<Chunk, ParseError<&str>> {
 }
 
 pub(crate) fn block(input: In) -> IRes<Block> {
-	pair(many0(stat), opt(return_stat))
+	dbg!(input);
+	ws0(pair(many0(stat), opt(return_stat)))
 		.map(|(stlist, oret)| Block { stlist, oret })
 		.parse(input)
 }
 
 pub(crate) fn return_stat(input: In) -> IRes<ReturnStatement> {
+	dbg!(input);
 	delimited(
 		tag(KRETURN),
 		opt(list(tchar(COMMA), exp)),

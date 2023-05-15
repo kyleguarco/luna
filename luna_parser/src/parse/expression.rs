@@ -28,24 +28,28 @@ use super::{
 };
 
 pub fn anon_func_def(input: In) -> IRes<AnonFunctionDefinition> {
+	dbg!(input);
 	preceded(tag(KFUNCTION), func_body)
 		.map(|body| AnonFunctionDefinition { body })
 		.parse(input)
 }
 
 pub fn infix_exp(input: In) -> IRes<InfixExpression> {
+	dbg!(input);
 	tuple((exp.map(Box::new), infix_op, exp.map(Box::new)))
 		.map(|(left, op, right)| InfixExpression { left, op, right })
 		.parse(input)
 }
 
 pub fn unary_exp(input: In) -> IRes<UnaryExpression> {
+	dbg!(input);
 	pair(unary_op, exp.map(Box::new))
 		.map(|(op, ex)| UnaryExpression { op, ex })
 		.parse(input)
 }
 
 pub fn exp(input: In) -> IRes<Expression> {
+	dbg!(input);
 	alt((
 		value(Expression::Nil, tag(KNIL)),
 		value(Expression::False, tag(KFALSE)),
@@ -62,8 +66,9 @@ pub fn exp(input: In) -> IRes<Expression> {
 	.parse(input)
 }
 
-// Might be recursive with `var`?
+#[inline(always)]
 pub fn prefix_exp(input: In) -> IRes<PrefixExpression> {
+	dbg!(input);
 	alt((
 		var.map(PrefixExpression::from),
 		func_call.map(PrefixExpression::from),
@@ -73,5 +78,6 @@ pub fn prefix_exp(input: In) -> IRes<PrefixExpression> {
 }
 
 pub fn exp_list(input: In) -> IRes<Vec<Expression>> {
+	dbg!(input);
 	list(tchar(COMMA), exp)(input)
 }

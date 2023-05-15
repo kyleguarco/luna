@@ -19,28 +19,33 @@ use crate::{
 use super::expression::exp;
 
 pub fn table_cons(input: In) -> IRes<TableConstructor> {
+	dbg!(input);
 	opt(braces(fieldlist))
 		.map(|oflist| TableConstructor { oflist })
 		.parse(input)
 }
 
 pub fn bracket_field(input: In) -> IRes<BracketField> {
+	dbg!(input);
 	assign(bracket(exp), exp)
 		.map(|(tabexp, val)| BracketField { tabexp, val })
 		.parse(input)
 }
 
 pub fn name_field(input: In) -> IRes<NameField> {
+	dbg!(input);
 	assign(name, exp)
 		.map(|(tabname, val)| NameField { tabname, val })
 		.parse(input)
 }
 
 pub fn fieldlist(input: In) -> IRes<FieldList> {
+	dbg!(input);
 	terminated(list(fieldsep, field), opt(fieldsep))(input)
 }
 
 pub fn field(input: In) -> IRes<Field> {
+	dbg!(input);
 	alt((
 		bracket_field.map(Field::from),
 		name_field.map(Field::from),
@@ -50,5 +55,6 @@ pub fn field(input: In) -> IRes<Field> {
 }
 
 pub fn fieldsep(input: In) -> IRes<In> {
+	dbg!(input);
 	recognize(tchar(COMMA).or(tchar(SEMICOLON))).parse(input)
 }

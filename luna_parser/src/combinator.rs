@@ -4,7 +4,7 @@ use nom::{
 	character::complete::{char as tchar, multispace0, multispace1},
 	multi::separated_list1,
 	sequence::{delimited, separated_pair},
-	AsChar, IResult, InputIter, InputLength, InputTake, Slice, UnspecializedInput,
+	AsChar, IResult, InputIter, InputLength, InputTake, InputTakeAtPosition, Slice,
 };
 
 use crate::terminal::string::{EQUALS, LBRACE, LBRACKET, LPAREN, RBRACE, RBRACKET, RPAREN};
@@ -27,8 +27,8 @@ where
 #[inline(always)]
 pub fn ws0<F, I, O>(parser: F) -> impl FnMut(I) -> IResult<I, O>
 where
-	I: InputLength + InputTake + InputIter + Clone + UnspecializedInput,
-	<I as InputIter>::Item: AsChar + Clone,
+	I: InputIter + InputTakeAtPosition + Clone,
+	<I as InputTakeAtPosition>::Item: AsChar + Clone,
 	F: FnMut(I) -> IResult<I, O>,
 {
 	delimited(multispace0, parser, multispace0)
@@ -40,8 +40,8 @@ where
 #[inline(always)]
 pub fn ws1<F, I, O>(parser: F) -> impl FnMut(I) -> IResult<I, O>
 where
-	I: InputLength + InputTake + InputIter + Clone + UnspecializedInput,
-	<I as InputIter>::Item: AsChar + Clone,
+	I: InputIter + InputTakeAtPosition + Clone,
+	<I as InputTakeAtPosition>::Item: AsChar + Clone,
 	F: FnMut(I) -> IResult<I, O>,
 {
 	delimited(multispace1, parser, multispace1)

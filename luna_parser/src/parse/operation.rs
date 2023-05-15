@@ -9,6 +9,7 @@ use crate::{
 };
 
 pub fn infix_op(input: In) -> IRes<InfixOperation> {
+	dbg!(input);
 	use InfixOperation::*;
 
 	alt((
@@ -37,6 +38,7 @@ pub fn infix_op(input: In) -> IRes<InfixOperation> {
 }
 
 pub fn unary_op(input: In) -> IRes<UnaryOperation> {
+	dbg!(input);
 	use UnaryOperation::*;
 
 	alt((
