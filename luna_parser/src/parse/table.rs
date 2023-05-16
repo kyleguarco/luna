@@ -25,21 +25,21 @@ pub fn table_cons(input: In) -> IRes<TableConstructor> {
 		.parse(input)
 }
 
-pub fn bracket_field(input: In) -> IRes<BracketField> {
+fn bracket_field(input: In) -> IRes<BracketField> {
 	dbg!(input);
 	assign(bracket(exp), exp)
 		.map(|(tabexp, val)| BracketField { tabexp, val })
 		.parse(input)
 }
 
-pub fn name_field(input: In) -> IRes<NameField> {
+fn name_field(input: In) -> IRes<NameField> {
 	dbg!(input);
 	assign(name, exp)
 		.map(|(tabname, val)| NameField { tabname, val })
 		.parse(input)
 }
 
-pub fn fieldlist(input: In) -> IRes<FieldList> {
+fn fieldlist(input: In) -> IRes<FieldList> {
 	dbg!(input);
 	terminated(list(fieldsep, field), opt(fieldsep))(input)
 }
@@ -54,7 +54,7 @@ pub fn field(input: In) -> IRes<Field> {
 	.parse(input)
 }
 
-pub fn fieldsep(input: In) -> IRes<In> {
+fn fieldsep(input: In) -> IRes<In> {
 	dbg!(input);
 	recognize(tchar(COMMA).or(tchar(SEMICOLON))).parse(input)
 }

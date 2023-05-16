@@ -27,21 +27,21 @@ use super::{
 	variable::var,
 };
 
-pub fn anon_func_def(input: In) -> IRes<AnonFunctionDefinition> {
+fn anon_func_def(input: In) -> IRes<AnonFunctionDefinition> {
 	dbg!(input);
 	preceded(tag(KFUNCTION), func_body)
 		.map(|body| AnonFunctionDefinition { body })
 		.parse(input)
 }
 
-pub fn infix_exp(input: In) -> IRes<InfixExpression> {
+fn infix_exp(input: In) -> IRes<InfixExpression> {
 	dbg!(input);
 	tuple((exp.map(Box::new), infix_op, exp.map(Box::new)))
 		.map(|(left, op, right)| InfixExpression { left, op, right })
 		.parse(input)
 }
 
-pub fn unary_exp(input: In) -> IRes<UnaryExpression> {
+fn unary_exp(input: In) -> IRes<UnaryExpression> {
 	dbg!(input);
 	pair(unary_op, exp.map(Box::new))
 		.map(|(op, ex)| UnaryExpression { op, ex })
@@ -66,7 +66,6 @@ pub fn exp(input: In) -> IRes<Expression> {
 	.parse(input)
 }
 
-#[inline(always)]
 pub fn prefix_exp(input: In) -> IRes<PrefixExpression> {
 	dbg!(input);
 	alt((

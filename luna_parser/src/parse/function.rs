@@ -39,14 +39,14 @@ pub fn func_name(input: In) -> IRes<FunctionName> {
 		.parse(input)
 }
 
-pub fn as_func(input: In) -> IRes<AsFunction> {
+fn as_func(input: In) -> IRes<AsFunction> {
 	dbg!(input);
 	pair(prefix_exp, args)
 		.map(|(pexp, argu)| AsFunction { pexp, argu })
 		.parse(input)
 }
 
-pub fn as_method(input: In) -> IRes<AsMethod> {
+fn as_method(input: In) -> IRes<AsMethod> {
 	dbg!(input);
 	separated_pair(prefix_exp, tchar(COLON), pair(name, args))
 		.map(|(pexp, (name, argu))| AsMethod { pexp, name, argu })
@@ -69,7 +69,7 @@ pub fn func_call(input: In) -> IRes<FunctionCall> {
 	.parse(input)
 }
 
-pub fn args(input: In) -> IRes<Arguments> {
+fn args(input: In) -> IRes<Arguments> {
 	dbg!(input);
 	alt((
 		opt(exp_list).map(Arguments::from),
