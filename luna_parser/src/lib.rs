@@ -10,7 +10,7 @@ use luna_ast::{Block, Chunk, ReturnStatement};
 use nom::{
 	bytes::complete::tag,
 	character::complete::char as tchar,
-	combinator::{all_consuming, eof, opt},
+	combinator::{all_consuming, opt},
 	multi::many0,
 	sequence::{delimited, pair},
 	Finish, IResult, Parser,

@@ -4,7 +4,7 @@ use luna_ast::{
 	terminal::{Name, Numeral},
 	variable::Variable,
 };
-use nom::{combinator::{opt, eof}, multi::many0, sequence::pair};
+use nom::{combinator::opt, multi::many0, sequence::pair};
 
 use crate::{combinator::ws0, parse::statement::stat, return_stat};
 

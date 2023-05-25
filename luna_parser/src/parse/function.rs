@@ -15,6 +15,7 @@ use nom::{
 
 use crate::{
 	block,
+	combinator::paren,
 	terminal::{
 		literal_string, name, name_list,
 		string::{COLON, COMMA, TRIPLEDOT},
@@ -55,7 +56,7 @@ fn as_method(input: In) -> IRes<AsMethod> {
 
 pub fn func_body(input: In) -> IRes<FunctionBody> {
 	dbg!(input);
-	pair(opt(par_list), block)
+	pair(paren(opt(par_list)), block)
 		.map(|(oplist, bl)| FunctionBody { oplist, bl })
 		.parse(input)
 }
@@ -72,7 +73,7 @@ pub fn func_call(input: In) -> IRes<FunctionCall> {
 fn args(input: In) -> IRes<Arguments> {
 	dbg!(input);
 	alt((
-		opt(exp_list).map(Arguments::from),
+		opt(paren(exp_list)).map(Arguments::from),
 		table_cons.map(Arguments::from),
 		literal_string.map(Arguments::from),
 	))

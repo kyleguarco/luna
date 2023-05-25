@@ -6,7 +6,7 @@ use nom::{
 	branch::alt,
 	bytes::complete::tag,
 	character::complete::char as tchar,
-	combinator::{cond, eof, fail, opt, value},
+	combinator::{cond, fail, opt, value},
 	multi::many0,
 	sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
 	Parser,

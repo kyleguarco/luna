@@ -1,7 +1,7 @@
 use std::ops::{Range, RangeFrom};
 
 use nom::{
-	character::complete::{char as tchar, multispace0, multispace1},
+	character::complete::{char as tchar, multispace0},
 	multi::separated_list1,
 	sequence::{delimited, separated_pair},
 	AsChar, IResult, InputIter, InputLength, InputTake, InputTakeAtPosition, Slice,
@@ -32,19 +32,6 @@ where
 	F: FnMut(I) -> IResult<I, O>,
 {
 	delimited(multispace0, parser, multispace0)
-}
-
-/// Strips the whitespace on both sides of `parser`.
-///
-/// There must be whitespace.
-#[inline(always)]
-pub fn ws1<F, I, O>(parser: F) -> impl FnMut(I) -> IResult<I, O>
-where
-	I: InputIter + InputTakeAtPosition + Clone,
-	<I as InputTakeAtPosition>::Item: AsChar + Clone,
-	F: FnMut(I) -> IResult<I, O>,
-{
-	delimited(multispace1, parser, multispace1)
 }
 
 /// Matches an object from `parser` encased in parenthesis.
