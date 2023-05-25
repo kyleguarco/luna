@@ -6,7 +6,7 @@ use crate::{
 	Block,
 };
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct VarArgs;
 
 impl From<VarArgs> for Expression {
@@ -15,7 +15,7 @@ impl From<VarArgs> for Expression {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FunctionName {
 	/// Names that refer to a single element or elements of subtables
 	pub nlist: Vec<Name>,
@@ -24,7 +24,7 @@ pub struct FunctionName {
 	pub objname: Option<Name>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct AsFunction {
 	pub pexp: PrefixExpression,
 	pub argu: Arguments,
@@ -36,7 +36,7 @@ impl From<AsFunction> for FunctionCall {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct AsMethod {
 	pub pexp: PrefixExpression,
 	pub name: Name,
@@ -49,13 +49,13 @@ impl From<AsMethod> for FunctionCall {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FunctionBody {
 	pub oplist: Option<ParameterList>,
 	pub bl: Block,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum FunctionCall {
 	/// A function without a `self` parameter.
 	AsFunction(AsFunction),
@@ -75,7 +75,7 @@ impl From<FunctionCall> for PrefixExpression {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Arguments {
 	ClosedExpressionList(Option<ExpressionList>),
 	TableConstructor(TableConstructor),
@@ -88,7 +88,7 @@ impl From<Option<ExpressionList>> for Arguments {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ParameterList {
 	NameList(NameList),
 	NameListWithVarArgs(NameList),

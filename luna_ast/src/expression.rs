@@ -8,7 +8,7 @@ use crate::{
 
 pub type ExpressionList = Vec<Expression>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct AnonFunctionDefinition {
 	pub body: FunctionBody,
 }
@@ -19,7 +19,7 @@ impl From<AnonFunctionDefinition> for Expression {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct InfixExpression {
 	pub left: Box<Expression>,
 	pub op: InfixOperation,
@@ -32,7 +32,7 @@ impl From<InfixExpression> for Expression {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct UnaryExpression {
 	pub op: UnaryOperation,
 	pub ex: Box<Expression>,
@@ -44,7 +44,7 @@ impl From<UnaryExpression> for Expression {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Expression {
 	Nil,
 	False,
@@ -71,7 +71,7 @@ impl From<Expression> for PrefixExpression {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum PrefixExpression {
 	Variable(Variable),
 	FunctionCall(Box<FunctionCall>),

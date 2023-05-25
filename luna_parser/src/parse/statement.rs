@@ -6,7 +6,7 @@ use nom::{
 	branch::alt,
 	bytes::complete::tag,
 	character::complete::char as tchar,
-	combinator::{opt, value},
+	combinator::{cond, eof, fail, opt, value},
 	multi::many0,
 	sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
 	Parser,
@@ -139,6 +139,11 @@ pub fn local_def_attr(input: In) -> IRes<LocalDefinitionWithAttribute> {
 
 pub fn stat(input: In) -> IRes<Statement> {
 	dbg!(input);
+
+	// Since this combinator is usually called with `many0`, we need
+	// to provide a default end statement to prevent infinite recursion.
+	let (input, _) = cond(input.len() == 0, fail::<_, &str, _>)(input)?;
+
 	alt((
 		value(Statement::End, tchar(SEMICOLON)),
 		definition.map(Statement::from),

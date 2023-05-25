@@ -2,7 +2,7 @@ use crate::{expression::Expression, function::Arguments, terminal::Name};
 
 pub type FieldList = Vec<Field>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct TableConstructor {
 	pub oflist: Option<FieldList>,
 }
@@ -19,7 +19,7 @@ impl From<TableConstructor> for Arguments {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct BracketField {
 	pub tabexp: Expression,
 	pub val: Expression,
@@ -31,7 +31,7 @@ impl From<BracketField> for Field {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct NameField {
 	pub tabname: Name,
 	pub val: Expression,
@@ -43,7 +43,7 @@ impl From<NameField> for Field {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Field {
 	BracketField(BracketField),
 	NameField(NameField),

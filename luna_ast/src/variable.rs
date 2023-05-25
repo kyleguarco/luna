@@ -5,7 +5,7 @@ use crate::{
 
 pub type VariableList = Vec<Variable>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct PrefixExpressionIndex {
 	pub pexp: Box<PrefixExpression>,
 	pub ex: Box<Expression>,
@@ -17,7 +17,7 @@ impl From<PrefixExpressionIndex> for Variable {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct PrefixExpressionName {
 	pub pexp: Box<PrefixExpression>,
 	pub name: Name,
@@ -29,7 +29,7 @@ impl From<PrefixExpressionName> for Variable {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Variable {
 	Name(Name),
 	PrefixExpressionIndex(PrefixExpressionIndex),

@@ -1,4 +1,4 @@
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum InfixOperation {
 	Add,
 	Subtract,
@@ -23,7 +23,7 @@ pub enum InfixOperation {
 	Or,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum UnaryOperation {
 	Negate,
 	Not,

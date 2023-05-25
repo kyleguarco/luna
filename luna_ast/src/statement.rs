@@ -9,7 +9,7 @@ use crate::{
 	Block,
 };
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Label(pub Name);
 
 impl From<Label> for Statement {
@@ -18,14 +18,14 @@ impl From<Label> for Statement {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct IfBlock {
 	pub cond: Expression,
 	pub bl: Block,
 }
 
 /// **if** exp **then** block {**elseif** exp **then** block} \[**else** block\] **end**
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct IfTree {
 	/// The initial condition (if .. then ..)
 	pub initial: IfBlock,
@@ -42,7 +42,7 @@ impl From<IfTree> for Statement {
 }
 
 /// **for** `name` **in** `start`, `stop` \[, `step`\] **do** `block` **end**
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ForExpression {
 	/// The name used in this loop context
 	pub name: Name,
@@ -57,7 +57,7 @@ impl From<ForExpression> for Statement {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ForList {
 	pub nlist: NameList,
 	pub elist: ExpressionList,
@@ -70,7 +70,7 @@ impl From<ForList> for Statement {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct While {
 	pub cond: Expression,
 	pub bl: Block,
@@ -82,7 +82,7 @@ impl From<While> for Statement {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct RepeatUntil {
 	pub cond: Expression,
 	pub bl: Block,
@@ -94,7 +94,7 @@ impl From<RepeatUntil> for Statement {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Definition {
 	pub vlist: VariableList,
 	pub elist: ExpressionList,
@@ -106,7 +106,7 @@ impl From<Definition> for Statement {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FunctionDefinition {
 	pub fname: FunctionName,
 	pub fbody: FunctionBody,
@@ -118,7 +118,7 @@ impl From<FunctionDefinition> for Statement {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct LocalFunctionDefinition {
 	pub name: Name,
 	pub fbody: FunctionBody,
@@ -130,7 +130,7 @@ impl From<LocalFunctionDefinition> for Statement {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct LocalDefinitionWithAttribute {
 	pub atlist: AttributeNameList,
 	pub oelist: Option<ExpressionList>,
@@ -142,7 +142,7 @@ impl From<LocalDefinitionWithAttribute> for Statement {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Statement {
 	End,
 	Definition(Definition),

@@ -10,7 +10,7 @@ use luna_ast::{Block, Chunk, ReturnStatement};
 use nom::{
 	bytes::complete::tag,
 	character::complete::char as tchar,
-	combinator::{all_consuming, opt},
+	combinator::{all_consuming, eof, opt},
 	multi::many0,
 	sequence::{delimited, pair},
 	Finish, IResult, Parser,
@@ -28,6 +28,9 @@ pub mod error;
 mod parse;
 pub mod terminal;
 
+#[cfg(test)]
+mod test;
+
 pub fn chunk(input: In) -> Result<Chunk, ParseError<&str>> {
 	dbg!(input);
 	all_consuming(block.map(Chunk))
@@ -40,7 +43,8 @@ pub fn chunk(input: In) -> Result<Chunk, ParseError<&str>> {
 
 pub(crate) fn block(input: In) -> IRes<Block> {
 	dbg!(input);
-	ws0(pair(many0(stat), opt(return_stat)))
+	// TODO! This infinitely loops because many0 doesn't exit. Weird...
+	pair(many0(ws0(stat)), opt(return_stat))
 		.map(|(stlist, oret)| Block { stlist, oret })
 		.parse(input)
 }

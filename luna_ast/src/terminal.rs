@@ -7,7 +7,7 @@ use crate::{expression::Expression, function::Arguments, variable::Variable};
 
 pub type NameList = Vec<Name>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Name(pub String);
 
 impl From<Name> for Variable {
@@ -16,7 +16,7 @@ impl From<Name> for Variable {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Numeral {
 	Integer(isize),
 	Float(f64),
@@ -28,7 +28,7 @@ impl From<Numeral> for Expression {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct LiteralString(pub String);
 
 impl From<LiteralString> for Expression {

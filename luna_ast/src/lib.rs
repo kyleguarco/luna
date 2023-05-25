@@ -10,10 +10,10 @@ pub mod table;
 pub mod terminal;
 pub mod variable;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Chunk(pub Block);
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Block {
 	/// The statements within this block.
 	pub stlist: Vec<Statement>,
@@ -21,7 +21,7 @@ pub struct Block {
 	pub oret: Option<ReturnStatement>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ReturnStatement {
 	pub oelist: Option<ExpressionList>,
 }
