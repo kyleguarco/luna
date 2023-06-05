@@ -73,7 +73,7 @@ pub fn func_call(input: In) -> IRes<FunctionCall> {
 fn args(input: In) -> IRes<Arguments> {
 	dbg!(input);
 	alt((
-		opt(paren(exp_list)).map(Arguments::from),
+		paren(opt(exp_list)).map(Arguments::from),
 		table_cons.map(Arguments::from),
 		literal_string.map(Arguments::from),
 	))

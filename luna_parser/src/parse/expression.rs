@@ -5,7 +5,7 @@ use nom::{
 	branch::alt,
 	bytes::complete::tag,
 	character::complete::char as tchar,
-	combinator::value,
+	combinator::{cond, fail, value},
 	sequence::{pair, preceded, tuple},
 	Parser,
 };
@@ -50,6 +50,11 @@ fn unary_exp(input: In) -> IRes<UnaryExpression> {
 
 pub fn exp(input: In) -> IRes<Expression> {
 	dbg!(input);
+
+	// Since this combinator is usually called with `many0`, we need
+	// to provide a default end statement to prevent infinite recursion.
+	let (input, _) = cond(input.len() == 0, fail::<_, &str, _>)(input)?;
+
 	alt((
 		value(Expression::Nil, tag(KNIL)),
 		value(Expression::False, tag(KFALSE)),

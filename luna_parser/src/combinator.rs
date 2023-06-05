@@ -9,6 +9,14 @@ use nom::{
 
 use crate::terminal::string::{EQUALS, LBRACE, LBRACKET, LPAREN, RBRACE, RBRACKET, RPAREN};
 
+pub fn negate<I, F>(func: F) -> impl Fn(&I) -> bool
+where
+	I: ?Sized,
+	F: Fn(&I) -> bool,
+{
+	move |input: &I| !func(input)
+}
+
 /// Abbreivated list combinator for the list grammar rules.
 #[inline(always)]
 pub fn list<F, G, I, O1, O2>(sep: F, parser: G) -> impl FnMut(I) -> IResult<I, Vec<O2>>

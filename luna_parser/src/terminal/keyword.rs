@@ -20,3 +20,12 @@ pub const KTHEN: &str = "then";
 pub const KTRUE: &str = "true";
 pub const KUNTIL: &str = "until";
 pub const KWHILE: &str = "while";
+
+pub fn is_keyword(input: &str) -> bool {
+	match input {
+		KAND | KBREAK | KDO | KELSE | KELSEIF | KEND | KFALSE | KFOR | KFUNCTION | KGOTO | KIF
+		| KIN | KLOCAL | KNIL | KNOT | KOR | KREPEAT | KRETURN | KTHEN | KTRUE | KUNTIL
+		| KWHILE => true,
+		_ => false,
+	}
+}

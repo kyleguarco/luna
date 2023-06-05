@@ -7,7 +7,11 @@ use nom::{
 	Parser,
 };
 
-use crate::{combinator::list, IRes, In};
+use crate::{
+	combinator::{list, negate},
+	terminal::keyword::is_keyword,
+	IRes, In,
+};
 
 use self::string::COMMA;
 
@@ -17,7 +21,10 @@ pub mod string;
 pub(crate) fn name(input: In) -> IRes<Name> {
 	dbg!(input);
 	// TODO: Support ASCII symbols and numbers.
-	alpha1.map(String::from).map(Name).parse(input)
+	verify(alpha1, negate(is_keyword))
+		.map(String::from)
+		.map(Name)
+		.parse(input)
 }
 
 pub(crate) fn numeral(input: In) -> IRes<Numeral> {
