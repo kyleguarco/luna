@@ -10,7 +10,7 @@ use crate::{
 	IRes, In,
 };
 
-pub fn attrib_name(input: In) -> IRes<AttributeName> {
+fn attrib_name(input: In) -> IRes<AttributeName> {
 	dbg!(input);
 	name.and(attrib)
 		.map(|(name, attr)| AttributeName { name, attr })
@@ -24,7 +24,7 @@ pub fn attrib(input: In) -> IRes<Attribute> {
 		.parse(input)
 }
 
-pub fn att_name_list(input: In) -> IRes<Vec<AttributeName>> {
+pub fn attnamelist(input: In) -> IRes<Vec<AttributeName>> {
 	dbg!(input);
 	list(tchar(COMMA), attrib_name)(input)
 }

@@ -6,7 +6,7 @@ use nom::{
 	branch::alt,
 	bytes::complete::tag,
 	character::complete::char as tchar,
-	combinator::{cond, fail, opt, value},
+	combinator::{opt, value},
 	multi::many0,
 	sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
 	Parser,
@@ -27,10 +27,10 @@ use crate::{
 };
 
 use super::{
-	attribute::att_name_list,
-	expression::{exp, exp_list},
-	function::{func_body, func_call, func_name},
-	variable::var_list,
+	attribute::attnamelist,
+	expression::{exp, explist},
+	function::{funcbody, funcname, functioncall},
+	variable::varlist,
 };
 
 pub fn label(input: In) -> IRes<Label> {
@@ -40,7 +40,7 @@ pub fn label(input: In) -> IRes<Label> {
 		.parse(input)
 }
 
-pub fn if_block(keyword: In) -> impl FnMut(In) -> IRes<IfBlock> + '_ {
+fn if_block(keyword: In) -> impl FnMut(In) -> IRes<IfBlock> + '_ {
 	move |input: In| {
 		preceded(tag(keyword), separated_pair(exp, tag(KTHEN), block))
 			.map(|(cond, bl)| IfBlock { cond, bl })
@@ -48,7 +48,7 @@ pub fn if_block(keyword: In) -> impl FnMut(In) -> IRes<IfBlock> + '_ {
 	}
 }
 
-pub fn if_tree(input: In) -> IRes<IfTree> {
+fn if_tree(input: In) -> IRes<IfTree> {
 	dbg!(input);
 	tuple((
 		if_block(KIF),
@@ -59,7 +59,7 @@ pub fn if_tree(input: In) -> IRes<IfTree> {
 	.parse(input)
 }
 
-pub fn for_exp(input: In) -> IRes<ForExpression> {
+fn for_exp(input: In) -> IRes<ForExpression> {
 	dbg!(input);
 	let parse_exp = tuple((
 		exp,
@@ -81,87 +81,84 @@ pub fn for_exp(input: In) -> IRes<ForExpression> {
 		.parse(input)
 }
 
-pub fn for_list(input: In) -> IRes<ForList> {
+fn for_list(input: In) -> IRes<ForList> {
 	dbg!(input);
 	tuple((
 		preceded(tag(KFOR), name_list),
-		delimited(tag(KIN), exp_list, tag(KDO)),
+		delimited(tag(KIN), explist, tag(KDO)),
 		terminated(block, tag(KEND)),
 	))
 	.map(|(nlist, elist, bl)| ForList { nlist, elist, bl })
 	.parse(input)
 }
 
-pub fn pwhile(input: In) -> IRes<While> {
+fn pwhile(input: In) -> IRes<While> {
 	dbg!(input);
 	delimited(tag(KWHILE), separated_pair(exp, tag(KDO), block), tag(KEND))
 		.map(|(cond, bl)| While { cond, bl })
 		.parse(input)
 }
 
-pub fn repeat_until(input: In) -> IRes<RepeatUntil> {
+fn repeat_until(input: In) -> IRes<RepeatUntil> {
 	dbg!(input);
 	preceded(tag(KREPEAT), separated_pair(block, tag(KUNTIL), exp))
 		.map(|(bl, cond)| RepeatUntil { cond, bl })
 		.parse(input)
 }
 
-pub fn definition(input: In) -> IRes<Definition> {
+fn definition(input: In) -> IRes<Definition> {
 	dbg!(input);
-	assign(var_list, exp_list)
+	assign(varlist, explist)
 		.map(|(vlist, elist)| Definition { vlist, elist })
 		.parse(input)
 }
 
-pub fn func_def(input: In) -> IRes<FunctionDefinition> {
+pub fn functiondef(input: In) -> IRes<FunctionDefinition> {
 	dbg!(input);
-	pair(preceded(tag(KFUNCTION), func_name), func_body)
+	pair(preceded(tag(KFUNCTION), funcname), funcbody)
 		.map(|(fname, fbody)| FunctionDefinition { fname, fbody })
 		.parse(input)
 }
 
-pub fn local_func_def(input: In) -> IRes<LocalFunctionDefinition> {
+fn local_func_def(input: In) -> IRes<LocalFunctionDefinition> {
 	dbg!(input);
-	preceded(tag(KLOCAL), pair(preceded(tag(KFUNCTION), name), func_body))
+	preceded(tag(KLOCAL), pair(preceded(tag(KFUNCTION), name), funcbody))
 		.map(|(name, fbody)| LocalFunctionDefinition { name, fbody })
 		.parse(input)
 }
 
-pub fn local_def_attr(input: In) -> IRes<LocalDefinitionWithAttribute> {
+fn local_def_attr(input: In) -> IRes<LocalDefinitionWithAttribute> {
 	dbg!(input);
 	preceded(
 		tag(KLOCAL),
-		pair(att_name_list, opt(preceded(tchar(EQUALS), exp_list))),
+		pair(attnamelist, opt(preceded(tchar(EQUALS), explist))),
 	)
 	.map(|(atlist, oelist)| LocalDefinitionWithAttribute { atlist, oelist })
 	.parse(input)
 }
 
 pub fn stat(input: In) -> IRes<Statement> {
+	use Statement::*;
+
 	dbg!(input);
-
-	// Since this combinator is usually called with `many0`, we need
-	// to provide a default end statement to prevent infinite recursion.
-	let (input, _) = cond(input.len() == 0, fail::<_, &str, _>)(input)?;
-
 	alt((
 		value(Statement::End, tchar(SEMICOLON)),
-		definition.map(Statement::from),
-		func_call.map(Statement::from),
-		label.map(Statement::from),
-		value(Statement::Break, tag(KBREAK)),
-		preceded(tag(KGOTO), name).map(Statement::Goto),
+		definition.map(Definition),
+		functioncall.map(FunctionCall),
+		label.map(Label),
+		value(Break, tag(KBREAK)),
+		preceded(tag(KGOTO), name).map(Goto),
 		delimited(tag(KWHILE), block, tag(KEND))
 			.map(Box::new)
-			.map(Statement::Do),
-		pwhile.map(Statement::from),
-		repeat_until.map(Statement::from),
-		if_tree.map(Statement::from),
-		for_exp.map(Statement::from),
-		for_list.map(Statement::from),
-		func_def.map(Statement::from),
-		local_func_def.map(Statement::from),
-		local_def_attr.map(Statement::from),
+			.map(Do),
+		pwhile.map(While),
+		repeat_until.map(RepeatUntil),
+		if_tree.map(IfTree),
+		for_exp.map(ForExpression),
+		for_list.map(ForList),
+		functiondef.map(FunctionDefinition),
+		local_func_def.map(LocalFunctionDefinition),
+		local_def_attr.map(LocalDefinitionWithAttribute),
 	))
 	.parse(input)
 }

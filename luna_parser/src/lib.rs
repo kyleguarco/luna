@@ -5,12 +5,12 @@ pub(crate) type In<'a> = &'a str;
 pub(crate) type IRes<'a, O> = IResult<In<'a>, O>;
 
 use combinator::list;
-use error::ParseError;
 use luna_ast::{Block, Chunk, ReturnStatement};
 use nom::{
 	bytes::complete::tag,
 	character::complete::char as tchar,
 	combinator::{all_consuming, opt},
+	error::ParseError,
 	multi::many0,
 	sequence::{delimited, pair},
 	Finish, IResult, Parser,
@@ -31,20 +31,21 @@ pub mod terminal;
 #[cfg(test)]
 mod test;
 
-pub fn chunk(input: In) -> Result<Chunk, ParseError<&str>> {
+pub fn chunk(input: In) -> Result<Chunk, error::Error<In>> {
 	dbg!(input);
-	all_consuming(block.map(Chunk))
+	all_consuming(ws0(block).map(Chunk))
 		.parse(input)
 		.finish()
 		// If there's any remaining input, there's a problem
 		.map(|(_, chunk)| chunk)
-		.map_err(ParseError::from)
+		// Convert nom's error type into our error type
+		.map_err(|e| error::Error::from_error_kind(e.input, e.code))
 }
 
 pub(crate) fn block(input: In) -> IRes<Block> {
 	dbg!(input);
 	// TODO! This infinitely loops because many0 doesn't exit. Weird...
-	pair(many0(ws0(stat)), opt(return_stat))
+	pair(many0(stat), opt(return_stat))
 		.map(|(stlist, oret)| Block { stlist, oret })
 		.parse(input)
 }

@@ -18,7 +18,7 @@ use crate::{
 
 use super::expression::exp;
 
-pub fn table_cons(input: In) -> IRes<TableConstructor> {
+pub fn tableconstructor(input: In) -> IRes<TableConstructor> {
 	dbg!(input);
 	opt(braces(fieldlist))
 		.map(|oflist| TableConstructor { oflist })
@@ -54,7 +54,7 @@ pub fn field(input: In) -> IRes<Field> {
 	.parse(input)
 }
 
-fn fieldsep(input: In) -> IRes<In> {
+pub fn fieldsep(input: In) -> IRes<In> {
 	dbg!(input);
 	recognize(tchar(COMMA).or(tchar(SEMICOLON))).parse(input)
 }

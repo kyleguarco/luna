@@ -1,23 +1,26 @@
 use std::fmt::Debug;
 
-use nom::error::{self, Error};
+use nom::error;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct ParseError<I> {
+pub struct Error<I> {
 	pub input: I,
 	pub kind: ErrorKind,
 }
 
-impl<I: Clone + Debug> From<Error<I>> for ParseError<I> {
-	fn from(value: Error<I>) -> Self {
-		dbg!(value.code);
-
-		let kind = match value.code {
+impl<I> error::ParseError<I> for Error<I> {
+	fn from_error_kind(input: I, kind: error::ErrorKind) -> Self {
+		let kind = match kind {
 			error::ErrorKind::Eof => ErrorKind::Eof,
 			_ => ErrorKind::NotEnoughData,
 		};
 
-		Self { input: value.input, kind }
+		Self { input, kind }
+	}
+
+	fn append(input: I, kind: error::ErrorKind, _other: Self) -> Self {
+		// TODO!: more errors?
+		Self::from_error_kind(input, kind)
 	}
 }
 

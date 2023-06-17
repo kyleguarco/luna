@@ -10,8 +10,8 @@ use crate::{
 pub struct VarArgs;
 
 impl From<VarArgs> for Expression {
-	fn from(_: VarArgs) -> Self {
-		Self::VarArgs
+	fn from(value: VarArgs) -> Self {
+		Self::VarArgs(value)
 	}
 }
 

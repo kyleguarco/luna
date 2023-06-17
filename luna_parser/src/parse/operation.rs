@@ -8,7 +8,7 @@ use crate::{
 	IRes, In,
 };
 
-pub fn infix_op(input: In) -> IRes<InfixOperation> {
+pub fn binop(input: In) -> IRes<InfixOperation> {
 	dbg!(input);
 	use InfixOperation::*;
 
@@ -37,7 +37,7 @@ pub fn infix_op(input: In) -> IRes<InfixOperation> {
 	))(input)
 }
 
-pub fn unary_op(input: In) -> IRes<UnaryOperation> {
+pub fn unop(input: In) -> IRes<UnaryOperation> {
 	dbg!(input);
 	use UnaryOperation::*;
 

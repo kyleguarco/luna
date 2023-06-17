@@ -1,11 +1,11 @@
 use luna_ast::expression::{
-	AnonFunctionDefinition, Expression, InfixExpression, PrefixExpression, UnaryExpression,
+	AnonFunctionDefinition, BinaryExpression, Expression, PrefixExpression, UnaryExpression,
 };
 use nom::{
 	branch::alt,
 	bytes::complete::tag,
 	character::complete::char as tchar,
-	combinator::{cond, fail, value},
+	combinator::value,
 	sequence::{pair, preceded, tuple},
 	Parser,
 };
@@ -21,67 +21,64 @@ use crate::{
 };
 
 use super::{
-	function::{func_body, func_call, var_args},
-	operation::{infix_op, unary_op},
-	table::table_cons,
+	function::{funcbody, functioncall, var_args},
+	operation::{binop, unop},
+	table::tableconstructor,
 	variable::var,
 };
 
-fn anon_func_def(input: In) -> IRes<AnonFunctionDefinition> {
+fn functiondef(input: In) -> IRes<AnonFunctionDefinition> {
 	dbg!(input);
-	preceded(tag(KFUNCTION), func_body)
+	preceded(tag(KFUNCTION), funcbody)
 		.map(|body| AnonFunctionDefinition { body })
 		.parse(input)
 }
 
-fn infix_exp(input: In) -> IRes<InfixExpression> {
+fn binary_op(input: In) -> IRes<BinaryExpression> {
 	dbg!(input);
-	tuple((exp.map(Box::new), infix_op, exp.map(Box::new)))
-		.map(|(left, op, right)| InfixExpression { left, op, right })
+	tuple((exp.map(Box::new), binop, exp.map(Box::new)))
+		.map(|(left, op, right)| BinaryExpression { left, op, right })
 		.parse(input)
 }
 
-fn unary_exp(input: In) -> IRes<UnaryExpression> {
+fn unary_op(input: In) -> IRes<UnaryExpression> {
 	dbg!(input);
-	pair(unary_op, exp.map(Box::new))
+	pair(unop, exp.map(Box::new))
 		.map(|(op, ex)| UnaryExpression { op, ex })
 		.parse(input)
 }
 
 pub fn exp(input: In) -> IRes<Expression> {
+	use Expression::*;
+
 	dbg!(input);
-
-	// Since this combinator is usually called with `many0`, we need
-	// to provide a default end statement to prevent infinite recursion.
-	let (input, _) = cond(input.len() == 0, fail::<_, &str, _>)(input)?;
-
 	alt((
 		value(Expression::Nil, tag(KNIL)),
 		value(Expression::False, tag(KFALSE)),
 		value(Expression::True, tag(KTRUE)),
-		numeral.map(Expression::from),
-		literal_string.map(Expression::from),
-		var_args.map(Expression::from),
-		anon_func_def.map(Expression::from),
-		prefix_exp.map(Expression::from),
-		table_cons.map(Expression::from),
-		infix_exp.map(Expression::from),
-		unary_exp.map(Expression::from),
+		numeral.map(Numeral),
+		literal_string.map(LiteralString),
+		var_args.map(VarArgs),
+		functiondef.map(AnonFunctionDefinition),
+		prefixexp.map(Box::new).map(PrefixExpression),
+		tableconstructor.map(TableConstructor),
+		binary_op.map(BinaryExpression),
+		unary_op.map(UnaryExpression),
 	))
 	.parse(input)
 }
 
-pub fn prefix_exp(input: In) -> IRes<PrefixExpression> {
+pub fn prefixexp(input: In) -> IRes<PrefixExpression> {
 	dbg!(input);
 	alt((
 		var.map(PrefixExpression::from),
-		func_call.map(PrefixExpression::from),
+		functioncall.map(PrefixExpression::from),
 		braces(exp).map(PrefixExpression::from),
 	))
 	.parse(input)
 }
 
-pub fn exp_list(input: In) -> IRes<Vec<Expression>> {
+pub fn explist(input: In) -> IRes<Vec<Expression>> {
 	dbg!(input);
 	list(tchar(COMMA), exp)(input)
 }
