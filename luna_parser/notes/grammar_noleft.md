@@ -42,9 +42,14 @@ funcname ::= Name {'.' Name} [':' Name]
 
 varlist ::= var {',' var}
 
+braceexp ::= '(' exp ')'
+
+index ::= '[' exp ']' | '.' Name
+
 var ::= Name
-var ::= prefixexp '[' exp ']'
-var ::= prefixexp '.' Name
+var ::= var index
+var ::= functioncall index
+var ::= braceexp index
 
 namelist ::= Name {',' Name}
 
@@ -57,17 +62,18 @@ exp ::= Numeral
 exp ::= LiteralString
 exp ::= '...'
 exp ::= functiondef
-exp ::= prefixexp
+exp ::= (var | functioncall | braceexp)
 exp ::= tableconstructor
 exp ::= exp binop exp
 exp ::= unop exp
 
-prefixexp ::= var
-prefixexp ::= functioncall
-prefixexp ::= '(' exp ')'
+<!-- prefixexp ::= var | functioncall | braceexp -->
 
-functioncall ::= prefixexp args
-functioncall ::= prefixexp ':' Name args
+calltype ::= [':' Name] args
+
+functioncall ::= var calltype
+functioncall ::= functioncall calltype
+functioncall ::= braceexp calltype
 
 args ::=  '(' [explist] ')'
 args ::= tableconstructor
