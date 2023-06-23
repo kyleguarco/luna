@@ -46,34 +46,38 @@ braceexp ::= '(' exp ')'
 
 index ::= '[' exp ']' | '.' Name
 
-var ::= Name
-var ::= var index
-var ::= functioncall index
-var ::= braceexp index
+vtype ::= functioncall
+vtype ::= braceexp
+
+var ::= vtype [var index] | Name
 
 namelist ::= Name {',' Name}
 
 explist ::= exp {',' exp}
 
-exp ::= <nil>
-exp ::= <false>
-exp ::= <true>
-exp ::= Numeral
-exp ::= LiteralString
-exp ::= '...'
-exp ::= functiondef
-exp ::= (var | functioncall | braceexp)
-exp ::= tableconstructor
-exp ::= exp binop exp
+varargs ::= '...'
+
+value ::= <nil>
+value ::= <false>
+value ::= <true>
+value ::= Numeral
+value ::= LiteralString
+value ::= varargs
+value ::= functiondef
+value ::= var
+value ::= functioncall
+value ::= braceexp
+value ::= tableconstructor
+
+exp ::= value [binop exp]
 exp ::= unop exp
 
-<!-- prefixexp ::= var | functioncall | braceexp -->
+callinfo ::= [':' Name] args
 
-calltype ::= [':' Name] args
+fcalltype ::= var
+fcalltype ::= braceexp
 
-functioncall ::= var calltype
-functioncall ::= functioncall calltype
-functioncall ::= braceexp calltype
+functioncall ::= fcalltype [functioncall callinfo] callinfo
 
 args ::=  '(' [explist] ')'
 args ::= tableconstructor
@@ -83,8 +87,8 @@ functiondef ::= <function> funcbody
 
 funcbody ::= '(' [parlist] ')' block end
 
-parlist ::= namelist [',' '...']
-parlist ::= '...'
+parlist ::= namelist [',' varargs]
+parlist ::= varargs
 
 tableconstructor ::= '{' [fieldlist] '}'
 
