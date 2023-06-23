@@ -1,42 +1,22 @@
 use crate::{
-	expression::{Expression, PrefixExpression},
+	affix::{Index, Prefix, Suffix},
+	expression::Value,
 	terminal::Name,
 };
 
 pub type VariableList = Vec<Variable>;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct PrefixExpressionIndex {
-	pub pexp: Box<PrefixExpression>,
-	pub ex: Box<Expression>,
-}
-
-impl From<PrefixExpressionIndex> for Variable {
-	fn from(value: PrefixExpressionIndex) -> Self {
-		Self::PrefixExpressionIndex(value)
-	}
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct PrefixExpressionName {
-	pub pexp: Box<PrefixExpression>,
-	pub name: Name,
-}
-
-impl From<PrefixExpressionName> for Variable {
-	fn from(value: PrefixExpressionName) -> Self {
-		Self::PrefixExpressionName(value)
-	}
-}
-
-#[derive(Clone, Debug, PartialEq)]
 pub enum Variable {
 	Name(Name),
-	PrefixExpressionIndex(PrefixExpressionIndex),
-	PrefixExpressionName(PrefixExpressionName),
+	Indexed {
+		pfix: Prefix,
+		slist: Vec<Suffix>,
+		index: Index,
+	},
 }
 
-impl From<Variable> for PrefixExpression {
+impl From<Variable> for Value {
 	fn from(value: Variable) -> Self {
 		Self::Variable(value)
 	}

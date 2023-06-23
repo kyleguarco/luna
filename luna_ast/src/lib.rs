@@ -1,6 +1,7 @@
 use expression::ExpressionList;
 use statement::Statement;
 
+pub mod affix;
 pub mod attribute;
 pub mod expression;
 pub mod function;

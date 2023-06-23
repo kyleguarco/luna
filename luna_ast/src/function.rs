@@ -1,5 +1,6 @@
 use crate::{
-	expression::{Expression, ExpressionList, PrefixExpression},
+	affix::{Call, Prefix, Suffix},
+	expression::{ExpressionList, Value},
 	statement::Statement,
 	table::TableConstructor,
 	terminal::{LiteralString, Name, NameList},
@@ -9,7 +10,7 @@ use crate::{
 #[derive(Clone, Debug, PartialEq)]
 pub struct VarArgs;
 
-impl From<VarArgs> for Expression {
+impl From<VarArgs> for Value {
 	fn from(value: VarArgs) -> Self {
 		Self::VarArgs(value)
 	}
@@ -25,53 +26,21 @@ pub struct FunctionName {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct AsFunction {
-	pub pexp: PrefixExpression,
-	pub argu: Arguments,
-}
-
-impl From<AsFunction> for FunctionCall {
-	fn from(value: AsFunction) -> Self {
-		Self::AsFunction(value)
-	}
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct AsMethod {
-	pub pexp: PrefixExpression,
-	pub name: Name,
-	pub argu: Arguments,
-}
-
-impl From<AsMethod> for FunctionCall {
-	fn from(value: AsMethod) -> Self {
-		Self::AsMethod(value)
-	}
-}
-
-#[derive(Clone, Debug, PartialEq)]
 pub struct FunctionBody {
 	pub oplist: Option<ParameterList>,
 	pub bl: Block,
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum FunctionCall {
-	/// A function without a `self` parameter.
-	AsFunction(AsFunction),
-	/// A function with a `self` parameter.
-	AsMethod(AsMethod),
+pub struct FunctionCall {
+	pub pfix: Prefix,
+	pub slist: Vec<Suffix>,
+	pub call: Call,
 }
 
 impl From<FunctionCall> for Statement {
 	fn from(val: FunctionCall) -> Self {
 		Statement::FunctionCall(val)
-	}
-}
-
-impl From<FunctionCall> for PrefixExpression {
-	fn from(value: FunctionCall) -> Self {
-		Self::FunctionCall(Box::new(value))
 	}
 }
 
@@ -92,7 +61,7 @@ impl From<Option<ExpressionList>> for Arguments {
 pub enum ParameterList {
 	NameList(NameList),
 	NameListWithVarArgs(NameList),
-	VarArgs,
+	VarArgs(VarArgs),
 }
 
 impl From<NameList> for ParameterList {
@@ -114,7 +83,7 @@ impl From<(VarArgs, NameList)> for ParameterList {
 }
 
 impl From<VarArgs> for ParameterList {
-	fn from(_: VarArgs) -> Self {
-		Self::VarArgs
+	fn from(value: VarArgs) -> Self {
+		Self::VarArgs(value)
 	}
 }

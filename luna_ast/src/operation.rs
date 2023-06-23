@@ -1,5 +1,9 @@
+/// Grammar (binop): `'+' | '-' | '*' | '/'
+/// | '//' | '^' | '%' | '&' | '~' | '|' | '>>'
+/// | '<<' | '..' | '<' | ‘<=' | '>' | ‘>='
+/// | '==' | ‘~=' | <and> | <or>`
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum InfixOperation {
+pub enum BinaryOperation {
 	Add,
 	Subtract,
 	Multiply,
@@ -23,6 +27,7 @@ pub enum InfixOperation {
 	Or,
 }
 
+/// Grammar (unop): `'-' | <not> | '#' | '~'`
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum UnaryOperation {
 	Negate,

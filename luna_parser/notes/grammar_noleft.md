@@ -44,12 +44,18 @@ varlist ::= var {',' var}
 
 braceexp ::= '(' exp ')'
 
-index ::= '[' exp ']' | '.' Name
+prefix ::= braceexp
+prefix ::= Name
 
-vtype ::= functioncall
-vtype ::= braceexp
+index ::= '[' exp ']'
+index ::= '.' Name
 
-var ::= vtype [var index] | Name
+call ::= [':' Name] args
+
+suffix ::= call | index
+
+var ::= prefix {suffix} index
+var ::= Name
 
 namelist ::= Name {',' Name}
 
@@ -72,12 +78,7 @@ value ::= tableconstructor
 exp ::= value [binop exp]
 exp ::= unop exp
 
-callinfo ::= [':' Name] args
-
-fcalltype ::= var
-fcalltype ::= braceexp
-
-functioncall ::= fcalltype [functioncall callinfo] callinfo
+functioncall ::= prefix {suffix} call
 
 args ::=  '(' [explist] ')'
 args ::= tableconstructor
