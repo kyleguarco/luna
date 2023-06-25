@@ -1,12 +1,12 @@
 use luna_ast::expression::{
-	AnonFunctionDefinition, BinaryExpression, Expression, PrefixExpression, UnaryExpression,
+	AnonFunctionDefinition, BinaryExpression, Expression, UnaryExpression, Value,
 };
 use nom::{
 	branch::alt,
 	bytes::complete::tag,
 	character::complete::char as tchar,
-	combinator::value,
-	sequence::{pair, preceded, tuple},
+	combinator::{self, opt},
+	sequence::{pair, preceded},
 	Parser,
 };
 
@@ -21,7 +21,7 @@ use crate::{
 };
 
 use super::{
-	function::{funcbody, functioncall, var_args},
+	function::{funcbody, functioncall, varargs},
 	operation::{binop, unop},
 	table::tableconstructor,
 	variable::var,
@@ -30,14 +30,21 @@ use super::{
 fn functiondef(input: In) -> IRes<AnonFunctionDefinition> {
 	dbg!(input);
 	preceded(tag(KFUNCTION), funcbody)
-		.map(|body| AnonFunctionDefinition { body })
+		.map(AnonFunctionDefinition)
 		.parse(input)
 }
 
 fn binary_op(input: In) -> IRes<BinaryExpression> {
+	use BinaryExpression::*;
+
 	dbg!(input);
-	tuple((exp.map(Box::new), binop, exp.map(Box::new)))
-		.map(|(left, op, right)| BinaryExpression { left, op, right })
+	value
+		.map(Box::new)
+		.and(opt(pair(binop, exp.map(Box::new))))
+		.map(|(left, oright)| match oright {
+			Some((op, right)) => AsExpression { left, op, right },
+			None => AsValue(left),
+		})
 		.parse(input)
 }
 
@@ -48,32 +55,31 @@ fn unary_op(input: In) -> IRes<UnaryExpression> {
 		.parse(input)
 }
 
-pub fn exp(input: In) -> IRes<Expression> {
-	use Expression::*;
+pub fn value(input: In) -> IRes<Value> {
+	use Value::*;
 
 	dbg!(input);
 	alt((
-		value(Expression::Nil, tag(KNIL)),
-		value(Expression::False, tag(KFALSE)),
-		value(Expression::True, tag(KTRUE)),
+		combinator::value(Nil, tag(KNIL)),
+		combinator::value(False, tag(KFALSE)),
+		combinator::value(True, tag(KTRUE)),
 		numeral.map(Numeral),
 		literal_string.map(LiteralString),
-		var_args.map(VarArgs),
+		varargs.map(VarArgs),
 		functiondef.map(AnonFunctionDefinition),
-		prefixexp.map(Box::new).map(PrefixExpression),
+		var.map(Variable),
+		functioncall.map(FunctionCall),
+		braces(exp).map(BracedExpression),
 		tableconstructor.map(TableConstructor),
-		binary_op.map(BinaryExpression),
-		unary_op.map(UnaryExpression),
 	))
 	.parse(input)
 }
 
-pub fn prefixexp(input: In) -> IRes<PrefixExpression> {
+pub fn exp(input: In) -> IRes<Expression> {
 	dbg!(input);
 	alt((
-		var.map(PrefixExpression::from),
-		functioncall.map(PrefixExpression::from),
-		braces(exp).map(PrefixExpression::from),
+		binary_op.map(Expression::BinaryExpression),
+		unary_op.map(Expression::UnaryExpression),
 	))
 	.parse(input)
 }

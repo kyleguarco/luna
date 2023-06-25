@@ -1,43 +1,23 @@
-use luna_ast::variable::{PrefixExpressionIndex, PrefixExpressionName, Variable};
-use nom::{
-	branch::alt,
-	character::complete::char as tchar,
-	sequence::{pair, separated_pair},
-	Parser,
-};
+use luna_ast::variable::Variable;
+use nom::{branch::alt, character::complete::char as tchar, multi::many0, sequence::tuple, Parser};
 
 use crate::{
-	combinator::{bracket, list},
-	parse::expression::{exp, prefixexp},
-	terminal::{
-		name,
-		string::{COMMA, DOT},
-	},
+	combinator::list,
+	parse::affix::{index, prefix, suffix},
+	terminal::{name, string::COMMA},
 	IRes, In,
 };
-
-fn prefix_exp_index(input: In) -> IRes<PrefixExpressionIndex> {
-	dbg!(input);
-	pair(prefixexp.map(Box::new), bracket(exp).map(Box::new))
-		.map(|(pexp, ex)| PrefixExpressionIndex { pexp, ex })
-		.parse(input)
-}
-
-fn prefix_exp_name(input: In) -> IRes<PrefixExpressionName> {
-	dbg!(input);
-	separated_pair(prefixexp.map(Box::from), tchar(DOT), name)
-		.map(|(pexp, name)| PrefixExpressionName { pexp, name })
-		.parse(input)
-}
 
 pub fn var(input: In) -> IRes<Variable> {
 	use Variable::*;
 
-	dbg!(input);
 	alt((
 		name.map(Name),
-		prefix_exp_index.map(PrefixExpressionIndex),
-		prefix_exp_name.map(PrefixExpressionName),
+		tuple((prefix, many0(suffix), index)).map(|(pfix, slist, index)| Indexed {
+			pfix,
+			slist,
+			index,
+		}),
 	))
 	.parse(input)
 }

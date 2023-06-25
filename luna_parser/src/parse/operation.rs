@@ -1,4 +1,4 @@
-use luna_ast::operation::{InfixOperation, UnaryOperation};
+use luna_ast::operation::{BinaryOperation, UnaryOperation};
 use nom::{
 	branch::alt, bytes::complete::tag, character::complete::char as tchar, combinator::value,
 };
@@ -8,9 +8,9 @@ use crate::{
 	IRes, In,
 };
 
-pub fn binop(input: In) -> IRes<InfixOperation> {
+pub fn binop(input: In) -> IRes<BinaryOperation> {
 	dbg!(input);
-	use InfixOperation::*;
+	use BinaryOperation::*;
 
 	alt((
 		value(Add, tchar(PLUS)),

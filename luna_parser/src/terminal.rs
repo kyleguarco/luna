@@ -44,7 +44,7 @@ pub(crate) fn literal_string(input: In) -> IRes<LiteralString> {
 		.parse(input)
 }
 
-pub fn name_list(input: In) -> IRes<Vec<Name>> {
+pub fn namelist(input: In) -> IRes<Vec<Name>> {
 	dbg!(input);
 	list(tchar(COMMA), name)(input)
 }

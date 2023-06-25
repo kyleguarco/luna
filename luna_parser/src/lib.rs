@@ -33,7 +33,7 @@ mod test;
 
 pub fn chunk(input: In) -> Result<Chunk, error::Error<In>> {
 	dbg!(input);
-	all_consuming(ws0(block).map(Chunk))
+	all_consuming(block.map(Chunk))
 		.parse(input)
 		.finish()
 		// If there's any remaining input, there's a problem
@@ -45,7 +45,7 @@ pub fn chunk(input: In) -> Result<Chunk, error::Error<In>> {
 pub(crate) fn block(input: In) -> IRes<Block> {
 	dbg!(input);
 	// TODO! This infinitely loops because many0 doesn't exit. Weird...
-	pair(many0(stat), opt(return_stat))
+	ws0(pair(many0(stat), opt(return_stat)))
 		.map(|(stlist, oret)| Block { stlist, oret })
 		.parse(input)
 }

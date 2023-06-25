@@ -20,7 +20,7 @@ use crate::{
 			KBREAK, KDO, KELSE, KELSEIF, KEND, KFOR, KFUNCTION, KGOTO, KIF, KIN, KLOCAL, KREPEAT,
 			KTHEN, KUNTIL, KWHILE,
 		},
-		name, name_list,
+		name, namelist,
 		string::{COMMA, DOUBLECOLON, EQUALS, SEMICOLON},
 	},
 	IRes, In,
@@ -84,7 +84,7 @@ fn for_exp(input: In) -> IRes<ForExpression> {
 fn for_list(input: In) -> IRes<ForList> {
 	dbg!(input);
 	tuple((
-		preceded(tag(KFOR), name_list),
+		preceded(tag(KFOR), namelist),
 		delimited(tag(KIN), explist, tag(KDO)),
 		terminated(block, tag(KEND)),
 	))
