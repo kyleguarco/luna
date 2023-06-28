@@ -1,9 +1,8 @@
 use luna_ast::operation::{BinaryOperation, UnaryOperation};
-use nom::{
-	branch::alt, bytes::complete::tag, character::complete::char as tchar, combinator::value,
-};
+use nom::{branch::alt, combinator::value};
 
 use crate::{
+	combinator::{wschar, wstag},
 	terminal::{keyword::*, string::*},
 	IRes, In,
 };
@@ -13,27 +12,27 @@ pub fn binop(input: In) -> IRes<BinaryOperation> {
 	use BinaryOperation::*;
 
 	alt((
-		value(Add, tchar(PLUS)),
-		value(Subtract, tchar(MINUS)),
-		value(Multiply, tchar(STAR)),
-		value(Divide, tchar(SLASH)),
-		value(FloorDivide, tag(DOUBLESLASH)),
-		value(Power, tchar(CARET)),
-		value(Modulo, tchar(PERCENT)),
-		value(BitwiseAnd, tchar(AMPH)),
-		value(BitwiseXor, tchar(TILDE)),
-		value(BitwiseOr, tchar(PIPE)),
-		value(BitwiseRightShift, tag(RSHIFT)),
-		value(BitwiseLeftShift, tag(LSHIFT)),
-		value(Concat, tag(DOUBLEDOT)),
-		value(LessThan, tchar(LESS)),
-		value(LessEqual, tag(LESSEQUAL)),
-		value(GreaterThan, tchar(GREATER)),
-		value(GreaterEqual, tag(GREATEREQUAL)),
-		value(IsEqual, tag(ISEQUAL)),
-		value(IsNotEqual, tag(NOTEQUAL)),
-		value(And, tag(KAND)),
-		value(Or, tag(KOR)),
+		value(Add, wschar(PLUS)),
+		value(Subtract, wschar(MINUS)),
+		value(Multiply, wschar(STAR)),
+		value(Divide, wschar(SLASH)),
+		value(FloorDivide, wstag(DOUBLESLASH)),
+		value(Power, wschar(CARET)),
+		value(Modulo, wschar(PERCENT)),
+		value(BitwiseAnd, wschar(AMPH)),
+		value(BitwiseXor, wschar(TILDE)),
+		value(BitwiseOr, wschar(PIPE)),
+		value(BitwiseRightShift, wstag(RSHIFT)),
+		value(BitwiseLeftShift, wstag(LSHIFT)),
+		value(Concat, wstag(DOUBLEDOT)),
+		value(LessThan, wschar(LESS)),
+		value(LessEqual, wstag(LESSEQUAL)),
+		value(GreaterThan, wschar(GREATER)),
+		value(GreaterEqual, wstag(GREATEREQUAL)),
+		value(IsEqual, wstag(ISEQUAL)),
+		value(IsNotEqual, wstag(NOTEQUAL)),
+		value(And, wstag(KAND)),
+		value(Or, wstag(KOR)),
 	))(input)
 }
 
@@ -42,9 +41,9 @@ pub fn unop(input: In) -> IRes<UnaryOperation> {
 	use UnaryOperation::*;
 
 	alt((
-		value(Not, tchar(MINUS)),
-		value(Negate, tag(KNOT)),
-		value(Length, tchar(POUND)),
-		value(BitwiseNot, tchar(TILDE)),
+		value(Not, wschar(MINUS)),
+		value(Negate, wstag(KNOT)),
+		value(Length, wschar(POUND)),
+		value(BitwiseNot, wschar(TILDE)),
 	))(input)
 }

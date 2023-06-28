@@ -1,8 +1,8 @@
 use luna_ast::attribute::{Attribute, AttributeName};
-use nom::{character::complete::char as tchar, combinator::opt, sequence::delimited, Parser};
+use nom::{combinator::opt, sequence::delimited, Parser};
 
 use crate::{
-	combinator::list,
+	combinator::{list, wschar},
 	terminal::{
 		name,
 		string::{COMMA, GREATER, LESS},
@@ -19,12 +19,12 @@ fn attrib_name(input: In) -> IRes<AttributeName> {
 
 pub fn attrib(input: In) -> IRes<Attribute> {
 	dbg!(input);
-	delimited(tchar(LESS), opt(name), tchar(GREATER))
+	delimited(wschar(LESS), opt(name), wschar(GREATER))
 		.map(|oname| Attribute { oname })
 		.parse(input)
 }
 
 pub fn attnamelist(input: In) -> IRes<Vec<AttributeName>> {
 	dbg!(input);
-	list(tchar(COMMA), attrib_name)(input)
+	list(wschar(COMMA), attrib_name)(input)
 }

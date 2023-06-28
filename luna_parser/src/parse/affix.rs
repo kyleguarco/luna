@@ -1,14 +1,13 @@
 use luna_ast::affix::{Call, Index, Prefix, Suffix};
 use nom::{
 	branch::alt,
-	character::complete::char as tchar,
 	combinator::opt,
 	sequence::{pair, preceded},
 	Parser,
 };
 
 use crate::{
-	combinator::{braces, bracket},
+	combinator::{braces, bracket, wschar},
 	parse::{expression::exp, function::args},
 	terminal::{name, string::COLON},
 	IRes, In,
@@ -30,7 +29,7 @@ pub fn index(input: In) -> IRes<Index> {
 
 pub fn call(input: In) -> IRes<Call> {
 	dbg!(input);
-	pair(opt(preceded(tchar(COLON), name)), args)
+	pair(opt(preceded(wschar(COLON), name)), args)
 		.map(|(oname, argu)| Call { oname, argu })
 		.parse(input)
 }

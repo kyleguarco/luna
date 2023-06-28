@@ -1,14 +1,13 @@
 use luna_ast::table::{BracketField, Field, FieldList, NameField, TableConstructor};
 use nom::{
 	branch::alt,
-	character::complete::char as tchar,
 	combinator::{opt, recognize},
 	sequence::terminated,
 	Parser,
 };
 
 use crate::{
-	combinator::{assign, braces, bracket, list},
+	combinator::{assign, braces, bracket, list, wschar},
 	terminal::{
 		name,
 		string::{COMMA, SEMICOLON},
@@ -20,7 +19,7 @@ use super::expression::exp;
 
 pub fn tableconstructor(input: In) -> IRes<TableConstructor> {
 	dbg!(input);
-	opt(braces(fieldlist))
+	braces(opt(fieldlist))
 		.map(|oflist| TableConstructor { oflist })
 		.parse(input)
 }
@@ -56,5 +55,5 @@ pub fn field(input: In) -> IRes<Field> {
 
 pub fn fieldsep(input: In) -> IRes<In> {
 	dbg!(input);
-	recognize(tchar(COMMA).or(tchar(SEMICOLON))).parse(input)
+	recognize(wschar(COMMA).or(wschar(SEMICOLON))).parse(input)
 }

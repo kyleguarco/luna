@@ -3,15 +3,13 @@ use luna_ast::expression::{
 };
 use nom::{
 	branch::alt,
-	bytes::complete::tag,
-	character::complete::char as tchar,
 	combinator::{self, opt},
 	sequence::{pair, preceded},
 	Parser,
 };
 
 use crate::{
-	combinator::{braces, list},
+	combinator::{braces, list, wschar, wstag},
 	terminal::{
 		keyword::{KFALSE, KFUNCTION, KNIL, KTRUE},
 		literal_string, numeral,
@@ -29,7 +27,7 @@ use super::{
 
 fn functiondef(input: In) -> IRes<AnonFunctionDefinition> {
 	dbg!(input);
-	preceded(tag(KFUNCTION), funcbody)
+	preceded(wstag(KFUNCTION), funcbody)
 		.map(AnonFunctionDefinition)
 		.parse(input)
 }
@@ -60,9 +58,9 @@ pub fn value(input: In) -> IRes<Value> {
 
 	dbg!(input);
 	alt((
-		combinator::value(Nil, tag(KNIL)),
-		combinator::value(False, tag(KFALSE)),
-		combinator::value(True, tag(KTRUE)),
+		combinator::value(Nil, wstag(KNIL)),
+		combinator::value(False, wstag(KFALSE)),
+		combinator::value(True, wstag(KTRUE)),
 		numeral.map(Numeral),
 		literal_string.map(LiteralString),
 		varargs.map(VarArgs),
@@ -86,5 +84,5 @@ pub fn exp(input: In) -> IRes<Expression> {
 
 pub fn explist(input: In) -> IRes<Vec<Expression>> {
 	dbg!(input);
-	list(tchar(COMMA), exp)(input)
+	list(wschar(COMMA), exp)(input)
 }

@@ -5,17 +5,15 @@ use luna_ast::function::{
 };
 use nom::{
 	branch::alt,
-	bytes::complete::tag,
-	character::complete::char as tchar,
 	combinator::{opt, value},
-	multi::{many0, separated_list1},
+	multi::many0,
 	sequence::{pair, preceded, tuple},
 	Parser,
 };
 
 use crate::{
 	block,
-	combinator::paren,
+	combinator::{list, paren, wschar, wstag},
 	parse::affix::{call, prefix, suffix},
 	terminal::{
 		literal_string, name, namelist,
@@ -28,17 +26,14 @@ use super::{expression::explist, table::tableconstructor};
 
 pub(super) fn varargs(input: In) -> IRes<VarArgs> {
 	dbg!(input);
-	value(VarArgs, tag(TRIPLEDOT)).parse(input)
+	value(VarArgs, wstag(TRIPLEDOT)).parse(input)
 }
 
 pub fn funcname(input: In) -> IRes<FunctionName> {
 	dbg!(input);
-	pair(
-		separated_list1(tchar(DOT), name),
-		opt(preceded(tchar(COLON), name)),
-	)
-	.map(|(nlist, objname)| FunctionName { nlist, objname })
-	.parse(input)
+	pair(list(wschar(DOT), name), opt(preceded(wschar(COLON), name)))
+		.map(|(nlist, objname)| FunctionName { nlist, objname })
+		.parse(input)
 }
 
 pub fn funcbody(input: In) -> IRes<FunctionBody> {
@@ -71,7 +66,7 @@ pub fn parlist(input: In) -> IRes<ParameterList> {
 	dbg!(input);
 	alt((
 		namelist
-			.and(opt(preceded(tchar(COMMA), varargs)))
+			.and(opt(preceded(wschar(COMMA), varargs)))
 			.map(|(nlist, vargs)| match vargs {
 				Some(_) => NameListWithVarArgs(nlist),
 				None => NameList(nlist),

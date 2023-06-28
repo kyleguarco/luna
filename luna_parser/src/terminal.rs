@@ -1,7 +1,7 @@
 use luna_ast::terminal::{LiteralString, Name, Numeral};
 use nom::{
 	bytes::complete::is_not,
-	character::complete::{alpha1, char as tchar, digit1},
+	character::complete::{alpha1, char as wschar, digit1},
 	combinator::{map_res, verify},
 	sequence::delimited,
 	Parser,
@@ -38,7 +38,7 @@ pub(crate) fn numeral(input: In) -> IRes<Numeral> {
 pub(crate) fn literal_string(input: In) -> IRes<LiteralString> {
 	dbg!(input);
 	// TODO: Support escpaed strings and multiline strings.
-	delimited(tchar('"'), parse_literal, tchar('"'))
+	delimited(wschar('"'), parse_literal, wschar('"'))
 		.map(String::from)
 		.map(LiteralString)
 		.parse(input)
@@ -46,7 +46,7 @@ pub(crate) fn literal_string(input: In) -> IRes<LiteralString> {
 
 pub fn namelist(input: In) -> IRes<Vec<Name>> {
 	dbg!(input);
-	list(tchar(COMMA), name)(input)
+	list(wschar(COMMA), name)(input)
 }
 
 /// Parse a non-empty block of text that doesn't include \ or "
