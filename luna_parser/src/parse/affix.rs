@@ -7,7 +7,7 @@ use nom::{
 };
 
 use crate::{
-	combinator::{braces, bracket, wschar},
+	combinator::{bracket, paren, wschar},
 	parse::{expression::exp, function::args},
 	terminal::{name, string::COLON},
 	IRes, In,
@@ -16,7 +16,7 @@ use crate::{
 pub fn prefix(input: In) -> IRes<Prefix> {
 	dbg!(input);
 	alt((
-		braces(exp).map(Prefix::BracedExpression),
+		paren(exp).map(Prefix::BracedExpression),
 		name.map(Prefix::Name),
 	))
 	.parse(input)

@@ -63,7 +63,7 @@ pub enum Value {
 	AnonFunctionDefinition(AnonFunctionDefinition),
 	Variable(Variable),
 	FunctionCall(FunctionCall),
-	BracedExpression(Expression),
+	ParenExpression(Expression),
 	TableConstructor(TableConstructor),
 }
 
@@ -81,6 +81,6 @@ impl From<Expression> for Field {
 
 impl From<Expression> for Value {
 	fn from(value: Expression) -> Self {
-		Self::BracedExpression(value)
+		Self::ParenExpression(value)
 	}
 }

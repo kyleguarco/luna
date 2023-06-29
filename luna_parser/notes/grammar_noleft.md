@@ -42,9 +42,9 @@ funcname ::= Name {'.' Name} [':' Name]
 
 varlist ::= var {',' var}
 
-braceexp ::= '(' exp ')'
+parenexp ::= '(' exp ')'
 
-prefix ::= braceexp
+prefix ::= parenexp
 prefix ::= Name
 
 index ::= '[' exp ']'
@@ -72,7 +72,7 @@ value ::= varargs
 value ::= functiondef
 value ::= var
 value ::= functioncall
-value ::= braceexp
+value ::= parenexp
 value ::= tableconstructor
 
 exp ::= value [binop exp]

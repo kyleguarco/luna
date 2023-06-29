@@ -51,11 +51,13 @@ pub fn functioncall(input: In) -> IRes<FunctionCall> {
 }
 
 pub fn args(input: In) -> IRes<Arguments> {
+	use Arguments::*;
+
 	dbg!(input);
 	alt((
-		paren(opt(explist)).map(Arguments::from),
-		tableconstructor.map(Arguments::from),
-		literal_string.map(Arguments::from),
+		paren(opt(explist)).map(ClosedExpressionList),
+		tableconstructor.map(TableConstructor),
+		literal_string.map(LiteralString),
 	))
 	.parse(input)
 }

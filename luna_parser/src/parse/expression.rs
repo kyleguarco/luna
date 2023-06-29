@@ -9,7 +9,7 @@ use nom::{
 };
 
 use crate::{
-	combinator::{braces, list, wschar, wstag},
+	combinator::{list, paren, wschar, wstag},
 	terminal::{
 		keyword::{KFALSE, KFUNCTION, KNIL, KTRUE},
 		literal_string, numeral,
@@ -67,7 +67,7 @@ pub fn value(input: In) -> IRes<Value> {
 		functiondef.map(AnonFunctionDefinition),
 		var.map(Variable),
 		functioncall.map(FunctionCall),
-		braces(exp).map(BracedExpression),
+		paren(exp).map(ParenExpression),
 		tableconstructor.map(TableConstructor),
 	))
 	.parse(input)
