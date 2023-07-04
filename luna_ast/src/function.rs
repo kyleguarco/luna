@@ -1,5 +1,5 @@
 use crate::{
-	affix::{Call, Prefix, Suffix},
+	affix::{Affix, Call},
 	expression::{ExpressionList, Value},
 	statement::Statement,
 	table::TableConstructor,
@@ -33,8 +33,7 @@ pub struct FunctionBody {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct FunctionCall {
-	pub pfix: Prefix,
-	pub slist: Vec<Suffix>,
+	pub affix: Affix,
 	pub call: Call,
 }
 

@@ -1,7 +1,8 @@
-use luna_ast::affix::{Call, Index, Prefix, Suffix};
+use luna_ast::affix::{Affix, Call, Index, Prefix, Suffix};
 use nom::{
 	branch::alt,
 	combinator::opt,
+	multi::many0,
 	sequence::{pair, preceded},
 	Parser,
 };
@@ -9,14 +10,17 @@ use nom::{
 use crate::{
 	combinator::{bracket, paren, wschar},
 	parse::{expression::exp, function::args},
-	terminal::{name, string::COLON},
+	terminal::{
+		name,
+		string::{COLON, DOT},
+	},
 	IRes, In,
 };
 
 pub fn prefix(input: In) -> IRes<Prefix> {
 	dbg!(input);
 	alt((
-		paren(exp).map(Prefix::BracedExpression),
+		paren(exp).map(Prefix::ParenExpression),
 		name.map(Prefix::Name),
 	))
 	.parse(input)
@@ -24,7 +28,11 @@ pub fn prefix(input: In) -> IRes<Prefix> {
 
 pub fn index(input: In) -> IRes<Index> {
 	dbg!(input);
-	alt((bracket(exp).map(Index::Expression), name.map(Index::Member))).parse(input)
+	alt((
+		bracket(exp).map(Index::Expression),
+		preceded(wschar(DOT), name).map(Index::Member),
+	))
+	.parse(input)
 }
 
 pub fn call(input: In) -> IRes<Call> {
@@ -37,4 +45,12 @@ pub fn call(input: In) -> IRes<Call> {
 pub fn suffix(input: In) -> IRes<Suffix> {
 	dbg!(input);
 	alt((call.map(Suffix::Call), index.map(Suffix::Index))).parse(input)
+}
+
+pub fn affix(input: In) -> IRes<Affix> {
+	dbg!(input);
+	prefix
+		.and(many0(suffix))
+		.map(|(pfix, suflist)| Affix { pfix, suflist })
+		.parse(input)
 }

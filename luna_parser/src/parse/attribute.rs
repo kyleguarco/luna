@@ -20,7 +20,7 @@ fn attrib_name(input: In) -> IRes<AttributeName> {
 pub fn attrib(input: In) -> IRes<Attribute> {
 	dbg!(input);
 	delimited(wschar(LESS), opt(name), wschar(GREATER))
-		.map(|oname| Attribute { oname })
+		.map(Attribute)
 		.parse(input)
 }
 

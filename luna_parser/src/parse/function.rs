@@ -6,16 +6,16 @@ use luna_ast::function::{
 use nom::{
 	branch::alt,
 	combinator::{opt, value},
-	multi::many0,
-	sequence::{pair, preceded, tuple},
+	sequence::{pair, preceded, terminated},
 	Parser,
 };
 
 use crate::{
 	block,
 	combinator::{list, paren, wschar, wstag},
-	parse::affix::{call, prefix, suffix},
+	parse::affix::{affix, call},
 	terminal::{
+		keyword::KEND,
 		literal_string, name, namelist,
 		string::{COLON, COMMA, DOT, TRIPLEDOT},
 	},
@@ -31,29 +31,31 @@ pub(super) fn varargs(input: In) -> IRes<VarArgs> {
 
 pub fn funcname(input: In) -> IRes<FunctionName> {
 	dbg!(input);
-	pair(list(wschar(DOT), name), opt(preceded(wschar(COLON), name)))
+	list(wschar(DOT), name)
+		.and(opt(preceded(wschar(COLON), name)))
 		.map(|(nlist, objname)| FunctionName { nlist, objname })
 		.parse(input)
 }
 
 pub fn funcbody(input: In) -> IRes<FunctionBody> {
 	dbg!(input);
-	pair(paren(opt(parlist)), block)
+	terminated(pair(paren(opt(parlist)), block), wstag(KEND))
 		.map(|(oplist, bl)| FunctionBody { oplist, bl })
 		.parse(input)
 }
 
 pub fn functioncall(input: In) -> IRes<FunctionCall> {
 	dbg!(input);
-	tuple((prefix, many0(suffix), call))
-		.map(|(pfix, slist, call)| FunctionCall { pfix, slist, call })
+	// TODO! many0(suffix) consumes the required `call`, causing an error.
+	pair(affix, call)
+		.map(|(affix, call)| FunctionCall { affix, call })
 		.parse(input)
 }
 
 pub fn args(input: In) -> IRes<Arguments> {
+	dbg!(input);
 	use Arguments::*;
 
-	dbg!(input);
 	alt((
 		paren(opt(explist)).map(ClosedExpressionList),
 		tableconstructor.map(TableConstructor),
@@ -63,9 +65,9 @@ pub fn args(input: In) -> IRes<Arguments> {
 }
 
 pub fn parlist(input: In) -> IRes<ParameterList> {
+	dbg!(input);
 	use ParameterList::*;
 
-	dbg!(input);
 	alt((
 		namelist
 			.and(opt(preceded(wschar(COMMA), varargs)))

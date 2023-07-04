@@ -15,6 +15,4 @@ pub struct AttributeName {
 ///
 /// Grammar: `['<' Name '>']`
 #[derive(Clone, Debug, PartialEq)]
-pub struct Attribute {
-	pub oname: Option<Name>,
-}
+pub struct Attribute(pub Option<Name>);

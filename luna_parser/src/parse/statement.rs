@@ -34,7 +34,7 @@ use super::{
 pub fn label(input: In) -> IRes<Label> {
 	dbg!(input);
 	delimited(wstag(DOUBLECOLON), name, wstag(DOUBLECOLON))
-		.map(|name| Label(name))
+		.map(Label)
 		.parse(input)
 }
 
@@ -48,11 +48,14 @@ fn if_block(keyword: In) -> impl FnMut(In) -> IRes<IfBlock> + '_ {
 
 fn if_tree(input: In) -> IRes<IfTree> {
 	dbg!(input);
-	tuple((
-		if_block(KIF),
-		many0(if_block(KELSEIF)),
-		opt(preceded(wstag(KELSE), block)),
-	))
+	terminated(
+		tuple((
+			if_block(KIF),
+			many0(if_block(KELSEIF)),
+			opt(preceded(wstag(KELSE), block)),
+		)),
+		wstag(KEND),
+	)
 	.map(|(initial, elseifs, otherwise)| IfTree { initial, elseifs, otherwise })
 	.parse(input)
 }
@@ -143,9 +146,9 @@ fn local_def_attr(input: In) -> IRes<LocalDefinitionWithAttribute> {
 }
 
 pub fn stat(input: In) -> IRes<Statement> {
+	dbg!(input);
 	use Statement::*;
 
-	dbg!(input);
 	alt((
 		value(Statement::End, wschar(SEMICOLON)),
 		definition.map(Definition),

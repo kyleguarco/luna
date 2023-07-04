@@ -33,9 +33,9 @@ fn functiondef(input: In) -> IRes<AnonFunctionDefinition> {
 }
 
 fn binary_op(input: In) -> IRes<BinaryExpression> {
+	dbg!(input);
 	use BinaryExpression::*;
 
-	dbg!(input);
 	value
 		.map(Box::new)
 		.and(opt(pair(binop, exp.map(Box::new))))
@@ -54,9 +54,9 @@ fn unary_op(input: In) -> IRes<UnaryExpression> {
 }
 
 pub fn value(input: In) -> IRes<Value> {
+	dbg!(input);
 	use Value::*;
 
-	dbg!(input);
 	alt((
 		combinator::value(Nil, wstag(KNIL)),
 		combinator::value(False, wstag(KFALSE)),

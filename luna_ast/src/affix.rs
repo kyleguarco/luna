@@ -2,7 +2,7 @@ use crate::{expression::Expression, function::Arguments, terminal::Name};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Prefix {
-	BracedExpression(Expression),
+	ParenExpression(Expression),
 	Name(Name),
 }
 
@@ -26,4 +26,11 @@ pub struct Call {
 pub enum Suffix {
 	Call(Call),
 	Index(Index),
+}
+
+/// A series of names, beginning with a [Name] or [Expression].
+#[derive(Clone, Debug, PartialEq)]
+pub struct Affix {
+	pub pfix: Prefix,
+	pub suflist: Vec<Suffix>,
 }

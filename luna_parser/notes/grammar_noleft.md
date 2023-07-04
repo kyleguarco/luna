@@ -54,7 +54,9 @@ call ::= [':' Name] args
 
 suffix ::= call | index
 
-var ::= prefix {suffix} index
+affix ::= prefix {suffix}
+
+var ::= affix index
 var ::= Name
 
 namelist ::= Name {',' Name}
@@ -78,7 +80,7 @@ value ::= tableconstructor
 exp ::= value [binop exp]
 exp ::= unop exp
 
-functioncall ::= prefix {suffix} call
+functioncall ::= affix call
 
 args ::=  '(' [explist] ')'
 args ::= tableconstructor
