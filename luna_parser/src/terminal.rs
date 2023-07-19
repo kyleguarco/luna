@@ -20,7 +20,6 @@ pub mod string;
 
 pub(crate) fn name(input: In) -> IRes<Name> {
 	dbg!(input);
-	println!("here");
 	// TODO: Support ASCII symbols and numbers.
 	verify(alpha1, negate(is_keyword))
 		.map(String::from)

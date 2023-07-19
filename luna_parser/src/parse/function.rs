@@ -1,11 +1,13 @@
 //! # Function Structure Parsers
 
-use luna_ast::function::{
-	Arguments, FunctionBody, FunctionCall, FunctionName, ParameterList, VarArgs,
+use luna_ast::{
+	affix::Suffix,
+	expression::AnonFunctionDefinition,
+	function::{Arguments, FunctionBody, FunctionCall, FunctionName, ParameterList, VarArgs},
 };
 use nom::{
 	branch::alt,
-	combinator::{opt, value},
+	combinator::{opt, value, verify},
 	sequence::{pair, preceded, terminated},
 	Parser,
 };
@@ -13,9 +15,9 @@ use nom::{
 use crate::{
 	block,
 	combinator::{list, paren, wschar, wstag},
-	parse::affix::{affix, call},
+	parse::affix::affix,
 	terminal::{
-		keyword::KEND,
+		keyword::{KEND, KFUNCTION},
 		literal_string, name, namelist,
 		string::{COLON, COMMA, DOT, TRIPLEDOT},
 	},
@@ -44,12 +46,27 @@ pub fn funcbody(input: In) -> IRes<FunctionBody> {
 		.parse(input)
 }
 
+pub fn functiondef(input: In) -> IRes<AnonFunctionDefinition> {
+	dbg!(input);
+	preceded(wstag(KFUNCTION), funcbody)
+		.map(AnonFunctionDefinition)
+		.parse(input)
+}
+
 pub fn functioncall(input: In) -> IRes<FunctionCall> {
 	dbg!(input);
-	// TODO! many0(suffix) consumes the required `call`, causing an error.
-	pair(affix, call)
-		.map(|(affix, call)| FunctionCall { affix, call })
-		.parse(input)
+	verify(affix, |affix| {
+		matches!(affix.suflist.last().unwrap(), Suffix::Call(_))
+	})
+	.map(|mut affix| {
+		if let Suffix::Call(call) = affix.suflist.pop().unwrap() {
+			FunctionCall { affix, call }
+		} else {
+			// SAFETY: `verify` assured us that the popped element here is an `Call`
+			unreachable!()
+		}
+	})
+	.parse(input)
 }
 
 pub fn args(input: In) -> IRes<Arguments> {

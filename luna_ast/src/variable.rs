@@ -1,15 +1,11 @@
-use crate::{
-	affix::{Affix, Index},
-	expression::Value,
-	terminal::Name,
-};
+use crate::{affix::Affix, expression::Value, terminal::Name};
 
 pub type VariableList = Vec<Variable>;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Variable {
 	Name(Name),
-	Indexed { affix: Affix, index: Index },
+	Affixed(Affix),
 }
 
 impl From<Variable> for Value {

@@ -2,7 +2,7 @@ use luna_ast::affix::{Affix, Call, Index, Prefix, Suffix};
 use nom::{
 	branch::alt,
 	combinator::opt,
-	multi::many0,
+	multi::many1,
 	sequence::{pair, preceded},
 	Parser,
 };
@@ -50,7 +50,7 @@ pub fn suffix(input: In) -> IRes<Suffix> {
 pub fn affix(input: In) -> IRes<Affix> {
 	dbg!(input);
 	prefix
-		.and(many0(suffix))
+		.and(many1(suffix))
 		.map(|(pfix, suflist)| Affix { pfix, suflist })
 		.parse(input)
 }

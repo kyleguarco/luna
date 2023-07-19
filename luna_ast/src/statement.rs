@@ -107,13 +107,13 @@ impl From<Definition> for Statement {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct FunctionDefinition {
+pub struct NamedFunctionDefinition {
 	pub fname: FunctionName,
 	pub fbody: FunctionBody,
 }
 
-impl From<FunctionDefinition> for Statement {
-	fn from(value: FunctionDefinition) -> Self {
+impl From<NamedFunctionDefinition> for Statement {
+	fn from(value: NamedFunctionDefinition) -> Self {
 		Self::FunctionDefinition(value)
 	}
 }
@@ -156,7 +156,7 @@ pub enum Statement {
 	IfTree(IfTree),
 	ForExpression(ForExpression),
 	ForList(ForList),
-	FunctionDefinition(FunctionDefinition),
+	FunctionDefinition(NamedFunctionDefinition),
 	LocalFunctionDefinition(LocalFunctionDefinition),
 	LocalDefinitionWithAttribute(LocalDefinitionWithAttribute),
 }

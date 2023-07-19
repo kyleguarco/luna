@@ -1,11 +1,11 @@
 use std::ops::{Range, RangeFrom};
 
 use nom::{
-
+	bytes::complete::tag,
 	character::complete::{char as tchar, multispace0},
 	multi::separated_list1,
 	sequence::{delimited, separated_pair},
-	AsChar, Compare, IResult, InputIter, InputLength, InputTake, InputTakeAtPosition, Slice, bytes::complete::tag,
+	AsChar, Compare, IResult, InputIter, InputLength, InputTake, InputTakeAtPosition, Slice,
 };
 
 use crate::terminal::string::{EQUALS, LBRACE, LBRACKET, LPAREN, RBRACE, RBRACKET, RPAREN};

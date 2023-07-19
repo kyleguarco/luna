@@ -7,6 +7,7 @@ pub enum Prefix {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+#[repr(u8)]
 pub enum Index {
 	/// Index using the `'[' exp ']'` syntax
 	Expression(Expression),
@@ -23,9 +24,19 @@ pub struct Call {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+#[repr(u8)]
 pub enum Suffix {
 	Call(Call),
 	Index(Index),
+}
+
+impl Suffix {
+	pub fn to_u8(&self) -> u8 {
+		match self {
+			Suffix::Call(_) => Suffix::Call as u8,
+			Suffix::Index(_) => Suffix::Index as u8,
+		}
+	}
 }
 
 /// A series of names, beginning with a [Name] or [Expression].

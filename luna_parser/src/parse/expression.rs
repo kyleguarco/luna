@@ -1,17 +1,16 @@
-use luna_ast::expression::{
-	AnonFunctionDefinition, BinaryExpression, Expression, UnaryExpression, Value,
-};
+use luna_ast::expression::{BinaryExpression, Expression, UnaryExpression, Value};
 use nom::{
 	branch::alt,
 	combinator::{self, opt},
-	sequence::{pair, preceded},
+	sequence::pair,
 	Parser,
 };
 
 use crate::{
 	combinator::{list, paren, wschar, wstag},
+	parse::function::functiondef,
 	terminal::{
-		keyword::{KFALSE, KFUNCTION, KNIL, KTRUE},
+		keyword::{KFALSE, KNIL, KTRUE},
 		literal_string, numeral,
 		string::COMMA,
 	},
@@ -19,18 +18,11 @@ use crate::{
 };
 
 use super::{
-	function::{funcbody, functioncall, varargs},
+	function::{functioncall, varargs},
 	operation::{binop, unop},
 	table::tableconstructor,
 	variable::var,
 };
-
-fn functiondef(input: In) -> IRes<AnonFunctionDefinition> {
-	dbg!(input);
-	preceded(wstag(KFUNCTION), funcbody)
-		.map(AnonFunctionDefinition)
-		.parse(input)
-}
 
 fn binary_op(input: In) -> IRes<BinaryExpression> {
 	dbg!(input);

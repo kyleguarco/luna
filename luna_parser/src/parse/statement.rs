@@ -1,5 +1,5 @@
 use luna_ast::statement::{
-	Definition, ForExpression, ForList, FunctionDefinition, IfBlock, IfTree, Label,
+	Definition, ForExpression, ForList, NamedFunctionDefinition, IfBlock, IfTree, Label,
 	LocalDefinitionWithAttribute, LocalFunctionDefinition, RepeatUntil, Statement, While,
 };
 use nom::{
@@ -118,10 +118,10 @@ fn definition(input: In) -> IRes<Definition> {
 		.parse(input)
 }
 
-pub fn functiondef(input: In) -> IRes<FunctionDefinition> {
+fn namedfunctiondef(input: In) -> IRes<NamedFunctionDefinition> {
 	dbg!(input);
 	pair(preceded(wstag(KFUNCTION), funcname), funcbody)
-		.map(|(fname, fbody)| FunctionDefinition { fname, fbody })
+		.map(|(fname, fbody)| NamedFunctionDefinition { fname, fbody })
 		.parse(input)
 }
 
@@ -164,7 +164,7 @@ pub fn stat(input: In) -> IRes<Statement> {
 		if_tree.map(IfTree),
 		for_exp.map(ForExpression),
 		for_list.map(ForList),
-		functiondef.map(FunctionDefinition),
+		namedfunctiondef.map(FunctionDefinition),
 		local_func_def.map(LocalFunctionDefinition),
 		local_def_attr.map(LocalDefinitionWithAttribute),
 	))

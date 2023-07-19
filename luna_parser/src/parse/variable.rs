@@ -1,9 +1,9 @@
 use luna_ast::variable::Variable;
-use nom::{branch::alt, sequence::pair, Parser};
+use nom::{branch::alt, Parser};
 
 use crate::{
 	combinator::{list, wschar},
-	parse::affix::{affix, index},
+	parse::affix::affix,
 	terminal::{name, string::COMMA},
 	IRes, In,
 };
@@ -12,12 +12,7 @@ pub fn var(input: In) -> IRes<Variable> {
 	dbg!(input);
 	use Variable::*;
 
-	alt((
-		name.map(Name),
-		// TODO! many0(suffix) consumes the last required `index`, causing an error
-		pair(affix, index).map(|(affix, index)| Indexed { affix, index }),
-	))
-	.parse(input)
+	alt((affix.map(Affixed), name.map(Name))).parse(input)
 }
 
 pub fn varlist(input: In) -> IRes<Vec<Variable>> {

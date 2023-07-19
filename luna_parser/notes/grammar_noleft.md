@@ -56,7 +56,8 @@ suffix ::= call | index
 
 affix ::= prefix {suffix}
 
-var ::= affix index
+<!-- Removing the index on this rule is a deviation from the lua forum page. -->
+var ::= affix
 var ::= Name
 
 namelist ::= Name {',' Name}
