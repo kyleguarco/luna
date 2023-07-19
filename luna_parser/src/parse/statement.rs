@@ -1,6 +1,9 @@
-use luna_ast::statement::{
-	Definition, ForExpression, ForList, NamedFunctionDefinition, IfBlock, IfTree, Label,
-	LocalDefinitionWithAttribute, LocalFunctionDefinition, RepeatUntil, Statement, While,
+use luna_ast::{
+	statement::{
+		Assignment, ForExpression, ForList, IfBlock, IfTree, Label, LocalDefinitionWithAttribute,
+		LocalFunctionDefinition, NamedFunctionDefinition, RepeatUntil, Statement, While,
+	},
+	Block,
 };
 use nom::{
 	branch::alt,
@@ -93,7 +96,11 @@ fn for_list(input: In) -> IRes<ForList> {
 	.parse(input)
 }
 
-fn pwhile(input: In) -> IRes<While> {
+fn doblk(input: In) -> IRes<Block> {
+	delimited(wstag(KWHILE), block, wstag(KEND)).parse(input)
+}
+
+fn whileblk(input: In) -> IRes<While> {
 	dbg!(input);
 	delimited(
 		wstag(KWHILE),
@@ -111,14 +118,14 @@ fn repeat_until(input: In) -> IRes<RepeatUntil> {
 		.parse(input)
 }
 
-fn definition(input: In) -> IRes<Definition> {
+fn assignment(input: In) -> IRes<Assignment> {
 	dbg!(input);
 	assign(varlist, explist)
-		.map(|(vlist, elist)| Definition { vlist, elist })
+		.map(|(vlist, elist)| Assignment { vlist, elist })
 		.parse(input)
 }
 
-fn namedfunctiondef(input: In) -> IRes<NamedFunctionDefinition> {
+fn named_functiondef(input: In) -> IRes<NamedFunctionDefinition> {
 	dbg!(input);
 	pair(preceded(wstag(KFUNCTION), funcname), funcbody)
 		.map(|(fname, fbody)| NamedFunctionDefinition { fname, fbody })
@@ -151,20 +158,18 @@ pub fn stat(input: In) -> IRes<Statement> {
 
 	alt((
 		value(Statement::End, wschar(SEMICOLON)),
-		definition.map(Definition),
+		assignment.map(Assignment),
 		functioncall.map(FunctionCall),
 		label.map(Label),
 		value(Break, wstag(KBREAK)),
 		preceded(wstag(KGOTO), name).map(Goto),
-		delimited(wstag(KWHILE), block, wstag(KEND))
-			.map(Box::new)
-			.map(Do),
-		pwhile.map(While),
+		doblk.map(Box::new).map(Do),
+		whileblk.map(While),
 		repeat_until.map(RepeatUntil),
 		if_tree.map(IfTree),
 		for_exp.map(ForExpression),
 		for_list.map(ForList),
-		namedfunctiondef.map(FunctionDefinition),
+		named_functiondef.map(FunctionDefinition),
 		local_func_def.map(LocalFunctionDefinition),
 		local_def_attr.map(LocalDefinitionWithAttribute),
 	))

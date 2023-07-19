@@ -1,6 +1,6 @@
 [package]
 name = "luna_ast"
-description = "Structures for the Lua syntax tree."
+description = "Structures for the Lua syntax tree"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

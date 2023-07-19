@@ -1,0 +1,11 @@
+[package]
+name = "luna_type"
+description = "Primitive Lua type definitions"
+authors.workspace = true
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]

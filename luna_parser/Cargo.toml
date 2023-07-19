@@ -1,6 +1,6 @@
 [package]
 name = "luna_parser"
-description = "A parser for the Lua programming language."
+description = "A parser for the Lua programming language"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

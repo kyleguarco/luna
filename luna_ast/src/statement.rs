@@ -95,14 +95,14 @@ impl From<RepeatUntil> for Statement {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Definition {
+pub struct Assignment {
 	pub vlist: VariableList,
 	pub elist: ExpressionList,
 }
 
-impl From<Definition> for Statement {
-	fn from(value: Definition) -> Self {
-		Self::Definition(value)
+impl From<Assignment> for Statement {
+	fn from(value: Assignment) -> Self {
+		Self::Assignment(value)
 	}
 }
 
@@ -145,7 +145,7 @@ impl From<LocalDefinitionWithAttribute> for Statement {
 #[derive(Clone, Debug, PartialEq)]
 pub enum Statement {
 	End,
-	Definition(Definition),
+	Assignment(Assignment),
 	FunctionCall(FunctionCall),
 	Label(Label),
 	Break,

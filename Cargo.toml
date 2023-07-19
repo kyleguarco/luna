@@ -17,3 +17,4 @@ license-file.workspace = true
 
 [dependencies]
 luna_parser = { path = "luna_parser" }
+luna_type = { path = "luna_type" }
