@@ -1,7 +1,19 @@
 [workspace]
+resolver = "2"
 
-members = [
-	"luna",
-	"luna_ast",
-	"luna_parser",
-]
+[workspace.package]
+authors = ["Kyle Guarco <kyleguarco55@gmail.com>"]
+version = "5.4.4"
+edition = "2021"
+license-file = "LICENSE.txt"
+
+[package]
+name = "luna"
+description = "The Lua programming language, in Rust."
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license-file.workspace = true
+
+[dependencies]
+luna_parser = { path = "luna_parser" }
