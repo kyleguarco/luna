@@ -1,10 +1,11 @@
 [package]
-name = "luna_ast"
+name = "luna-ast"
 description = "Structures for the Lua syntax tree"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
 license-file.workspace = true
+rust-version.workspace = true
 
 [lib]
 

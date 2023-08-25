@@ -6,6 +6,7 @@ authors = ["Kyle Guarco <kyleguarco55@gmail.com>"]
 version = "5.4.4"
 edition = "2021"
 license-file = "LICENSE.txt"
+rust-version = "1.72.0"
 
 [package]
 name = "luna"
@@ -14,7 +15,8 @@ version.workspace = true
 authors.workspace = true
 edition.workspace = true
 license-file.workspace = true
+rust-version.workspace = true
 
 [dependencies]
-luna_parser = { path = "luna_parser" }
-luna_type = { path = "luna_type" }
+luna-parser = { path = "luna-parser" }
+luna-type = { path = "luna-type" }

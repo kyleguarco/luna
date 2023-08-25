@@ -21,7 +21,7 @@ use terminal::{
 use combinator::{ws0, wschar, wstag};
 
 mod combinator;
-pub mod error;
+pub use nom::error;
 mod parse;
 pub mod terminal;
 

@@ -1,13 +1,14 @@
 [package]
-name = "luna_parser"
+name = "luna-parser"
 description = "A parser for the Lua programming language"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
 license-file.workspace = true
+rust-version.workspace = true
 
 [lib]
 
 [dependencies]
 nom = "7.1.3"
-luna_ast = { path = "../luna_ast" }
+luna-ast = { path = "../luna-ast" }
