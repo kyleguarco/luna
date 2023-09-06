@@ -1,0 +1,12 @@
+[package]
+name = "luna-vm"
+description = "A hybrid (stack and register) virtual machine"
+authors.workspace = true
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+rust-version.workspace = true
+
+[lib]
+
+[dependencies]
