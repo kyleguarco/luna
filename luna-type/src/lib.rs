@@ -38,24 +38,6 @@ pub trait Value: Default {
 	/// The provided methods from this trait rely on the correctness of this implementation.
 	fn kind(&self) -> Kind;
 
-	/// Map `Self` to another `Value`
-	fn map<F, V>(self, f: F) -> V
-	where
-		F: FnOnce(Self) -> V,
-		V: Value,
-	{
-		f(self)
-	}
-
-	/// Map `Self` to another `Value`, with a possibility to return nothing.
-	fn map_opt<F, V>(self, f: F) -> Option<V>
-	where
-		F: FnOnce(Self) -> Option<V>,
-		V: Value,
-	{
-		f(self)
-	}
-
 	fn is_nil(&self) -> bool {
 		self.kind() == Kind::Nil
 	}

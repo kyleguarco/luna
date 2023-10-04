@@ -1,83 +1,48 @@
-use crate::{Instruction, InstructionSize, Mode, ModeId, Props};
+#[repr(u8)]
+#[derive(Debug, Clone, Copy)]
+pub enum FormatKind {
+	ABC = 0,
+	ABX = 1,
+	ASBX = 2,
+	AX = 3,
+	ISJ = 4,
+}
 
 /// Generic instruction format with three arguments.
-#[derive(Default)]
-pub(crate) struct ABC {
+#[repr(C)]
+#[derive(Debug, Default, Clone, Copy)]
+pub struct ABC {
 	pub c: u8,
 	pub b: u8,
 	pub k: bool,
 	pub a: u8,
 }
 
-impl Mode for ABC {
-	fn mode_id() -> ModeId {
-		ModeId::ABC
-	}
+/// Instruction format that's mostly used for loading.
+#[repr(C)]
+#[derive(Debug, Default, Clone, Copy)]
+pub struct ABX {
+	pub bx: u32,
+	pub a: u8,
 }
 
-impl<P> Instruction for P
-where
-	P: Props<Format = ABC>,
-{
-	fn serialize(self) -> Option<InstructionSize> {
-		let ABC { c, b, k, a } = *self.get_format();
-
-		Some(
-			(self.opcode() as u32)
-				| ((a as u32) << 7)
-				| ((b as u32) << 16)
-				| ((c as u32) << 24)
-				| ((k as u32) << 15),
-		)
-	}
-
-	fn deserialize(inst: InstructionSize) -> Self::Format {
-		todo!()
-	}
+/// Instruction format that's mostly used for loading (signed).
+#[repr(C)]
+#[derive(Debug, Default, Clone, Copy)]
+pub struct ASBX {
+	pub sbx: i32,
+	pub a: u8,
 }
 
-#[derive(Default)]
-pub(crate) struct ABX {
-	bx: u32,
-	a: u8,
+#[repr(C)]
+#[derive(Debug, Default, Clone, Copy)]
+pub struct AX {
+	pub ax: u32,
 }
 
-impl Mode for ABX {
-	fn mode_id() -> ModeId {
-		ModeId::ABX
-	}
-}
-
-#[derive(Default)]
-pub(crate) struct ASBX {
-	sbx: i32,
-	a: u8,
-}
-
-impl Mode for ASBX {
-	fn mode_id() -> ModeId {
-		ModeId::ASBX
-	}
-}
-
-#[derive(Default)]
-pub(crate) struct AX {
-	ax: u32,
-}
-
-impl Mode for AX {
-	fn mode_id() -> ModeId {
-		ModeId::AX
-	}
-}
-
-#[derive(Default)]
-pub(crate) struct ISJ {
-	sj: i32,
-}
-
-impl Mode for ISJ {
-	fn mode_id() -> ModeId {
-		ModeId::ISJ
-	}
+/// Instruction format specifically used for jumps.
+#[repr(C)]
+#[derive(Debug, Default, Clone, Copy)]
+pub struct ISJ {
+	pub sj: i32,
 }
