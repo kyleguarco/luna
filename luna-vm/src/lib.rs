@@ -1,5 +1,7 @@
+mod cn;
+
 mod formats;
-mod instrs;
-mod kind;
+mod inst;
+mod ops;
 
 pub(crate) mod mask;
