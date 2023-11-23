@@ -1,7 +1,8 @@
+// Only really useful for this crate, anyway.
 mod cn;
+mod mask;
 
-mod formats;
-mod inst;
 mod ops;
+pub use ops::code::{OpCode, OpCodeId};
 
-pub(crate) mod mask;
+pub mod formats;

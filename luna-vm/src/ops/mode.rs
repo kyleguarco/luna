@@ -1,8 +1,4 @@
-use crate::{
-	cn,
-	inst::{Instruction, InstructionSize},
-	mask::Mask,
-};
+use crate::cn;
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]
@@ -14,11 +10,9 @@ pub enum FormatKind {
 	ISJ = cn::FMT_ISJ,
 }
 
-pub type OpModeSize = u8;
-
 /// Operating mode of an instruction.
 #[derive(Clone, Copy)]
-pub struct OpMode(OpModeSize);
+pub struct OpMode(u8);
 
 impl OpMode {
 	/// Specifies flags in a raw operation mode byte.
@@ -30,16 +24,16 @@ impl OpMode {
 	/// * `it` - Uses the top of the stack (in top).
 	/// * `t` - Next instruction must be a jump (this is a test).
 	/// * `a` - Sets the `A` register.
-	pub(crate) const fn new(
+	pub(super) const fn new(
 		mm: bool, ot: bool, it: bool, t: bool, a: bool, format: FormatKind,
 	) -> Self {
 		Self(
-			((mm as OpModeSize) << 7)
-				| ((ot as OpModeSize) << 6)
-				| ((it as OpModeSize) << 5)
-				| ((t as OpModeSize) << 4)
-				| ((a as OpModeSize) << 3)
-				| (format as OpModeSize),
+			((mm as u8) << 7)
+				| ((ot as u8) << 6)
+				| ((it as u8) << 5)
+				| ((t as u8) << 4)
+				| ((a as u8) << 3)
+				| (format as u8),
 		)
 	}
 
@@ -54,9 +48,8 @@ impl OpMode {
 		}
 	}
 
-	pub fn format_unchecked(&self) -> FormatKind {
-		self.format()
-			.expect("Invalid format. There should only be five formats.")
+	pub unsafe fn format_unchecked(&self) -> FormatKind {
+		unsafe { self.format().unwrap_unchecked() }
 	}
 
 	pub fn sets_reg_a(&self) -> bool {
@@ -90,21 +83,5 @@ impl std::fmt::Debug for OpMode {
 			.field("ot", &self.sets_top())
 			.field("mm", &self.calls_metamethod())
 			.finish()
-	}
-}
-
-impl From<Instruction> for OpMode {
-	fn from(inst: Instruction) -> Self {
-		let part = inst.0 & InstructionSize::mask1(cn::SIZE_OP, 0);
-		dbg!(inst.0, part);
-		Self(part as OpModeSize)
-	}
-}
-
-// There should only be a 1-way conversion, since we can no longer
-// guarantee the validity of this byte.
-impl Into<u8> for OpMode {
-	fn into(self) -> u8 {
-		self.0
 	}
 }
