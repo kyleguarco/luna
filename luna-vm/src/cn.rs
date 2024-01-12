@@ -1,108 +1,49 @@
-//! VM Constants
+//! # Virtual Machine Constants
 //!
 //! These constants are defined here as they are in the Lua source code.
 //! See `lopcodes.h` and `lopcodes.c` for more.
 
-use crate::ops::code::OpCodeId;
+use crate::ops::OpCodeId;
 
-pub const OP_MOVE: OpCodeId = 0;
-pub const OP_LOADI: OpCodeId = 1;
-pub const OP_LOADF: OpCodeId = 2;
-pub const OP_LOADK: OpCodeId = 3;
-pub const OP_LOADKX: OpCodeId = 4;
-pub const OP_LOADFALSE: OpCodeId = 5;
-pub const OP_LFALSESKIP: OpCodeId = 6;
-pub const OP_LOADTRUE: OpCodeId = 7;
-pub const OP_LOADNIL: OpCodeId = 8;
-pub const OP_GETUPVAL: OpCodeId = 9;
-pub const OP_SETUPVAL: OpCodeId = 10;
-pub const OP_GETTABUP: OpCodeId = 11;
-pub const OP_GETTABLE: OpCodeId = 12;
-pub const OP_GETI: OpCodeId = 13;
-pub const OP_GETFIELD: OpCodeId = 14;
-pub const OP_SETTABUP: OpCodeId = 15;
-pub const OP_SETTABLE: OpCodeId = 16;
-pub const OP_SETI: OpCodeId = 17;
-pub const OP_SETFIELD: OpCodeId = 18;
-pub const OP_NEWTABLE: OpCodeId = 19;
-pub const OP_ISELF: OpCodeId = 20;
-pub const OP_ADDI: OpCodeId = 21;
-pub const OP_ADDK: OpCodeId = 22;
-pub const OP_SUBK: OpCodeId = 23;
-pub const OP_MULK: OpCodeId = 24;
-pub const OP_MODK: OpCodeId = 25;
-pub const OP_POWK: OpCodeId = 26;
-pub const OP_DIVK: OpCodeId = 27;
-pub const OP_IDIVK: OpCodeId = 28;
-pub const OP_BANDK: OpCodeId = 29;
-pub const OP_BORK: OpCodeId = 30;
-pub const OP_BXORK: OpCodeId = 31;
-pub const OP_SHRI: OpCodeId = 32;
-pub const OP_SHLI: OpCodeId = 33;
-pub const OP_ADD: OpCodeId = 34;
-pub const OP_SUB: OpCodeId = 35;
-pub const OP_MUL: OpCodeId = 36;
-pub const OP_MOD: OpCodeId = 37;
-pub const OP_POW: OpCodeId = 38;
-pub const OP_DIV: OpCodeId = 39;
-pub const OP_IDIV: OpCodeId = 40;
-pub const OP_BAND: OpCodeId = 41;
-pub const OP_BOR: OpCodeId = 42;
-pub const OP_BXOR: OpCodeId = 43;
-pub const OP_SHL: OpCodeId = 44;
-pub const OP_SHR: OpCodeId = 45;
-pub const OP_MMBIN: OpCodeId = 46;
-pub const OP_MMBINI: OpCodeId = 47;
-pub const OP_MMBINK: OpCodeId = 48;
-pub const OP_UNM: OpCodeId = 49;
-pub const OP_BNOT: OpCodeId = 50;
-pub const OP_NOT: OpCodeId = 51;
-pub const OP_LEN: OpCodeId = 52;
-pub const OP_CONCAT: OpCodeId = 53;
-pub const OP_CLOSE: OpCodeId = 54;
-pub const OP_TBC: OpCodeId = 55;
-pub const OP_JMP: OpCodeId = 56;
-pub const OP_EQ: OpCodeId = 57;
-pub const OP_LT: OpCodeId = 58;
-pub const OP_LE: OpCodeId = 59;
-pub const OP_EQK: OpCodeId = 60;
-pub const OP_EQI: OpCodeId = 61;
-pub const OP_LTI: OpCodeId = 62;
-pub const OP_LEI: OpCodeId = 63;
-pub const OP_GTI: OpCodeId = 64;
-pub const OP_GEI: OpCodeId = 65;
-pub const OP_TEST: OpCodeId = 66;
-pub const OP_TESTSET: OpCodeId = 67;
-pub const OP_CALL: OpCodeId = 68;
-pub const OP_TAILCALL: OpCodeId = 69;
-pub const OP_RETURN: OpCodeId = 70;
-pub const OP_RETURN0: OpCodeId = 71;
-pub const OP_RETURN1: OpCodeId = 72;
-pub const OP_FORLOOP: OpCodeId = 73;
-pub const OP_FORPREP: OpCodeId = 74;
-pub const OP_TFORPREP: OpCodeId = 75;
-pub const OP_TFORCALL: OpCodeId = 76;
-pub const OP_TFORLOOP: OpCodeId = 77;
-pub const OP_SETLIST: OpCodeId = 78;
-pub const OP_CLOSURE: OpCodeId = 79;
-pub const OP_VARARG: OpCodeId = 80;
-pub const OP_VARARGPREP: OpCodeId = 81;
-pub const OP_EXTRAARG: OpCodeId = 82;
+/// Macro for creating a group of constants (constants of the same type).
+/// Used to save poor developers some typing and copy-pasting.
+macro_rules! group_const {
+	($t:ty, { $($name:ident = $val:literal),*$(,)? }) => {
+		$(pub const $name: $t = $val;)*
+	};
+}
 
-pub const FMT_ABC: u8 = 0;
-pub const FMT_ABX: u8 = 1;
-pub const FMT_ASBX: u8 = 2;
-pub const FMT_AX: u8 = 3;
-pub const FMT_ISJ: u8 = 4;
+// Instruction opcode constants
+group_const! { OpCodeId, {
+	OP_MOVE = 0, OP_LOADI = 1, OP_LOADF = 2, OP_LOADK = 3, OP_LOADKX = 4, OP_LOADFALSE = 5,
+	OP_LFALSESKIP = 6, OP_LOADTRUE = 7, OP_LOADNIL = 8, OP_GETUPVAL = 9, OP_SETUPVAL = 10,
+	OP_GETTABUP = 11, OP_GETTABLE = 12, OP_GETI = 13, OP_GETFIELD = 14, OP_SETTABUP = 15,
+	OP_SETTABLE = 16, OP_SETI = 17, OP_SETFIELD = 18, OP_NEWTABLE = 19, OP_ISELF = 20,
+	OP_ADDI = 21, OP_ADDK = 22, OP_SUBK = 23, OP_MULK = 24, OP_MODK = 25,
+	OP_POWK = 26, OP_DIVK = 27, OP_IDIVK = 28, OP_BANDK = 29, OP_BORK = 30,
+	OP_BXORK = 31, OP_SHRI = 32, OP_SHLI = 33, OP_ADD = 34, OP_SUB = 35,
+	OP_MUL = 36, OP_MOD = 37, OP_POW = 38, OP_DIV = 39, OP_IDIV = 40,
+	OP_BAND = 41, OP_BOR = 42, OP_BXOR = 43, OP_SHL = 44, OP_SHR = 45,
+	OP_MMBIN = 46, OP_MMBINI = 47, OP_MMBINK = 48, OP_UNM = 49, OP_BNOT = 50,
+	OP_NOT = 51, OP_LEN = 52, OP_CONCAT = 53, OP_CLOSE = 54, OP_TBC = 55,
+	OP_JMP = 56, OP_EQ = 57, OP_LT = 58, OP_LE = 59, OP_EQK = 60,
+	OP_EQI = 61, OP_LTI = 62, OP_LEI = 63, OP_GTI = 64, OP_GEI = 65,
+	OP_TEST = 66, OP_TESTSET = 67, OP_CALL = 68, OP_TAILCALL = 69, OP_RETURN = 70,
+	OP_RETURN0 = 71, OP_RETURN1 = 72, OP_FORLOOP = 73, OP_FORPREP = 74, OP_TFORPREP = 75,
+	OP_TFORCALL = 76, OP_TFORLOOP = 77, OP_SETLIST = 78, OP_CLOSURE = 79, OP_VARARG = 80,
+	OP_VARARGPREP = 81, OP_EXTRAARG = 82,
+}}
 
-pub const SIZE_A: u8 = 8;
-pub const SIZE_B: u8 = 8;
-pub const SIZE_C: u8 = 8;
+// Instruction format identifiers
+group_const! { u8, { FMT_ABC = 0, FMT_ABX = 1, FMT_ASBX = 2, FMT_AX = 3, FMT_ISJ = 4, }}
+
+// Instruction format section sizes
+group_const! { u8, { SIZE_A = 8, SIZE_B = 8, SIZE_C = 8, SIZE_OP = 7 }}
 pub const SIZE_BX: u8 = SIZE_B + SIZE_C + 1;
 pub const SIZE_AX: u8 = SIZE_A + SIZE_BX;
 pub const SIZE_SJ: u8 = SIZE_A + SIZE_BX;
-pub const SIZE_OP: u8 = 7;
 
+// Instruction section positions
 pub const POS_OP: u8 = 0;
 pub const POS_A: u8 = POS_OP + SIZE_OP;
 pub const POS_K: u8 = POS_A + SIZE_A;

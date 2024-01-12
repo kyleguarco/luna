@@ -1,3 +1,5 @@
+use crate::value::Value;
+
 pub type Float = ordered_float::OrderedFloat<f64>;
 pub type Integer = isize;
 
@@ -25,9 +27,9 @@ impl Default for Number {
 	}
 }
 
-impl<T: Into<Number> + Default> crate::Value for T {
-	fn kind(&self) -> crate::Kind {
-		crate::Kind::Number
+impl Value for Number {
+	fn kind(&self) -> crate::value::Kind {
+		crate::value::Kind::Number
 	}
 }
 

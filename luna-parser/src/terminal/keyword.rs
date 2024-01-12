@@ -1,25 +1,19 @@
-pub const KAND: &str = "and";
-pub const KBREAK: &str = "break";
-pub const KDO: &str = "do";
-pub const KELSE: &str = "else";
-pub const KELSEIF: &str = "elseif";
-pub const KEND: &str = "end";
-pub const KFALSE: &str = "false";
-pub const KFOR: &str = "for";
-pub const KFUNCTION: &str = "function";
-pub const KGOTO: &str = "goto";
-pub const KIF: &str = "if";
-pub const KIN: &str = "in";
-pub const KLOCAL: &str = "local";
-pub const KNIL: &str = "nil";
-pub const KNOT: &str = "not";
-pub const KOR: &str = "or";
-pub const KREPEAT: &str = "repeat";
-pub const KRETURN: &str = "return";
-pub const KTHEN: &str = "then";
-pub const KTRUE: &str = "true";
-pub const KUNTIL: &str = "until";
-pub const KWHILE: &str = "while";
+macro_rules! keyword {
+	($($name:ident = $val:literal),*) => {
+		$(pub const $name: &str = $val;)*
+	};
+}
+
+keyword! {
+	KAND = "and", KBREAK = "break", KDO = "do",
+	KELSE = "else", KELSEIF = "elseif", KEND = "end",
+	KFALSE = "false", KFOR = "for", KFUNCTION = "function",
+	KGOTO = "goto", KIF = "if", KIN = "in",
+	KLOCAL = "local", KNIL = "nil", KNOT = "not",
+	KOR = "or", KREPEAT = "repeat", KRETURN = "return",
+	KTHEN = "then", KTRUE = "true", KUNTIL = "until",
+	KWHILE = "while"
+}
 
 pub fn is_keyword(input: &str) -> bool {
 	match input {

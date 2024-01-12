@@ -1,3 +1,5 @@
+use crate::cn;
+
 pub type ASize = u8;
 pub type AXSize = u32;
 pub type BSize = u8;
@@ -20,3 +22,13 @@ pub type AX = AXSize;
 
 /// Instruction format specifically used for jumps.
 pub type ISJ = SJSize;
+
+#[repr(u8)]
+#[derive(Debug, Clone, Copy)]
+pub enum FormatKind {
+	ABC = cn::FMT_ABC,
+	ABX = cn::FMT_ABX,
+	ASBX = cn::FMT_ASBX,
+	AX = cn::FMT_AX,
+	ISJ = cn::FMT_ISJ,
+}

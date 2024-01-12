@@ -6,7 +6,7 @@ authors = ["Kyle Guarco <kyleguarco55@gmail.com>"]
 version = "5.4.4"
 edition = "2021"
 license-file = "LICENSE.txt"
-rust-version = "1.72.0"
+rust-version = "1.75.0"
 
 [package]
 name = "luna"

@@ -1,18 +1,8 @@
-use crate::cn;
+//! ## `OpMode` Implementation
 
-#[repr(u8)]
-#[derive(Debug, Clone, Copy)]
-pub enum FormatKind {
-	ABC = cn::FMT_ABC,
-	ABX = cn::FMT_ABX,
-	ASBX = cn::FMT_ASBX,
-	AX = cn::FMT_AX,
-	ISJ = cn::FMT_ISJ,
-}
+use crate::{cn, formats::FormatKind};
 
-/// Operating mode of an instruction.
-#[derive(Clone, Copy)]
-pub struct OpMode(u8);
+use super::OpMode;
 
 impl OpMode {
 	/// Specifies flags in a raw operation mode byte.
@@ -70,18 +60,5 @@ impl OpMode {
 
 	pub fn calls_metamethod(&self) -> bool {
 		(self.0 & (1 << 7)) != 0
-	}
-}
-
-impl std::fmt::Debug for OpMode {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.debug_struct("OpMode")
-			.field("format", &self.format())
-			.field("a", &self.sets_reg_a())
-			.field("t", &self.is_test())
-			.field("it", &self.uses_top())
-			.field("ot", &self.sets_top())
-			.field("mm", &self.calls_metamethod())
-			.finish()
 	}
 }
