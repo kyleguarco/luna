@@ -19,5 +19,3 @@ rust-version.workspace = true
 
 [dependencies]
 luna-parser = { path = "luna-parser" }
-luna-type = { path = "luna-type" }
-luna-vm = { path = "luna-vm" }
